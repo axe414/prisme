@@ -20,7 +20,7 @@ if (existsSync(join(ROOT, ".env"))) {
 }
 
 const { getIndex, refreshAuto, autoStatus } = await import("../lib/ingest.mjs");
-const { buildStories, editionFile, mondeLookup, REGIONS } = await import("../lib/edition.mjs");
+const { buildStories, editionFile, articlesFile, mondeLookup, REGIONS } = await import("../lib/edition.mjs");
 const { allVideos } = await import("../lib/videos.mjs");
 const { directory } = await import("../lib/media-db.mjs");
 const { canSummarize, summarize } = await import("../lib/summarize.mjs");
@@ -50,6 +50,7 @@ for (const region of REGIONS) {
   const file = editionFile(index, data, monde);
   editions[region] = file;
   writeFileSync(join(DATA, `edition-${region}.json`), JSON.stringify(file));
+  writeFileSync(join(DATA, `articles-${region}.json`), JSON.stringify(articlesFile(index, region)));
   log(`édition ${region} : ${file.stories.length} histoires publiées sur ${file.totals.stories}, ${file.totals.outlets} médias`);
 }
 

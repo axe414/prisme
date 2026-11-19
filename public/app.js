@@ -265,6 +265,12 @@ async function feedLocal(p) {
       return words.every((w) => text.includes(w));
     });
   } else if (cat !== "une") list = list.filter((s) => s.categories.includes(cat));
+  if (q) {
+    // Une recherche qui nomme un média trouve aussi les histoires où ce média apparaît.
+    const fq = foldText(q).trim();
+    const byOutlet = ed.stories.filter((s) => !list.includes(s) && s.articles.some((a) => { const n = foldText(a.sourceName); return n.includes(fq) || (n.length >= 3 && fq.includes(n)); }));
+    list = [...list, ...byOutlet];
+  }
   const key = q ? "essentiel" : lens;
   if (key !== "recent") list = list.filter((s) => s.scores[key] > 0);
   list = [...list].sort((a, b) => b.scores[key] - a.scores[key]);
@@ -393,39 +399,40 @@ WHERE {
   return { domain, curated, country: curated?.country || null, sameOwner, wikidata, wikidataError };
 }
 
-// Recherche élargie : GDELT (la presse du monde entier, interrogée depuis l'app) + toutes les éditions de Prisme.
+// Tous les articles d'une édition (48 h), publiés par le robot en format compact.
+async function articlesOf(region) {
+  const raw = await dataJson(`articles-${region}.json`, 15 * 60e3);
+  if (raw._decoded) return raw._decoded;
+  const counts = new Map();
+  for (const it of raw.items) counts.set(it[2], (counts.get(it[2]) || 0) + 1);
+  const domains = raw.domains.map(([domain, name, k, owner, country, bias, st], i) => ({
+    domain, name, count: counts.get(i) || 0, fold: foldText(name),
+    media: k === "unk" ? { known: false, name, country } : { known: true, name, owner, country, bias: k === "state" ? null : bias, state: st },
+  }));
+  const items = raw.items.map(([title, url, di, min, lang]) => ({
+    title, url, domain: domains[di].domain, sourceName: domains[di].name, media: domains[di].media,
+    published: min ? new Date(min * 60000).toISOString() : null, lang, fold: foldText(title),
+  }));
+  return (raw._decoded = { domains, items });
+}
+
+// Les médias dont le nom ou l'adresse correspond à la recherche (« tva nouvelle » → TVA Nouvelles).
+function matchOutlets(domains, q) {
+  const fq = foldText(q).trim(), compact = fq.replace(/[^\p{L}\p{N}]+/gu, "");
+  if (fq.length < 2) return [];
+  return domains.filter((d) => d.fold.includes(fq) || (d.fold.length >= 3 && fq.includes(d.fold)) ||
+    (compact.length >= 3 && d.domain.replace(/[^a-z0-9]/g, "").includes(compact)))
+    .sort((a, b) => b.count - a.count).slice(0, 8);
+}
+
+// Recherche élargie : tous les articles lus par Prisme dans l'édition (48 h), y compris ceux d'un média nommé.
 async function searchLocal(q, region) {
-  const { dir } = await lookupDir("");
-  const byDomain = new Map(dir.map((m) => [m.domain, m]));
-  const mediaFor = (domain) => {
-    let d = domain;
-    while (d) { const m = byDomain.get(d); if (m) return { known: true, ...m }; const i = d.indexOf("."); if (i < 0) break; d = d.slice(i + 1); }
-    return { known: false };
-  };
-  const articles = [], seen = new Set();
-  const add = (a) => { if (!a.url || seen.has(a.url)) return; seen.add(a.url); articles.push(a); };
-  // 1) Ce que Prisme a déjà lu (édition Monde), qui contient le sujet.
+  const idx = await articlesOf(region);
   const words = foldText(q).split(/[^\p{L}\p{N}]+/u).filter((w) => w.length >= 2);
-  const monde = await edition("monde").catch(() => null);
-  for (const s of monde?.stories || []) for (const a of s.articles) if (words.every((w) => foldText(a.title).includes(w))) add(a);
-  // 2) GDELT, sur 7 jours.
-  let gdeltError = null;
-  try {
-    const lang = region === "qc" || region === "fr" ? " sourcelang:french" : "";
-    const res = await fetch(`https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(q + lang)}&mode=artlist&format=json&maxrecords=150&sort=datedesc&timespan=1w`);
-    const text = await res.text();
-    if (!res.ok || !text.trim().startsWith("{")) throw new Error(res.status === 429 ? "GDELT limite les demandes, réessaie dans quelques secondes" : `GDELT ${res.status}`);
-    for (const g of JSON.parse(text).articles || []) {
-      const domain = String(g.domain || "").toLowerCase().replace(/^www\d?\./, "");
-      const s = g.seendate || "";
-      const published = s.length >= 15 ? `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}T${s.slice(9, 11)}:${s.slice(11, 13)}:${s.slice(13, 15)}Z` : null;
-      const media = mediaFor(domain);
-      add({ title: g.title, url: g.url, published, domain, sourceName: media.name || domain, media, image: g.socialimage || null, lang: null });
-    }
-  } catch (e) { gdeltError = e.message; }
-  if (!articles.length && gdeltError) throw new Error(`Recherche élargie indisponible : ${gdeltError}.`);
+  const outlets = new Set(matchOutlets(idx.domains, q).map((d) => d.domain));
+  const articles = idx.items.filter((a) => outlets.has(a.domain) || (words.length && words.every((w) => a.fold.includes(w))));
   articles.sort((a, b) => (b.published || "").localeCompare(a.published || ""));
-  return { query: q, articles: articles.slice(0, 220), gdeltError };
+  return { query: q, articles: articles.slice(0, 300) };
 }
 
 /* ---------- Routes ---------- */
@@ -437,6 +444,7 @@ function parseRoute() {
   if (p.get("v") === "proprietaires") return { view: "owners", region: r };
   if (p.get("v") === "moi") return { view: "me", region: r };
   if (["matin", "videos", "quiz"].includes(p.get("v"))) return { view: p.get("v"), region: r };
+  if (p.get("m")) return { view: "outlet", m: p.get("m").toLowerCase(), region: r };
   const cat = CATS.some(([v]) => v === p.get("c")) ? p.get("c") : "une";
   const lens = p.get("l") in LENSES ? p.get("l") : "essentiel";
   return { view: "feed", cat, lens, region: r };
@@ -448,6 +456,7 @@ function href(o = {}) {
   if (o.h) p.set("h", o.h);
   else if (o.q) p.set("q", o.q);
   else if (o.v) p.set("v", o.v);
+  else if (o.m) p.set("m", o.m);
   else {
     if (o.cat && o.cat !== "une") p.set("c", o.cat);
     if (o.lens && o.lens !== "essentiel") p.set("l", o.lens);
@@ -486,6 +495,7 @@ function render({ scroll = 0 } = {}) {
   else if (route.view === "matin") viewMatin(v);
   else if (route.view === "videos") viewVideos(v);
   else if (route.view === "quiz") viewQuiz(v);
+  else if (route.view === "outlet") viewOutlet(v, route);
   else viewFeed(v, route);
   requestAnimationFrame(() => scrollTo(0, scroll));
 }
@@ -512,7 +522,7 @@ function renderChrome(route) {
   $("#mastLinks").innerHTML = PAGES.map(([v, l]) => `<a href="${href({ v })}" data-nav ${page === v ? 'aria-current="page"' : ""}>${l}</a>`).join("");
   $("#editionSel").innerHTML = REGIONS.map(([v, l]) => `<option value="${v}" ${v === state.region ? "selected" : ""}>${l}</option>`).join("");
   $("#cats").innerHTML = CATS.map(([v, l]) => `<a href="${href({ cat: v, lens: route.view === "feed" ? route.lens : undefined })}" data-nav ${route.view === "feed" && route.cat === v ? 'aria-current="page"' : ""}>${l}</a>`).join("");
-  const onUne = route.view === "feed" || route.view === "story" || route.view === "search";
+  const onUne = ["feed", "story", "search", "outlet"].includes(route.view);
   const alerts = alertCount();
   $("#tabbar").innerHTML = `
     <a href="${href({})}" data-nav ${onUne ? 'aria-current="page"' : ""}>${svg("une")}À la une${alerts ? `<span class="dot">${alerts}</span>` : ""}</a>
@@ -528,7 +538,8 @@ function renderChrome(route) {
     if (el.offsetLeft + el.offsetWidth > bar.scrollLeft + bar.clientWidth || el.offsetLeft < bar.scrollLeft) bar.scrollLeft = el.offsetLeft - 16;
   }
   $("#search").q.value = route.view === "search" ? route.q : "";
-  $("#sections").hidden = !["feed", "search", "story"].includes(route.view) && innerWidth < 761;
+  $("#sections").hidden = !["feed", "search", "story", "outlet"].includes(route.view) && innerWidth < 761;
+  topbarSize();
   document.title = route.view === "feed" ? (route.cat === "une" ? "Prisme" : `${CAT_LABEL[route.cat]} — Prisme`) : document.title;
 }
 
@@ -571,11 +582,133 @@ function openMoreSheet() {
 }
 document.addEventListener("click", (e) => { if (e.target.closest("[data-close-modal]")) closeLayer("#modal"); });
 
-$("#search").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const q = e.target.q.value.trim();
-  if (q.length >= 2) { e.target.q.blur(); go(href({ q })); }
-});
+/* ---------- Le haut de page reste à portée de main ---------- */
+function topbarSize() { document.documentElement.style.setProperty("--top-h", `${$("#topbar").offsetHeight}px`); }
+{
+  const bar = $("#topbar");
+  let lastY = scrollY;
+  addEventListener("scroll", () => {
+    const y = scrollY, dy = y - lastY;
+    lastY = y;
+    // Plus mince une fois qu'on est descendu (deux seuils pour ne pas clignoter).
+    if (y > 140) bar.classList.add("compact"); else if (y < 40) bar.classList.remove("compact");
+    // Téléphone : se range quand on descend, revient dès qu'on remonte.
+    if (innerWidth > 760 || y < 160 || bar.contains(document.activeElement)) bar.classList.remove("tucked");
+    else if (dy > 8) bar.classList.add("tucked");
+    else if (dy < -6) bar.classList.remove("tucked");
+  }, { passive: true });
+  addEventListener("resize", topbarSize);
+  bar.addEventListener("transitionend", topbarSize);
+}
+
+/* ---------- Recherche : suggestions pendant qu'on tape ---------- */
+const recent = {
+  list() { try { return JSON.parse(store.get("recent", "[]")); } catch { return []; } },
+  add(q) { store.set("recent", JSON.stringify([q, ...this.list().filter((x) => x.toLowerCase() !== q.toLowerCase())].slice(0, 8))); },
+  clear() { store.set("recent", "[]"); },
+};
+const SG_ICON = {
+  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/>',
+  trend: '<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',
+  all: '<path d="M4 6h16M4 12h16M4 18h10"/>',
+};
+const sgIcon = (k) => `<svg class="sg-ico" viewBox="0 0 24 24" aria-hidden="true">${SG_ICON[k]}</svg>`;
+// Met en gras les mots cherchés dans un titre (sans tenir compte des accents).
+function markWords(text, words) {
+  const f = foldText(text);
+  if (f.length !== text.length || !words.length) return esc(text);
+  const hit = new Uint8Array(text.length);
+  for (const w of words) { let i = f.indexOf(w); while (i >= 0) { hit.fill(1, i, i + w.length); i = f.indexOf(w, i + w.length); } }
+  let out = "", on = false;
+  for (let i = 0; i < text.length; i++) {
+    if (hit[i] !== +on) { out += on ? "</mark>" : "<mark>"; on = !on; }
+    out += esc(text[i]);
+  }
+  return out + (on ? "</mark>" : "");
+}
+
+{
+  const form = $("#search"), input = form.q, box = $("#suggest");
+  let token = 0;
+  const open = (html) => { box.innerHTML = html; box.hidden = false; input.setAttribute("aria-expanded", "true"); };
+  const close = () => { box.hidden = true; input.setAttribute("aria-expanded", "false"); };
+  const searchFor = (q, wide = false) => {
+    q = q.trim();
+    if (q.length < 2) return;
+    recent.add(q);
+    if (wide) state.pendingWide = q;
+    close();
+    input.blur();
+    go(href({ q }));
+  };
+  const item = (attrs, inner) => `<a class="sg" role="option" ${attrs}>${inner}</a>`;
+  const sgSearch = (q, icon, sub = "") => item(`href="${href({ q })}" data-q="${esc(q)}"`, `${sgIcon(icon)}<span class="sg-main">${esc(q)}${sub ? `<small>${sub}</small>` : ""}</span>`);
+
+  async function suggest() {
+    const my = ++token;
+    const q = input.value.trim(), fq = foldText(q).trim();
+    const ed = await edition(state.region).catch(() => null);
+    if (my !== token) return;
+    const trending = ed?.trending || [];
+    if (fq.length < 2) {
+      const rec = recent.list(), mine = topics.list();
+      open(`${rec.length ? `<div class="sg-h">Recherches récentes <button type="button" data-clear>Effacer</button></div>${rec.slice(0, 5).map((t) => sgSearch(t, "clock")).join("")}` : ""}
+        ${mine.length ? `<div class="sg-h">Mes sujets</div>${mine.slice(0, 5).map((t) => sgSearch(t, "star")).join("")}` : ""}
+        ${trending.length ? `<div class="sg-h">En ce moment</div>${trending.slice(0, 7).map((t) => sgSearch(t, "trend")).join("")}` : ""}
+        <p class="sg-tips">Cherche un sujet (une personne, une ville, un enjeu) ou le nom d'un média, comme « TVA » ou « Le Devoir ».</p>`);
+      return;
+    }
+    const words = fq.split(/[^\p{L}\p{N}]+/u).filter((w) => w.length >= 2);
+    const themes = [...new Set([...topics.list(), ...recent.list(), ...trending])].filter((t) => foldText(t).includes(fq) && foldText(t) !== fq).slice(0, 3);
+    const stories = (ed?.stories || []).filter((s) => words.length && words.every((w) => foldText(s.title).includes(w)))
+      .sort((a, b) => b.sources - a.sources).slice(0, 4);
+    const draw = (outlets) => {
+      if (my !== token) return;
+      open(`${sgSearch(q, "search", "Les histoires sur ce sujet")}
+        ${themes.map((t) => sgSearch(t, "trend")).join("")}
+        ${outlets.length ? `<div class="sg-h">Médias</div>${outlets.map((d) => item(`href="${href({ m: d.domain })}" data-nav`,
+          `${favicon(d.domain, d.name)}<span class="sg-main" data-no-tr><b>${markWords(d.name, words)}</b><small>${d.media.known ? esc(d.media.owner.replace(/\s*\(.*\)$/, "")) : esc(d.domain)}</small></span><span class="sg-side">${badge(d.media)}</span>`)).join("")}` : ""}
+        ${stories.length ? `<div class="sg-h">Histoires</div>${stories.map((s) => item(`href="${href({ h: s.id })}" data-nav`,
+          `<span class="sg-main"><span class="sg-t" data-no-tr>${markWords(s.title, words)}</span><small>${plural(s.sources, "média")} ${s.sources > 1 ? "en parlent" : "en parle"} · ${esc(ago(s.lastSeen || s.firstSeen))}</small></span>`)).join("")}` : ""}
+        ${item(`href="${href({ q })}" data-q="${esc(q)}" data-wide`, `${sgIcon("all")}<span class="sg-main">Chercher « ${esc(q)} » dans tous les articles (48 h)</span>`).replace('class="sg"', 'class="sg sg-all"')}`);
+    };
+    draw([]);
+    articlesOf(state.region).then((idx) => draw(matchOutlets(idx.domains, q).slice(0, 4))).catch(() => {});
+  }
+
+  input.addEventListener("focus", () => { suggest(); articlesOf(state.region).catch(() => {}); });
+  input.addEventListener("input", suggest);
+  input.addEventListener("keydown", (e) => {
+    if (box.hidden) return;
+    const opts = $$(".sg", box), cur = opts.findIndex((o) => o.getAttribute("aria-selected") === "true");
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const next = opts[(cur + (e.key === "ArrowDown" ? 1 : -1) + opts.length) % opts.length];
+      opts.forEach((o) => o.setAttribute("aria-selected", o === next));
+      next?.scrollIntoView({ block: "nearest" });
+    } else if (e.key === "Enter" && cur >= 0) {
+      e.preventDefault();
+      opts[cur].click();
+    } else if (e.key === "Escape") { close(); }
+  });
+  // Un clic dans la liste ne doit pas fermer la liste avant d'être reçu.
+  box.addEventListener("mousedown", (e) => e.preventDefault());
+  box.addEventListener("click", (e) => {
+    if (e.target.closest("[data-clear]")) { recent.clear(); suggest(); return; }
+    const a = e.target.closest(".sg");
+    if (!a) return;
+    if (a.dataset.q) { e.preventDefault(); e.stopPropagation(); searchFor(a.dataset.q, a.hasAttribute("data-wide")); return; }
+    close();
+    input.blur();
+  });
+  input.addEventListener("blur", () => setTimeout(close, 120));
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    searchFor(input.value);
+  });
+}
 
 /* ---------- Petits morceaux ---------- */
 function bar(counts, lg = false) {
@@ -616,7 +749,7 @@ function legend() {
 
 // Pourquoi cette histoire est là : la règle, en clair.
 function reason(s) {
-  const parts = [`<b>${plural(s.sources, "média")}</b>`];
+  const parts = [`<b>${plural(s.sources, "média")}</b> ${s.sources > 1 ? "en parlent" : "en parle"}`];
   if (s.sides === 3) parts.push("des 3 côtés");
   else if (s.sides === 2) parts.push("2 côtés");
   parts.push(ago(s.lastSeen || s.firstSeen));
@@ -636,6 +769,16 @@ function favRow(s, max = 6) {
   for (const a of s.articles) if (!seen.has(a.domain)) { seen.add(a.domain); list.push(a); }
   return `<span class="favs">${list.slice(0, max).map((a) => favicon(a.domain, a.sourceName)).join("")}${list.length > max ? `<span class="more">+${list.length - max}</span>` : ""}</span>`;
 }
+// « Couvert par La Presse, Radio-Canada, Le Devoir et 4 autres » : les médias de l'histoire, nommés en clair.
+// Les médias connus passent devant ; chaque nom mène à la page du média.
+function coveredBy(s, max = 3) {
+  const seen = new Set(), list = [];
+  for (const a of s.articles) if (!seen.has(a.domain)) { seen.add(a.domain); list.push(a); }
+  const named = [...list].sort((a, b) => (b.media?.known ? 1 : 0) - (a.media?.known ? 1 : 0)).slice(0, max);
+  const rest = Math.max(0, s.sources - named.length);
+  return `<p class="covered">${favRow(s, 5)}<span>Couvert par <span data-no-tr>${named.map((a) =>
+    `<a href="${href({ m: a.domain })}" data-nav>${esc(a.sourceName)}</a>`).join(", ")}</span>${rest ? ` et ${rest} ${rest > 1 ? "autres" : "autre"}` : ""}</span></p>`;
+}
 const catKicker = (s, cat) => {
   const c = s.categories?.find((x) => x !== cat) || s.categories?.[0];
   return c ? `${esc(CAT_LABEL[c] || c)} · ` : "";
@@ -648,7 +791,8 @@ function storyRow(s, cat) {
       <div class="kicker">${catKicker(s, cat)}${reason(s)} ${langTag(s.lang)}</div>
       <h3 data-no-tr><a href="${link}" data-nav>${esc(s.title)}</a></h3>
       ${s.summary ? `<p class="dek" data-no-tr>${esc(s.summary)}</p>` : ""}
-      <div class="story-foot">${bar(s.counts)}${splitHtml(s.counts)}${favRow(s)}${flags(s)}${s.articles.some((a) => reads.has(a.url)) ? `<span class="flag read">Lu</span>` : ""}</div>
+      ${coveredBy(s)}
+      <div class="story-foot">${bar(s.counts)}${splitHtml(s.counts)}${flags(s)}${s.articles.some((a) => reads.has(a.url)) ? `<span class="flag read">Lu</span>` : ""}</div>
     </div>
     ${s.image ? `<a class="thumb" href="${link}" data-nav tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(s.image))}" alt="" loading="lazy" referrerpolicy="no-referrer"></a>` : ""}
   </article>`;
@@ -672,8 +816,9 @@ function leadStory(s, cat) {
       <div class="kicker">${catKicker(s, cat)}${reason(s)}</div>
       <h2 data-no-tr><a href="${link}" data-nav>${esc(s.title)}</a></h2>
       ${s.summary ? `<p class="dek" data-no-tr>${esc(s.summary)}</p><p class="dek-src">Résumé : ${esc(s.summarySource || "")}</p>` : ""}
+      ${coveredBy(s, 4)}
       ${bigBar(s.counts)}
-      <div class="story-foot">${splitHtml(s.counts)}${favRow(s, 8)}${flags(s)}</div>
+      <div class="story-foot">${splitHtml(s.counts)}${flags(s)}</div>
       <div class="angles3">${SIDES.map((side) => {
         const a = by[side.key];
         return `<div><div class="side"><i style="background:${side.color}"></i>${side.label}</div>
@@ -685,6 +830,16 @@ function leadStory(s, cat) {
 }
 
 /* ---------- Le fil ---------- */
+// Montrée une seule fois : comment lire un bloc du fil.
+const HOWTO = `<aside class="howto" aria-label="Comment lire Prisme">
+  <div class="howto-h"><span class="kicker">Comment lire Prisme</span><button class="btn" type="button" id="howtoOk">Compris</button></div>
+  <ol>
+    <li><b>Chaque bloc est une histoire</b>, pas un article : un même évènement, raconté par plusieurs médias. Prisme regroupe leurs articles.</li>
+    <li><b>« 6 médias en parlent »</b> : six médias différents ont publié un article sur cette histoire. Leurs noms sont écrits en dessous (« Couvert par… ») ; touche un nom pour voir ce média.</li>
+    <li><b>La barre de couleur</b> montre d'où viennent ces médias : <span class="sw-l">gauche</span>, <span class="sw-c">centre</span>, <span class="sw-r">droite</span>.</li>
+    <li><b>Touche le titre</b> pour comparer : chaque article, média par média, les mots de chaque côté et qui possède ces médias.</li>
+  </ol>
+</aside>`;
 const feedKey = (r) => (r.q ? `q|${r.q.toLowerCase()}|${state.region}` : `f|${r.cat}|${r.lens}|${state.region}`);
 
 function viewFeed(v, route) {
@@ -699,9 +854,11 @@ function viewFeed(v, route) {
   v.innerHTML = `${folio(esc(CAT_LABEL[route.cat]), regionLabel())}${lensHtml}
     <div class="topics" id="topics"></div>
     <div class="layout">
-      <div class="main-col"><div id="feed"></div><div id="sentinel"></div><div id="feedStatus"></div></div>
+      <div class="main-col">${store.get("howto") ? "" : HOWTO}<div id="feed"></div><div id="sentinel"></div><div id="feedStatus"></div></div>
       <aside class="rail" aria-label="Autour du fil"><div class="rail-in" id="rail"></div></aside>
     </div>`;
+  const ht = $("#howtoOk", v);
+  if (ht) ht.onclick = () => { store.set("howto", "1"); $(".howto", v)?.remove(); };
   $(".lenses", v).onclick = (e) => {
     const b = e.target.closest("[data-lens]");
     if (b) go(href({ cat: route.cat, lens: b.dataset.lens }));
@@ -1098,9 +1255,10 @@ function viewSearch(v, route) {
       <p>Les histoires des dernières 48 heures, dans les médias que Prisme lit directement.</p>
       <div class="actions">
         <button class="btn${followed ? " ghost" : ""}" type="button" id="follow">${followed ? "✓ Suivi" : "★ Suivre ce sujet"}</button>
-        <a class="btn ghost" href="#wide" id="wideBtn">Élargir à tout le web (7 jours)</a>
+        <a class="btn ghost" href="#wide" id="wideBtn">Chercher dans tous les articles (48 h)</a>
       </div>
     </header>
+    <section id="outletHits" hidden></section>
     <div class="layout">
       <div class="main-col"><div id="feed"></div><div id="sentinel"></div><div id="feedStatus"></div>
         <section id="wide" class="sec"></section>
@@ -1115,6 +1273,7 @@ function viewSearch(v, route) {
     drawRail(state.feeds.get(feedKey(route)));
   };
   $("#wideBtn", v).onclick = (e) => { e.preventDefault(); loadWide(route.q); };
+  recent.add(route.q);
   const key = feedKey(route);
   mountFeed(key, { q: route.q });
   const f = state.feeds.get(key);
@@ -1125,10 +1284,51 @@ function viewSearch(v, route) {
     if (ff.stories.length < 3 && state.route.view === "search" && state.route.q === route.q) loadWide(route.q, false);
   };
   if (f) check();
-  if (state.wide.has(`${route.q}|${state.region}`)) loadWide(route.q, false);
+  if (state.wide.has(`${route.q}|${state.region}`) || state.pendingWide === route.q) { state.pendingWide = null; loadWide(route.q, state.wide.size > 0); }
+  // La recherche nomme peut-être un média : on le propose en premier.
+  articlesOf(state.region).then((idx) => {
+    const hits = matchOutlets(idx.domains, route.q);
+    const el = $("#outletHits");
+    if (!el || !hits.length || state.route.view !== "search" || state.route.q !== route.q) return;
+    el.hidden = false;
+    el.innerHTML = `<h2 class="block-h">Médias <small>qui correspondent à « ${esc(route.q)} »</small></h2>
+      <div class="outlet-hits">${hits.map((d) => `<a class="outlet-hit" href="${href({ m: d.domain })}" data-nav>
+        ${favicon(d.domain, d.name)}<span class="oh-main"><b>${esc(d.name)}</b><small>${d.media.known ? esc(d.media.owner.replace(/\s*\(.*\)$/, "")) : esc(d.domain)}</small></span>
+        <span class="oh-side">${badge(d.media)}<small>${plural(d.count, "article")} en 48 h</small></span></a>`).join("")}</div>`;
+  }).catch(() => {});
 }
 
-const emptySearch = (q) => `<div class="empty" style="padding-bottom:10px"><h3>Rien dans les dernières 48 heures.</h3><p>Aucun média lu par Prisme n'a publié sur « ${esc(q)} » récemment. Voici ce qu'on trouve en élargissant à tout le web sur 7 jours.</p></div>`;
+const emptySearch = (q) => `<div class="empty" style="padding-bottom:10px"><h3>Rien dans les dernières 48 heures.</h3><p>Aucune histoire de Prisme ne correspond à « ${esc(q)} ». Voici ce qu'on trouve dans tous les articles lus par Prisme.</p></div>`;
+
+/* ---------- La page d'un média : ses derniers articles et ses histoires du moment ---------- */
+async function viewOutlet(v, route) {
+  v.innerHTML = `<div class="page-h">${'<div class="skel" style="height:44px;width:50%;margin-top:10px"></div>'.repeat(2)}</div>`;
+  let idx = await articlesOf(state.region).catch(() => null);
+  let d = idx?.domains.find((x) => x.domain === route.m);
+  if (!d && state.region !== "monde") { idx = await articlesOf("monde").catch(() => null); d = idx?.domains.find((x) => x.domain === route.m); }
+  if (state.route.view !== "outlet" || state.route.m !== route.m) return;
+  if (!d) {
+    v.innerHTML = `<div class="empty"><h3>Ce média n'a rien publié dans les dernières 48 heures.</h3><p><button class="btn ghost" type="button" data-domain="${esc(route.m)}" data-name="${esc(route.m)}">Voir sa fiche</button></p></div>`;
+    return;
+  }
+  document.title = `${d.name} — Prisme`;
+  const items = idx.items.filter((a) => a.domain === d.domain).slice(0, 120);
+  const ed = await edition(state.region).catch(() => null);
+  const stories = (ed?.stories || []).filter((s) => s.sources >= 2 && s.articles.some((a) => a.domain === d.domain)).slice(0, 6);
+  for (const s of stories) state.stories.set(s.id, s);
+  const m = d.media;
+  v.innerHTML = `<header class="page-h outlet-head">
+      <div class="kicker">Média · ${esc(regionLabel())}</div>
+      <h1>${favicon(d.domain, d.name)} ${esc(d.name)}</h1>
+      <p class="outlet-meta">${badge(m)} ${m.known ? `<span>Propriété : <b>${esc(m.owner)}</b></span>` : ""} ${m.country ? `<span>${esc(countryName(m.country))}</span>` : ""} <a class="link" href="https://${esc(d.domain)}" target="_blank" rel="noopener noreferrer">${esc(d.domain)} ↗</a></p>
+      <div class="actions"><button class="btn" type="button" data-domain="${esc(d.domain)}" data-name="${esc(d.name)}">Fiche complète (propriétaire, groupe)</button></div>
+    </header>
+    ${stories.length ? `<section class="sec"><h2 class="block-h">Ses histoires du moment <small>celles que d'autres médias couvrent aussi</small></h2>${stories.map((s) => storyRow(s)).join("")}</section>` : ""}
+    <section class="sec">
+      <h2 class="block-h">Ses derniers articles <small>${plural(items.length, "article")} en 48 h</small></h2>
+      <ul class="arts">${items.map((a) => `<li class="art"><time>${esc(ago(a.published))}</time><div>${langTag(a.lang)} ${artLink(a, "t")} ${transLink(a)}</div></li>`).join("")}</ul>
+    </section>`;
+}
 
 async function loadWide(q, scroll = true) {
   const el = $("#wide");
@@ -1138,9 +1338,9 @@ async function loadWide(q, scroll = true) {
   const intro = f && !f.stories.length && !f.loading ? emptySearch(q) : "";
   if (scroll) el.scrollIntoView({ behavior: "smooth", block: "start" });
   if (!state.wide.has(key)) {
-    el.innerHTML = `${intro}<h2 class="block-h">Tout le web <small>GDELT et toutes les éditions de Prisme, 7 jours</small></h2><div class="loader">Recherche dans des centaines de médias…</div>`;
-    try { state.wide.set(key, await api(`/api/search?q=${encodeURIComponent(q)}&region=${state.region}&period=7d`)); }
-    catch (e) { el.innerHTML = `<h2 class="block-h">Tout le web</h2><div class="empty"><p>${esc(e.message)}</p></div>`; return; }
+    el.innerHTML = `${intro}<h2 class="block-h">Tous les articles <small>48 h</small></h2><div class="loader">Recherche dans des milliers de médias…</div>`;
+    try { state.wide.set(key, await api(`/api/search?q=${encodeURIComponent(q)}&region=${state.region}`)); }
+    catch (e) { el.innerHTML = `<h2 class="block-h">Tous les articles</h2><div class="empty"><p>${esc(e.message)}</p></div>`; return; }
     if (state.route.view !== "search" || state.route.q !== q) return;
   }
   state.wideBias.clear();
@@ -1154,8 +1354,9 @@ function drawWide(el, d, intro = "") {
   const seen = new Set();
   for (const x of a) if (!seen.has(x.domain)) { seen.add(x.domain); counts[biasKey(x.media)]++; }
   const tabs = [["articles", "Articles", a.length], ["comparer", "Comparer", null], ["medias", "Médias", doms], ["videos", "Vidéos", null]];
-  el.innerHTML = `${intro}<h2 class="block-h">Tout le web <small>GDELT et toutes les éditions de Prisme, 7 jours · ${plural(a.length, "article")} · ${plural(doms, "média")}</small></h2>
-    <p class="note" style="margin:0 0 12px">Ici, Prisme cherche le sujet dans tous les médias qu'il lit, puis dans GDELT, qui surveille la presse du monde entier. Les résultats sont simplement classés du plus récent au plus ancien.</p>
+  if (!a.length) { el.innerHTML = `${intro}<h2 class="block-h">Tous les articles <small>48 h</small></h2><div class="empty"><p>Aucun article des médias lus par Prisme ne contient tous ces mots. Essaie un mot plus court ou une autre édition (Monde entier cherche partout).</p></div>`; return; }
+  el.innerHTML = `${intro}<h2 class="block-h">Tous les articles <small>48 h · ${plural(a.length, "article")} · ${plural(doms, "média")}</small></h2>
+    <p class="note" style="margin:0 0 12px">Ici, Prisme cherche dans chaque article publié par les médias de cette édition depuis 48 heures, même ceux qui ne font pas partie d'une histoire. Aucun tri : du plus récent au plus ancien.</p>
     ${bigBar(counts)}
     <nav class="tabs" role="tablist">${tabs.map(([k, l, n]) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${state.wideTab === k}">${l}${n != null ? `<sup>${n}</sup>` : ""}</button>`).join("")}</nav>
     <div id="widePanel"></div>`;
@@ -1934,8 +2135,8 @@ const ABOUT_EN = `<div class="modal-pad">
     <p>About 160 well-known outlets have an indicative leaning on five levels, inspired by public ratings (AllSides, Media Bias/Fact Check, Ad Fontes Media). State-controlled outlets are listed separately. Outlets discovered automatically are marked “Not rated”. Ownership comes from Prisme's database and Wikidata.</p>
     <h3>My prism</h3>
     <p>When you open an article from Prisme, its outlet, leaning and owner are logged in your browser, and nowhere else. You can erase everything in one tap.</p>
-    <h3>Whole-web search</h3>
-    <p>“Search the whole web” looks through every outlet Prisme reads, then GDELT, which monitors the world's press. Results are sorted newest first.</p>
+    <h3>Search</h3>
+    <p>Type a topic or an outlet's name: suggestions appear as you type. “Search all articles” looks through every article published in the last 48 hours by the edition's outlets, even those not part of a story. Results are sorted newest first.</p>
     <h3>Limits</h3>
     <p>A left/right label sums up a whole outlet, not each article. Feeds only cover roughly the last 48 hours. Neutral summaries are written by AI from headlines only. Use Prisme as a compass, not a verdict.</p>
   </div>`;
@@ -1957,7 +2158,7 @@ function openAbout() {
     <h3>Mon prisme</h3>
     <p>Quand tu ouvres un article depuis Prisme, son média, son orientation et son propriétaire sont notés dans ton navigateur, et nulle part ailleurs. « Mon prisme » s'en sert pour te montrer de quel côté tu penches, à qui appartient ce que tu lis, et ce que tu rates de l'autre côté. Tu peux tout effacer en un clic.</p>
     <h3>La recherche élargie</h3>
-    <p>Le bouton « Élargir à tout le web » cherche dans tous les médias lus par Prisme, puis dans GDELT, qui surveille la presse du monde entier. Personne ne trie : du plus récent au plus ancien.</p>
+    <p>Tape un sujet ou le nom d'un média : des suggestions apparaissent pendant que tu écris. Le bouton « Chercher dans tous les articles » fouille chaque article publié depuis 48 heures par les médias de l'édition, même ceux qui ne font pas partie d'une histoire. Personne ne trie : du plus récent au plus ancien.</p>
     <h3>Les limites</h3>
     <p>Une étiquette gauche/droite résume un média entier, pas chaque article. Les flux ne couvrent que les dernières 48 heures environ. Sers-toi de Prisme comme d'une boussole, pas d'un verdict.</p>
   </div>`);

@@ -41,6 +41,7 @@
 <body>
   <a class="skip" href="#view">Aller au contenu</a>
 
+  <div class="topbar" id="topbar">
   <header class="mast">
     <div class="band">
       <div class="wrap band-row">
@@ -83,11 +84,14 @@
       <div class="cats" id="cats"></div>
       <form class="search" id="search" role="search">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input name="q" type="search" placeholder="Chercher un sujet" autocomplete="off" aria-label="Chercher un sujet" enterkeyhint="search">
+        <input name="q" type="search" placeholder="Un sujet, un média…" autocomplete="off" aria-label="Chercher un sujet ou un média" enterkeyhint="search"
+          role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggest">
         <kbd>/</kbd>
+        <div class="suggest" id="suggest" role="listbox" hidden></div>
       </form>
     </div>
   </nav>
+  </div>
 
   <!-- Barre d'onglets du téléphone -->
   <nav class="tabbar" id="tabbar" aria-label="Navigation principale"></nav>

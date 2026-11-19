@@ -15,7 +15,7 @@ if (existsSync(join(root, ".env"))) {
 }
 
 const { getIndex } = await import("./lib/ingest.mjs");
-const { buildStories, editionFile, mondeLookup, REGIONS } = await import("./lib/edition.mjs");
+const { buildStories, editionFile, articlesFile, mondeLookup, REGIONS } = await import("./lib/edition.mjs");
 const { allVideos } = await import("./lib/videos.mjs");
 const { directory } = await import("./lib/media-db.mjs");
 
@@ -66,6 +66,8 @@ let videosCache = { at: 0, body: null };
 async function dataFile(name) {
   const m = name.match(/^edition-([a-z]+)\.json$/);
   if (m && REGIONS.includes(m[1])) return editionJson(m[1]);
+  const a = name.match(/^articles-([a-z]+)\.json$/);
+  if (a && REGIONS.includes(a[1])) return JSON.stringify(articlesFile(await getIndex(), a[1]));
   if (name === "videos.json") {
     if (!videosCache.body || Date.now() - videosCache.at > 30 * 60e3) videosCache = { at: Date.now(), body: JSON.stringify({ builtAt: new Date().toISOString(), videos: await allVideos() }) };
     return videosCache.body;
