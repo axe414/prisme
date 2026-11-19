@@ -110,7 +110,9 @@ const EXACT = {
   "Les médias regroupés par propriétaire, et la toile des familles.": "Outlets grouped by owner, and the map of families.",
   "Un titre : gauche, centre ou droite ?": "One headline: left, center or right?", "Les sources, les lentilles et les limites.": "Sources, lenses and limits.",
   "Installer Prisme sur l'écran d'accueil": "Install Prisme on your home screen", "Une icône comme une vraie app, en plein écran.": "An icon like a real app, full screen.",
-  "Langue": "Language",
+  "Langue": "Language", "Signaler une erreur ↗": "Report an error ↗", "Code source (libre, MIT)": "Source code (free, MIT)",
+  "Prisme lit directement les flux publics de ses médias et choisit ses histoires avec des règles visibles. Orientations indicatives, propriété selon la base Prisme et Wikidata.": "Prisme reads its outlets' public feeds directly and picks stories with visible rules. Indicative leanings, ownership from Prisme's database and Wikidata.",
+  "L'orientation est une estimation indicative inspirée des évaluations publiques (AllSides, Media Bias/Fact Check, Ad Fontes). La propriété vient de la base Prisme et de Wikidata, une source collaborative qui peut être incomplète ou en retard.": "The leaning is an indicative estimate inspired by public ratings (AllSides, Media Bias/Fact Check, Ad Fontes). Ownership comes from Prisme's database and Wikidata, a collaborative source that may be incomplete or out of date.",
 };
 
 // Textes avec un nombre ou un nom à l'intérieur.
@@ -122,6 +124,9 @@ const PATTERNS = [
   [/^(\d+) vidéos?$/, (m, n) => `${n} video${s(n)}`],
   [/^(\d+) articles? lus?$/, (m, n) => `${n} article${s(n)} read`],
   [/^(\d+) médias? lus? directement par Prisme dans cette édition\.$/, (m, n) => `${n} outlet${s(n)} read directly by Prisme in this edition.`],
+  [/^(\d+) (?:autres? médias?) non évalués\. (\d+) médias? lus? directement par Prisme dans cette édition\.$/, (m, a, b) => `${a} other outlets not rated. ${b} outlets read directly by Prisme in this edition.`],
+  [/^(\d+) autres? médias?$/, (m, n) => `${n} other outlet${s(n)}`],
+  [/^médias évalués$/, () => "rated outlets"],
   [/^(\d+) médias? actifs? silencieux$/, (m, n) => `${n} active outlet${s(n)} silent`],
   [/^(\d+) médias? dans le monde$/, (m, n) => `${n} outlet${s(n)} worldwide`],
   [/^Résumé : (.+)$/, (m, x) => `Summary: ${x}`],

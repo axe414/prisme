@@ -1,0 +1,20 @@
+name: Signaler un problème / Report a problem
+description: Un regroupement raté, un affichage cassé, une traduction manquante… / A wrong grouping, broken layout, missing translation…
+title: "[Problème] "
+labels: ["problème"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: Ce qui ne va pas / What's wrong
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: Lien vers la page / Link to the page
+  - type: input
+    id: device
+    attributes:
+      label: Appareil et navigateur / Device and browser
+      description: ex. iPhone, Safari / Windows, Edge

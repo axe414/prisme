@@ -1,0 +1,1827 @@
+[
+  {
+    "name": "Radio-Canada",
+    "domains": [
+      "radio-canada.ca"
+    ],
+    "country": "CA",
+    "type": "public",
+    "owner": "Société Radio-Canada (société d'État fédérale)",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "CBC News",
+    "domains": [
+      "cbc.ca"
+    ],
+    "country": "CA",
+    "type": "public",
+    "owner": "Société Radio-Canada (société d'État fédérale)",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "La Presse",
+    "domains": [
+      "lapresse.ca"
+    ],
+    "country": "CA",
+    "type": "OBNL",
+    "owner": "Fiducie de soutien à La Presse (OBNL depuis 2018)",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "Le Devoir",
+    "domains": [
+      "ledevoir.com"
+    ],
+    "country": "CA",
+    "type": "indépendant",
+    "owner": "Indépendant, sans actionnaire de contrôle",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "Le Journal de Montréal",
+    "domains": [
+      "journaldemontreal.com"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "Québecor (famille Péladeau)",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "Le Journal de Québec",
+    "domains": [
+      "journaldequebec.com"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "Québecor (famille Péladeau)",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "TVA Nouvelles",
+    "domains": [
+      "tvanouvelles.ca",
+      "qub.ca"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "Québecor (famille Péladeau)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Noovo Info",
+    "domains": [
+      "noovo.info"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "Bell Média (BCE)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "98.5 Montréal",
+    "domains": [
+      "985fm.ca",
+      "cogecomedia.com"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "Cogeco Média",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Le Soleil",
+    "domains": [
+      "lesoleil.com"
+    ],
+    "country": "CA",
+    "type": "coopérative",
+    "owner": "Coopérative nationale de l'information indépendante (CN2i)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Le Droit",
+    "domains": [
+      "ledroit.com"
+    ],
+    "country": "CA",
+    "type": "coopérative",
+    "owner": "Coopérative nationale de l'information indépendante (CN2i)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "La Tribune",
+    "domains": [
+      "latribune.ca"
+    ],
+    "country": "CA",
+    "type": "coopérative",
+    "owner": "Coopérative nationale de l'information indépendante (CN2i)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Le Nouvelliste",
+    "domains": [
+      "lenouvelliste.ca"
+    ],
+    "country": "CA",
+    "type": "coopérative",
+    "owner": "Coopérative nationale de l'information indépendante (CN2i)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "The Globe and Mail",
+    "domains": [
+      "theglobeandmail.com"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "Woodbridge Company (famille Thomson)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "National Post",
+    "domains": [
+      "nationalpost.com"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "Postmedia (Chatham Asset Management, actionnaire majoritaire)",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "Toronto Sun",
+    "domains": [
+      "torontosun.com"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "Postmedia (Chatham Asset Management, actionnaire majoritaire)",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "Montreal Gazette",
+    "domains": [
+      "montrealgazette.com"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "Postmedia (Chatham Asset Management, actionnaire majoritaire)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Toronto Star",
+    "domains": [
+      "thestar.com"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "NordStar Capital (Jordan Bitove)",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "Global News",
+    "domains": [
+      "globalnews.ca"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "Corus Entertainment",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "CTV News",
+    "domains": [
+      "ctvnews.ca"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "Bell Média (BCE)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Maclean's",
+    "domains": [
+      "macleans.ca"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "St. Joseph Communications",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "La Presse Canadienne",
+    "domains": [
+      "thecanadianpress.com"
+    ],
+    "country": "CA",
+    "type": "agence",
+    "owner": "La Presse Canadienne",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "The Tyee",
+    "domains": [
+      "thetyee.ca"
+    ],
+    "country": "CA",
+    "type": "indépendant",
+    "owner": "Indépendant (financé par les lecteurs)",
+    "bias": -2,
+    "leaning": "left",
+    "state": null
+  },
+  {
+    "name": "L'actualité",
+    "domains": [
+      "lactualite.com"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "Mishmash Média (à vérifier)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Les Affaires",
+    "domains": [
+      "lesaffaires.com"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "Mishmash Média (à vérifier)",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "Métro",
+    "domains": [
+      "journalmetro.com"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "Métro Média (à vérifier)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Pivot",
+    "domains": [
+      "pivot.quebec"
+    ],
+    "country": "CA",
+    "type": "OBNL",
+    "owner": "Pivot (média indépendant sans but lucratif)",
+    "bias": -2,
+    "leaning": "left",
+    "state": null
+  },
+  {
+    "name": "The Rover",
+    "domains": [
+      "therover.ca"
+    ],
+    "country": "CA",
+    "type": "indépendant",
+    "owner": "Indépendant (financé par les lecteurs)",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "CityNews",
+    "domains": [
+      "citynews.ca"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "Rogers Sports & Media (Rogers Communications)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "APTN News",
+    "domains": [
+      "aptnnews.ca"
+    ],
+    "country": "CA",
+    "type": "OBNL",
+    "owner": "Aboriginal Peoples Television Network (sans but lucratif)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "The Narwhal",
+    "domains": [
+      "thenarwhal.ca"
+    ],
+    "country": "CA",
+    "type": "OBNL",
+    "owner": "Organisme sans but lucratif",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "The Hub",
+    "domains": [
+      "thehub.ca"
+    ],
+    "country": "CA",
+    "type": "indépendant",
+    "owner": "Indépendant",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "Western Standard",
+    "domains": [
+      "westernstandard.news"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "Western Standard New Media",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "Rebel News",
+    "domains": [
+      "rebelnews.com"
+    ],
+    "country": "CA",
+    "type": "privé",
+    "owner": "Rebel News Network (Ezra Levant)",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "Le Monde",
+    "domains": [
+      "lemonde.fr"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "Groupe Le Monde",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "Le Figaro",
+    "domains": [
+      "lefigaro.fr"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "Groupe Dassault (famille Dassault)",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "Libération",
+    "domains": [
+      "liberation.fr"
+    ],
+    "country": "FR",
+    "type": "OBNL",
+    "owner": "Fonds de dotation pour une presse indépendante",
+    "bias": -2,
+    "leaning": "left",
+    "state": null
+  },
+  {
+    "name": "Mediapart",
+    "domains": [
+      "mediapart.fr"
+    ],
+    "country": "FR",
+    "type": "indépendant",
+    "owner": "Fonds pour une presse libre",
+    "bias": -2,
+    "leaning": "left",
+    "state": null
+  },
+  {
+    "name": "L'Humanité",
+    "domains": [
+      "humanite.fr"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "Société nouvelle du journal L'Humanité (historiquement lié au PCF)",
+    "bias": -2,
+    "leaning": "left",
+    "state": null
+  },
+  {
+    "name": "L'Obs",
+    "domains": [
+      "nouvelobs.com"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "Groupe Le Monde",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "HuffPost France",
+    "domains": [
+      "huffingtonpost.fr"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "Groupe Le Monde",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "Courrier international",
+    "domains": [
+      "courrierinternational.com"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "Groupe Le Monde",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Le Parisien",
+    "domains": [
+      "leparisien.fr"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "LVMH (Bernard Arnault)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Les Échos",
+    "domains": [
+      "lesechos.fr"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "LVMH (Bernard Arnault)",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "Le Point",
+    "domains": [
+      "lepoint.fr"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "Artémis (famille Pinault)",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "L'Express",
+    "domains": [
+      "lexpress.fr"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "Alain Weill",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Valeurs actuelles",
+    "domains": [
+      "valeursactuelles.com"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "Groupe Valmonde",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "CNews",
+    "domains": [
+      "cnews.fr"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "Groupe Canal+ (famille Bolloré, actionnaire principal)",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "Le JDD",
+    "domains": [
+      "lejdd.fr"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "Lagardère (groupe Bolloré)",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "Europe 1",
+    "domains": [
+      "europe1.fr"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "Lagardère (groupe Bolloré)",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "BFMTV",
+    "domains": [
+      "bfmtv.com"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "CMA CGM (Rodolphe Saadé)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "TF1 Info",
+    "domains": [
+      "tf1info.fr"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "Groupe TF1 (Bouygues)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "franceinfo",
+    "domains": [
+      "francetvinfo.fr"
+    ],
+    "country": "FR",
+    "type": "public",
+    "owner": "France Télévisions / Radio France (État français)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Radio France",
+    "domains": [
+      "radiofrance.fr",
+      "franceinter.fr"
+    ],
+    "country": "FR",
+    "type": "public",
+    "owner": "Radio France (État français)",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "France 24",
+    "domains": [
+      "france24.com"
+    ],
+    "country": "FR",
+    "type": "public",
+    "owner": "France Médias Monde (État français)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "RFI",
+    "domains": [
+      "rfi.fr"
+    ],
+    "country": "FR",
+    "type": "public",
+    "owner": "France Médias Monde (État français)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "20 Minutes",
+    "domains": [
+      "20minutes.fr"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "Groupe Rossel / SIPA Ouest-France",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Ouest-France",
+    "domains": [
+      "ouest-france.fr"
+    ],
+    "country": "FR",
+    "type": "OBNL",
+    "owner": "SIPA Ouest-France (association)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "La Croix",
+    "domains": [
+      "la-croix.com"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "Groupe Bayard (congrégation des Augustins de l'Assomption)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "AFP",
+    "domains": [
+      "afp.com"
+    ],
+    "country": "FR",
+    "type": "agence",
+    "owner": "Agence France-Presse (statut autonome, financement public partiel)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Reporterre",
+    "domains": [
+      "reporterre.net"
+    ],
+    "country": "FR",
+    "type": "OBNL",
+    "owner": "Association sans but lucratif",
+    "bias": -2,
+    "leaning": "left",
+    "state": null
+  },
+  {
+    "name": "Causeur",
+    "domains": [
+      "causeur.fr"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "Causeur SAS",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "Boulevard Voltaire",
+    "domains": [
+      "bvoltaire.fr"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "Boulevard Voltaire SAS",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "RTBF",
+    "domains": [
+      "rtbf.be"
+    ],
+    "country": "BE",
+    "type": "public",
+    "owner": "Radio-télévision belge de la Communauté française (public)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Le Soir",
+    "domains": [
+      "lesoir.be"
+    ],
+    "country": "BE",
+    "type": "privé",
+    "owner": "Groupe Rossel",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "RTS",
+    "domains": [
+      "rts.ch"
+    ],
+    "country": "CH",
+    "type": "public",
+    "owner": "SRG SSR (service public suisse)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Le Temps",
+    "domains": [
+      "letemps.ch"
+    ],
+    "country": "CH",
+    "type": "OBNL",
+    "owner": "Fondation Aventinus",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "The New York Times",
+    "domains": [
+      "nytimes.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "The New York Times Company (famille Sulzberger)",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "The Washington Post",
+    "domains": [
+      "washingtonpost.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Jeff Bezos (Nash Holdings)",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "The Wall Street Journal",
+    "domains": [
+      "wsj.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "News Corp (famille Murdoch)",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "New York Post",
+    "domains": [
+      "nypost.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "News Corp (famille Murdoch)",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "Fox News",
+    "domains": [
+      "foxnews.com",
+      "foxbusiness.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Fox Corporation (famille Murdoch)",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "CNN",
+    "domains": [
+      "cnn.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Warner Bros. Discovery (restructuration en cours)",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "MS NOW (ex-MSNBC)",
+    "domains": [
+      "msnbc.com",
+      "ms.now"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Versant (scission de Comcast)",
+    "bias": -2,
+    "leaning": "left",
+    "state": null
+  },
+  {
+    "name": "CNBC",
+    "domains": [
+      "cnbc.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Versant (scission de Comcast)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "NBC News",
+    "domains": [
+      "nbcnews.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Comcast (NBCUniversal)",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "ABC News",
+    "domains": [
+      "abcnews.go.com",
+      "abcnews.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "The Walt Disney Company",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "CBS News",
+    "domains": [
+      "cbsnews.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Paramount Skydance (famille Ellison)",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "The Free Press",
+    "domains": [
+      "thefp.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Paramount Skydance (famille Ellison)",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "NPR",
+    "domains": [
+      "npr.org"
+    ],
+    "country": "US",
+    "type": "OBNL",
+    "owner": "National Public Radio (sans but lucratif)",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "PBS",
+    "domains": [
+      "pbs.org"
+    ],
+    "country": "US",
+    "type": "OBNL",
+    "owner": "Public Broadcasting Service (sans but lucratif)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Associated Press",
+    "domains": [
+      "apnews.com"
+    ],
+    "country": "US",
+    "type": "agence",
+    "owner": "Coopérative de médias américains (sans but lucratif)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Reuters",
+    "domains": [
+      "reuters.com"
+    ],
+    "country": "GB",
+    "type": "agence",
+    "owner": "Thomson Reuters (famille Thomson)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Bloomberg",
+    "domains": [
+      "bloomberg.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Bloomberg L.P. (Michael Bloomberg)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Politico",
+    "domains": [
+      "politico.com",
+      "politico.eu"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Axel Springer",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "Axios",
+    "domains": [
+      "axios.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Cox Enterprises",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "The Hill",
+    "domains": [
+      "thehill.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Nexstar Media Group",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "USA Today",
+    "domains": [
+      "usatoday.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Gannett",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "Los Angeles Times",
+    "domains": [
+      "latimes.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Patrick Soon-Shiong",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "The Atlantic",
+    "domains": [
+      "theatlantic.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Laurene Powell Jobs (Emerson Collective)",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "The New Yorker",
+    "domains": [
+      "newyorker.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Condé Nast (Advance Publications)",
+    "bias": -2,
+    "leaning": "left",
+    "state": null
+  },
+  {
+    "name": "TIME",
+    "domains": [
+      "time.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Marc et Lynne Benioff",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "Newsweek",
+    "domains": [
+      "newsweek.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Newsweek Publishing",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Forbes",
+    "domains": [
+      "forbes.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Integrated Whale Media",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Vox",
+    "domains": [
+      "vox.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Vox Media",
+    "bias": -2,
+    "leaning": "left",
+    "state": null
+  },
+  {
+    "name": "HuffPost",
+    "domains": [
+      "huffpost.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "BuzzFeed Inc.",
+    "bias": -2,
+    "leaning": "left",
+    "state": null
+  },
+  {
+    "name": "Slate",
+    "domains": [
+      "slate.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Graham Holdings",
+    "bias": -2,
+    "leaning": "left",
+    "state": null
+  },
+  {
+    "name": "Mother Jones",
+    "domains": [
+      "motherjones.com"
+    ],
+    "country": "US",
+    "type": "OBNL",
+    "owner": "Foundation for National Progress (sans but lucratif)",
+    "bias": -2,
+    "leaning": "left",
+    "state": null
+  },
+  {
+    "name": "The Nation",
+    "domains": [
+      "thenation.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "The Nation Company",
+    "bias": -2,
+    "leaning": "left",
+    "state": null
+  },
+  {
+    "name": "Jacobin",
+    "domains": [
+      "jacobin.com"
+    ],
+    "country": "US",
+    "type": "indépendant",
+    "owner": "Indépendant",
+    "bias": -2,
+    "leaning": "left",
+    "state": null
+  },
+  {
+    "name": "The Intercept",
+    "domains": [
+      "theintercept.com"
+    ],
+    "country": "US",
+    "type": "OBNL",
+    "owner": "Organisme sans but lucratif",
+    "bias": -2,
+    "leaning": "left",
+    "state": null
+  },
+  {
+    "name": "ProPublica",
+    "domains": [
+      "propublica.org"
+    ],
+    "country": "US",
+    "type": "OBNL",
+    "owner": "Organisme sans but lucratif",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "Semafor",
+    "domains": [
+      "semafor.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Semafor Inc.",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Reason",
+    "domains": [
+      "reason.com"
+    ],
+    "country": "US",
+    "type": "OBNL",
+    "owner": "Reason Foundation (libertarien)",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "RealClearPolitics",
+    "domains": [
+      "realclearpolitics.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "RealClear Media",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "Washington Examiner",
+    "domains": [
+      "washingtonexaminer.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Clarity Media (Philip Anschutz)",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "The Washington Times",
+    "domains": [
+      "washingtontimes.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Operations Holdings (Église de l'Unification)",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "National Review",
+    "domains": [
+      "nationalreview.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "National Review, Inc.",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "The Federalist",
+    "domains": [
+      "thefederalist.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "FDRLST Media",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "The Daily Caller",
+    "domains": [
+      "dailycaller.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Daily Caller, Inc.",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "The Daily Wire",
+    "domains": [
+      "dailywire.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Daily Wire (Bentkey Ventures)",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "Breitbart",
+    "domains": [
+      "breitbart.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Breitbart News Network",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "Newsmax",
+    "domains": [
+      "newsmax.com"
+    ],
+    "country": "US",
+    "type": "privé",
+    "owner": "Newsmax Media (Christopher Ruddy)",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "BBC",
+    "domains": [
+      "bbc.com",
+      "bbc.co.uk"
+    ],
+    "country": "GB",
+    "type": "public",
+    "owner": "British Broadcasting Corporation (service public)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "The Guardian",
+    "domains": [
+      "theguardian.com"
+    ],
+    "country": "GB",
+    "type": "OBNL",
+    "owner": "Scott Trust (sans but lucratif)",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "The Independent",
+    "domains": [
+      "independent.co.uk"
+    ],
+    "country": "GB",
+    "type": "privé",
+    "owner": "Evgeny Lebedev et Sultan Muhammad Abuljadayel",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "Daily Mirror",
+    "domains": [
+      "mirror.co.uk"
+    ],
+    "country": "GB",
+    "type": "privé",
+    "owner": "Reach plc",
+    "bias": -2,
+    "leaning": "left",
+    "state": null
+  },
+  {
+    "name": "New Statesman",
+    "domains": [
+      "newstatesman.com"
+    ],
+    "country": "GB",
+    "type": "privé",
+    "owner": "Mike Danson",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "Financial Times",
+    "domains": [
+      "ft.com"
+    ],
+    "country": "GB",
+    "type": "privé",
+    "owner": "Nikkei Inc.",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "The Economist",
+    "domains": [
+      "economist.com"
+    ],
+    "country": "GB",
+    "type": "privé",
+    "owner": "The Economist Group (Exor, famille Agnelli, principal actionnaire)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Sky News",
+    "domains": [
+      "news.sky.com"
+    ],
+    "country": "GB",
+    "type": "privé",
+    "owner": "Comcast",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "The Times",
+    "domains": [
+      "thetimes.com",
+      "thetimes.co.uk"
+    ],
+    "country": "GB",
+    "type": "privé",
+    "owner": "News Corp (famille Murdoch)",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "The Telegraph",
+    "domains": [
+      "telegraph.co.uk"
+    ],
+    "country": "GB",
+    "type": "privé",
+    "owner": "Propriété en transition depuis 2024 (vérifier)",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "The Spectator",
+    "domains": [
+      "spectator.co.uk"
+    ],
+    "country": "GB",
+    "type": "privé",
+    "owner": "Paul Marshall",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "Daily Mail",
+    "domains": [
+      "dailymail.co.uk"
+    ],
+    "country": "GB",
+    "type": "privé",
+    "owner": "DMGT (famille Rothermere)",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "The Sun",
+    "domains": [
+      "thesun.co.uk"
+    ],
+    "country": "GB",
+    "type": "privé",
+    "owner": "News Corp (famille Murdoch)",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "GB News",
+    "domains": [
+      "gbnews.com"
+    ],
+    "country": "GB",
+    "type": "privé",
+    "owner": "Paul Marshall et Legatum",
+    "bias": 2,
+    "leaning": "right",
+    "state": null
+  },
+  {
+    "name": "Deutsche Welle",
+    "domains": [
+      "dw.com"
+    ],
+    "country": "DE",
+    "type": "public",
+    "owner": "Service public allemand",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Der Spiegel",
+    "domains": [
+      "spiegel.de"
+    ],
+    "country": "DE",
+    "type": "privé",
+    "owner": "Employés (50,5 %), Gruner + Jahr, famille Augstein",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "Frankfurter Allgemeine",
+    "domains": [
+      "faz.net"
+    ],
+    "country": "DE",
+    "type": "OBNL",
+    "owner": "Fazit-Stiftung (fondation)",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "El País",
+    "domains": [
+      "elpais.com"
+    ],
+    "country": "ES",
+    "type": "privé",
+    "owner": "Grupo PRISA",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "El Mundo",
+    "domains": [
+      "elmundo.es"
+    ],
+    "country": "ES",
+    "type": "privé",
+    "owner": "Unidad Editorial (RCS MediaGroup)",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "Euronews",
+    "domains": [
+      "euronews.com"
+    ],
+    "country": "FR",
+    "type": "privé",
+    "owner": "Alpac Capital",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Haaretz",
+    "domains": [
+      "haaretz.com"
+    ],
+    "country": "IL",
+    "type": "privé",
+    "owner": "Famille Schocken et M. DuMont Schauberg",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "The Times of Israel",
+    "domains": [
+      "timesofisrael.com"
+    ],
+    "country": "IL",
+    "type": "privé",
+    "owner": "The Times of Israel Ltd.",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "The Jerusalem Post",
+    "domains": [
+      "jpost.com"
+    ],
+    "country": "IL",
+    "type": "privé",
+    "owner": "Eli Azur",
+    "bias": 1,
+    "leaning": "center-right",
+    "state": null
+  },
+  {
+    "name": "The Kyiv Independent",
+    "domains": [
+      "kyivindependent.com"
+    ],
+    "country": "UA",
+    "type": "indépendant",
+    "owner": "Propriété de l'équipe (financement par les lecteurs)",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Meduza",
+    "domains": [
+      "meduza.io"
+    ],
+    "country": "LV",
+    "type": "indépendant",
+    "owner": "Média russe indépendant en exil",
+    "bias": -1,
+    "leaning": "center-left",
+    "state": null
+  },
+  {
+    "name": "The Moscow Times",
+    "domains": [
+      "themoscowtimes.com"
+    ],
+    "country": "NL",
+    "type": "indépendant",
+    "owner": "Média indépendant en exil",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "South China Morning Post",
+    "domains": [
+      "scmp.com"
+    ],
+    "country": "HK",
+    "type": "privé",
+    "owner": "Alibaba Group",
+    "bias": 0,
+    "leaning": "center",
+    "state": null
+  },
+  {
+    "name": "Al Jazeera",
+    "domains": [
+      "aljazeera.com",
+      "aljazeera.net"
+    ],
+    "country": "QA",
+    "type": "État",
+    "owner": "Al Jazeera Media Network (financé par l'État du Qatar)",
+    "bias": null,
+    "leaning": "state",
+    "state": "Qatar"
+  },
+  {
+    "name": "RT",
+    "domains": [
+      "rt.com"
+    ],
+    "country": "RU",
+    "type": "État",
+    "owner": "TV-Novosti (État russe)",
+    "bias": null,
+    "leaning": "state",
+    "state": "Russie"
+  },
+  {
+    "name": "Sputnik",
+    "domains": [
+      "sputnikglobe.com",
+      "sputniknews.com"
+    ],
+    "country": "RU",
+    "type": "État",
+    "owner": "Rossiya Segodnya (État russe)",
+    "bias": null,
+    "leaning": "state",
+    "state": "Russie"
+  },
+  {
+    "name": "TASS",
+    "domains": [
+      "tass.com",
+      "tass.ru"
+    ],
+    "country": "RU",
+    "type": "État",
+    "owner": "Agence de presse d'État russe",
+    "bias": null,
+    "leaning": "state",
+    "state": "Russie"
+  },
+  {
+    "name": "RIA Novosti",
+    "domains": [
+      "ria.ru"
+    ],
+    "country": "RU",
+    "type": "État",
+    "owner": "Rossiya Segodnya (État russe)",
+    "bias": null,
+    "leaning": "state",
+    "state": "Russie"
+  },
+  {
+    "name": "CGTN",
+    "domains": [
+      "cgtn.com"
+    ],
+    "country": "CN",
+    "type": "État",
+    "owner": "China Media Group (État chinois)",
+    "bias": null,
+    "leaning": "state",
+    "state": "Chine"
+  },
+  {
+    "name": "Xinhua",
+    "domains": [
+      "news.cn",
+      "xinhuanet.com"
+    ],
+    "country": "CN",
+    "type": "État",
+    "owner": "Agence de presse d'État chinoise",
+    "bias": null,
+    "leaning": "state",
+    "state": "Chine"
+  },
+  {
+    "name": "Global Times",
+    "domains": [
+      "globaltimes.cn"
+    ],
+    "country": "CN",
+    "type": "État",
+    "owner": "Quotidien du Peuple (Parti communiste chinois)",
+    "bias": null,
+    "leaning": "state",
+    "state": "Chine"
+  },
+  {
+    "name": "China Daily",
+    "domains": [
+      "chinadaily.com.cn"
+    ],
+    "country": "CN",
+    "type": "État",
+    "owner": "Département de la propagande du PCC",
+    "bias": null,
+    "leaning": "state",
+    "state": "Chine"
+  },
+  {
+    "name": "Press TV",
+    "domains": [
+      "presstv.ir"
+    ],
+    "country": "IR",
+    "type": "État",
+    "owner": "IRIB (État iranien)",
+    "bias": null,
+    "leaning": "state",
+    "state": "Iran"
+  },
+  {
+    "name": "TRT World",
+    "domains": [
+      "trtworld.com"
+    ],
+    "country": "TR",
+    "type": "État",
+    "owner": "TRT (État turc)",
+    "bias": null,
+    "leaning": "state",
+    "state": "Turquie"
+  }
+]

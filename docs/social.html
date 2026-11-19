@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Prisme — image d'aperçu</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; width: 1280px; height: 640px; overflow: hidden; }
+  body { background: #121212; color: #F2EFE8; font-family: "Newsreader", Georgia, serif; position: relative; }
+  .wrap { position: absolute; inset: 0; padding: 86px 96px; }
+  .logo { display: flex; align-items: center; gap: 26px; }
+  svg { width: 170px; height: 106px; overflow: visible; }
+  svg path { fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  h1 { font-size: 128px; line-height: .9; margin: 0; letter-spacing: -.035em; font-weight: 700; }
+  p { font-size: 40px; line-height: 1.25; margin: 44px 0 0; color: #D9D5CC; max-width: 1000px; }
+  p em { color: #F2EFE8; }
+  .meta { position: absolute; left: 96px; bottom: 62px; font: 500 22px "IBM Plex Mono", monospace; letter-spacing: .08em; text-transform: uppercase; color: #9C978A; }
+  .spectrum { position: absolute; left: 0; right: 0; bottom: 0; height: 18px; display: flex; }
+  .spectrum i { flex: 1; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo">
+      <svg viewBox="0 0 64 40">
+        <path d="M1 23.5 L21 21" stroke="#F2EFE8"/>
+        <path d="M27 4 L41 34 H13 Z" stroke="#F2EFE8"/>
+        <path d="M32.5 18.5 L63 7" stroke="#3F95AB"/><path d="M33.3 20 L63 14" stroke="#7DB5C4"/><path d="M34 21.5 L63 21" stroke="#ADA797"/>
+        <path d="M34.7 23 L63 28" stroke="#E09A7E"/><path d="M35.4 24.5 L63 35" stroke="#D0614A"/>
+      </svg>
+      <h1>Prisme</h1>
+    </div>
+    <p>L'actualité de près de 3 000 médias, <em>de la gauche à la droite</em>, et qui les possède.<br><span style="font-size:32px;color:#9C978A">News from ~3,000 outlets, left to right, and who owns them.</span></p>
+  </div>
+  <div class="meta">Open source · MIT · axe414.github.io/prisme</div>
+  <div class="spectrum"><i style="background:#17657A"></i><i style="background:#5E9FB0"></i><i style="background:#ADA797"></i><i style="background:#D88B6E"></i><i style="background:#B1412A"></i></div>
+</body>
+</html>

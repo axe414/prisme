@@ -851,10 +851,10 @@ function drawRail(f) {
       <p class="note">Nombre d'histoires de ce fil où chaque propriétaire a au moins un média.</p>
     </section>
     <section>
-      <h2 class="block-h">Les médias du fil</h2>
-      ${bigBar(sm.counts)}
+      <h2 class="block-h">Les médias du fil <small>médias évalués</small></h2>
+      ${bigBar(sm.counts, { rated: true })}
       <div style="margin-top:8px">${splitHtml(sm.counts)}</div>
-      <p class="note">${plural(sm.sourcesOnline, "média lu", "médias lus")} directement par Prisme dans cette édition. <button class="link" type="button" data-about>Comment Prisme choisit</button></p>
+      <p class="note">${sm.counts.unk ? `${plural(sm.counts.unk, "autre média", "autres médias")} non évalués. ` : ""}${plural(sm.sourcesOnline, "média lu", "médias lus")} directement par Prisme dans cette édition. <button class="link" type="button" data-about>Comment Prisme choisit</button></p>
     </section>` : ""}`;
   const nb = $("#notifBtn", el);
   if (nb) nb.onclick = async () => { await Notification.requestPermission(); drawRail(f); };
@@ -1862,6 +1862,7 @@ function mediaSheet(domain, name, info) {
     <div class="links">
       ${w?.wikipedia ? `<a class="btn ghost" href="${esc(safeUrl(w.wikipedia))}" target="_blank" rel="noopener noreferrer">Wikipédia ↗</a>` : ""}
       ${w?.url ? `<a class="btn ghost" href="${esc(safeUrl(w.url))}" target="_blank" rel="noopener noreferrer">Wikidata ↗</a>` : ""}
+      <a class="btn ghost" href="https://github.com/axe414/prisme/issues/new?template=corriger-un-media.yml&media=${encodeURIComponent(`${title} (${domain})`)}" target="_blank" rel="noopener noreferrer">Signaler une erreur ↗</a>
     </div>
     <p class="note" style="margin:16px 0 0">L'orientation est une estimation indicative inspirée des évaluations publiques (AllSides, Media Bias/Fact Check, Ad Fontes). La propriété vient de la base Prisme et de Wikidata, une source collaborative qui peut être incomplète ou en retard.${info.wikidataError ? ` Wikidata : ${esc(info.wikidataError)}.` : ""}</p>
   </section>`;

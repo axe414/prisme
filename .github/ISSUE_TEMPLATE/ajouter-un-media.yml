@@ -1,0 +1,35 @@
+name: Ajouter un média / Add an outlet
+description: Un média qui manque à Prisme. / An outlet Prisme is missing.
+title: "[Média] "
+labels: ["données", "nouveau média"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Nom / Name
+    validations:
+      required: true
+  - type: input
+    id: site
+    attributes:
+      label: Site web / Website
+    validations:
+      required: true
+  - type: input
+    id: feed
+    attributes:
+      label: Flux RSS (si tu le connais) / RSS feed (if known)
+  - type: input
+    id: country
+    attributes:
+      label: Pays et langue / Country and language
+    validations:
+      required: true
+  - type: input
+    id: owner
+    attributes:
+      label: Propriétaire / Owner
+  - type: textarea
+    id: leaning
+    attributes:
+      label: Orientation et sources (facultatif) / Leaning and sources (optional)

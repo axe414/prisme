@@ -1,0 +1,36 @@
+name: Corriger un média / Correct an outlet
+description: Une orientation ou un propriétaire est faux ou périmé. / A leaning or owner is wrong or outdated.
+title: "[Correction] "
+labels: ["données", "correction"]
+body:
+  - type: input
+    id: media
+    attributes:
+      label: Média / Outlet
+      description: Nom et site (ex. Le Journal de Montréal, journaldemontreal.com)
+    validations:
+      required: true
+  - type: dropdown
+    id: what
+    attributes:
+      label: Quoi corriger / What to correct
+      options:
+        - Orientation / Leaning
+        - Propriétaire / Owner
+        - Pays ou type / Country or type
+        - Autre / Other
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Ce que Prisme affiche et ce qui serait juste / What Prisme shows and what would be right
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source
+      description: Lien vers une évaluation publique, un article, un rapport annuel… / Link to a public rating, article, annual report…
+    validations:
+      required: true
