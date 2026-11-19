@@ -1,0 +1,23 @@
+{
+  "name": "Prisme — l'actualité, de gauche à droite",
+  "short_name": "Prisme",
+  "description": "Près de 3 000 médias lus directement : qui raconte l'actualité, de quel côté, et qui les possède.",
+  "lang": "fr-CA",
+  "start_url": "./?source=app",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4F2EC",
+  "theme_color": "#121212",
+  "categories": ["news"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Le matin", "url": "./?v=matin", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Mon prisme", "url": "./?v=moi", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Vidéos", "url": "./?v=videos", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

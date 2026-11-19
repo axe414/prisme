@@ -1,0 +1,16 @@
+{
+  "name": "prisme",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Toute l'actualité, toutes les sources, et qui les possède.",
+  "scripts": {
+    "dev": "node --max-old-space-size=4096 dev-server.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.10.0"
+  }
+}

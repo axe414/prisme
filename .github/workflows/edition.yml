@@ -1,0 +1,62 @@
+# Le robot de Prisme : toutes les 30 minutes, il lit près de 3 000 médias, prépare les éditions
+# et publie le site (app + données) sur GitHub Pages. Gratuit pour un dépôt public.
+name: Édition Prisme
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: edition
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # La mémoire du robot d'une fois à l'autre : premiers titres vus (titres modifiés) et résumés déjà écrits.
+      - name: Mémoire du robot
+        uses: actions/cache@v4
+        with:
+          path: .data
+          key: prisme-state-${{ github.run_id }}
+          restore-keys: prisme-state-
+
+      - run: npm ci
+
+      - name: Lire les médias et préparer les éditions
+        run: node --max-old-space-size=6144 tools/build-edition.mjs site
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

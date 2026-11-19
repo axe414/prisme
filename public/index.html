@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Prisme</title>
+  <meta name="description" content="Prisme lit directement près de 3 000 médias de 70 pays, regroupe leurs articles en histoires et montre qui les couvre, de la gauche à la droite, et qui les possède.">
+  <meta name="theme-color" content="#141414">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Prisme">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    try { const t = localStorage.getItem("prisme.theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+    if (location.hostname === "localhost") {
+      // Journal de diagnostic en local seulement : renvoie les erreurs du navigateur au terminal du serveur.
+      var report = function (msg) { try { navigator.sendBeacon("/__log", String(msg)); } catch (e) {} };
+      window.addEventListener("error", function (e) { report("ERREUR " + (e.message || (e.target && (e.target.src || e.target.href)) || "?") + (e.filename ? " @ " + e.filename + ":" + e.lineno : "")); }, true);
+      window.addEventListener("unhandledrejection", function (e) { report("PROMESSE " + (e.reason && (e.reason.stack || e.reason.message) || e.reason)); });
+      window.addEventListener("load", function () { setTimeout(function () { report(window.__prismeReady ? "app démarrée" : "APP NON DÉMARRÉE (app.js n'a pas tourné)"); }, 1500); });
+    }
+    if (location.protocol === "file:") {
+      document.addEventListener("DOMContentLoaded", function () {
+        var d = document.createElement("div");
+        d.setAttribute("role", "alert");
+        d.style.cssText = "position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:24px;background:#F4F2EC;color:#141414;font:16px/1.5 Georgia,serif;text-align:center";
+        d.innerHTML = '<div style="max-width:520px"><p style="font-size:24px;margin:0 0 12px">Prisme ne peut pas s’ouvrir comme un simple fichier.</p>' +
+          '<p style="margin:0 0 20px;opacity:.75">Double-clique plutôt sur <b>Lancer Prisme.cmd</b> dans le dossier prisme, ou ouvre <a href="http://localhost:8888">http://localhost:8888</a> si le serveur tourne déjà.</p></div>';
+        document.body.appendChild(d);
+      });
+    }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#view">Aller au contenu</a>
+
+  <header class="mast">
+    <div class="band">
+      <div class="wrap band-row">
+        <a class="logo" href="./" data-nav aria-label="Prisme, accueil">
+          <svg class="logo-mark" viewBox="0 0 64 40" aria-hidden="true">
+            <path class="beam" d="M1 23.5 L21 21"/>
+            <path class="tri" d="M27 4 L41 34 H13 Z"/>
+            <g class="rays">
+              <path d="M32.5 18.5 L63 7" style="stroke:var(--b-l2)"/>
+              <path d="M33.3 20 L63 14" style="stroke:var(--b-l1)"/>
+              <path d="M34 21.5 L63 21" style="stroke:var(--b-c)"/>
+              <path d="M34.7 23 L63 28" style="stroke:var(--b-r1)"/>
+              <path d="M35.4 24.5 L63 35" style="stroke:var(--b-r2)"/>
+            </g>
+          </svg>
+          <span class="logo-word">Prisme</span>
+        </a>
+        <nav class="mast-links" id="mastLinks" aria-label="Pages"></nav>
+        <div class="band-actions">
+          <label class="edition-pick" title="Édition">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+            <select id="editionSel" aria-label="Édition"></select>
+          </label>
+          <button class="icon-btn lang-btn" id="langBtn" type="button" data-no-tr>EN</button>
+          <button class="icon-btn" id="aboutBtn" type="button" title="Comment Prisme choisit" aria-label="Comment Prisme choisit">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+          </button>
+          <button class="icon-btn" id="themeBtn" type="button" title="Changer le thème" aria-label="Changer le thème">
+            <svg class="ico-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
+            <svg class="ico-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="spectrum" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+  </header>
+
+  <nav class="sections" id="sections" aria-label="Rubriques">
+    <div class="wrap sections-in">
+      <div class="cats" id="cats"></div>
+      <form class="search" id="search" role="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input name="q" type="search" placeholder="Chercher un sujet" autocomplete="off" aria-label="Chercher un sujet" enterkeyhint="search">
+        <kbd>/</kbd>
+      </form>
+    </div>
+  </nav>
+
+  <!-- Barre d'onglets du téléphone -->
+  <nav class="tabbar" id="tabbar" aria-label="Navigation principale"></nav>
+
+  <main id="view" class="wrap" tabindex="-1"></main>
+
+  <footer class="foot wrap">
+    <div class="spectrum" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <p><b>Prisme</b> lit directement les flux publics de ses médias et choisit ses histoires avec des règles visibles. Orientations indicatives, propriété selon la base Prisme et Wikidata. <button class="link" id="aboutBtn2" type="button">Comment Prisme choisit</button> · <a class="link" href="?v=proprietaires" data-nav>Qui possède quoi</a></p>
+  </footer>
+
+  <div class="drawer" id="drawer" aria-hidden="true">
+    <div class="scrim" data-close></div>
+    <aside class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+      <button class="icon-btn drawer-close" data-close aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <div id="drawerBody"></div>
+    </aside>
+  </div>
+
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="scrim" data-close></div>
+    <div class="modal-box" role="dialog" aria-modal="true">
+      <button class="icon-btn modal-close" data-close aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
