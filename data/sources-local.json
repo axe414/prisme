@@ -438,7 +438,7 @@
    "cc": "CA",
    "lang": "en",
    "feed": "https://invernessoran.ca/feed/",
-   "region": "Centre-du-Québec"
+   "region": "Nouvelle-Écosse"
   },
   "humberetc.ca": {
    "name": "Humber Et Cetera",
@@ -1868,19 +1868,6 @@
     "L'Ange-Gardien"
    ]
   },
-  "dbusiness.com": {
-   "name": "DBusiness Magazine",
-   "cc": "CA",
-   "lang": "en",
-   "feed": "https://www.dbusiness.com/feed/",
-   "region": "Ontario",
-   "cities": [
-    "Windsor",
-    "Tecumseh",
-    "Amherstburg",
-    "Detroit"
-   ]
-  },
   "gx94radio.com": {
    "name": "GX94 Radio",
    "cc": "CA",
@@ -1890,19 +1877,6 @@
    "cities": [
     "Regina",
     "Yorkton"
-   ]
-  },
-  "metrotimes.com": {
-   "name": "Detroit Metro Times",
-   "cc": "CA",
-   "lang": "en",
-   "feed": "https://metrotimes.com/feed/",
-   "region": "Ontario",
-   "cities": [
-    "Windsor",
-    "Tecumseh",
-    "Amherstburg",
-    "Detroit"
    ]
   },
   "abbynews.com": {
@@ -2327,17 +2301,6 @@
     "Blackfalds"
    ]
   },
-  "sequimgazette.com": {
-   "name": "Sequim Gazette",
-   "cc": "CA",
-   "lang": "en",
-   "feed": "https://sequimgazette.com/feed/",
-   "region": "Colombie-Britannique",
-   "cities": [
-    "Saanich",
-    "Esquimalt"
-   ]
-  },
   "nanaimonewsnow.com": {
    "name": "NanaimoNewsNOW",
    "cc": "CA",
@@ -2347,17 +2310,6 @@
    "cities": [
     "Nanaimo",
     "Parksville"
-   ]
-  },
-  "peninsuladailynews.com": {
-   "name": "Peninsula Daily News",
-   "cc": "CA",
-   "lang": "en",
-   "feed": "https://peninsuladailynews.com/feed/",
-   "region": "Colombie-Britannique",
-   "cities": [
-    "Saanich",
-    "Esquimalt"
    ]
   },
   "nanaimobulletin.com": {
@@ -2471,17 +2423,6 @@
     "Lac-Brome",
     "Saint-Pie",
     "Saint-Cyrille-de-Wendover"
-   ]
-  },
-  "wgrz.com": {
-   "name": "WGRZ",
-   "cc": "CA",
-   "lang": "en",
-   "feed": "https://www.wgrz.com/feeds/syndication/rss/news",
-   "region": "Ontario",
-   "cities": [
-    "Niagara Falls",
-    "Buffalo"
    ]
   },
   "islandsocialtrends.ca": {
@@ -2702,16 +2643,6 @@
    "cities": [
     "Sarnia",
     "Strathroy-Caradoc"
-   ]
-  },
-  "wgrt.com": {
-   "name": "WGRT",
-   "cc": "CA",
-   "lang": "en",
-   "feed": "https://wgrt.com/feed/",
-   "region": "Ontario",
-   "cities": [
-    "Sarnia"
    ]
   },
   "chatnewstoday.ca": {
@@ -3078,17 +3009,6 @@
     "Fort Saskatchewan"
    ]
   },
-  "fox2detroit.com": {
-   "name": "FOX 2 Detroit",
-   "cc": "CA",
-   "lang": "en",
-   "feed": "https://www.fox2detroit.com/rss.xml",
-   "region": "Ontario",
-   "cities": [
-    "Tecumseh",
-    "Detroit"
-   ]
-  },
   "strathmoretimes.com": {
    "name": "Strathmore Times",
    "cc": "CA",
@@ -3109,16 +3029,6 @@
    "cities": [
     "Owen Sound",
     "Kincardine"
-   ]
-  },
-  "grossepointenews.com": {
-   "name": "Grosse Pointe News",
-   "cc": "CA",
-   "lang": "en",
-   "feed": "https://grossepointenews.com/feed/",
-   "region": "Ontario",
-   "cities": [
-    "Tecumseh"
    ]
   },
   "exetertoday.ca": {
@@ -3210,17 +3120,6 @@
     "Yellowknife"
    ]
   },
-  "nantes.maville.com": {
-   "name": "maville.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://nantes.maville.com/flux/rss/actu.php?c=loc",
-   "region": "Laurentides",
-   "cities": [
-    "Saint-Colomban",
-    "Saint-Nazaire"
-   ]
-  },
   "sylvanlakenews.com": {
    "name": "Sylvan Lake News",
    "cc": "CA",
@@ -3241,17 +3140,6 @@
    "cities": [
     "Courtenay",
     "Powell River"
-   ]
-  },
-  "labaule.maville.com": {
-   "name": "maville.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://labaule.maville.com/flux/rss/actu.php?c=dep",
-   "region": "Laurentides",
-   "cities": [
-    "Saint-Colomban",
-    "Saint-Nazaire"
    ]
   },
   "energeticcity.ca": {
@@ -3487,36 +3375,6 @@
     "Déléage"
    ]
   },
-  "cathobel.be": {
-   "name": "CathoBel",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://cathobel.be/feed/",
-   "region": "Estrie",
-   "cities": [
-    "Waterloo"
-   ]
-  },
-  "mercisf.com": {
-   "name": "MerciSF",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://mercisf.com/feed/",
-   "region": "Laurentides",
-   "cities": [
-    "Piedmont"
-   ]
-  },
-  "nicematin.com": {
-   "name": "Nice-Matin",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://nicematin.com/rss",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Raphaël"
-   ]
-  },
   "echodefrontenac.com": {
    "name": "L'Écho de Frontenac",
    "cc": "CA",
@@ -3527,106 +3385,6 @@
     "Lac-Mégantic",
     "Weedon",
     "Saint-Gédéon-de-Beauce"
-   ]
-  },
-  "petitesaffiches.fr": {
-   "name": "Petites Affiches",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://petitesaffiches.fr/feed/",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Raphaël"
-   ]
-  },
-  "paris-normandie.fr": {
-   "name": "Paris Normandie",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://paris-normandie.fr/rss.xml",
-   "region": "Montérégie",
-   "cities": [
-    "Léry"
-   ]
-  },
-  "info83.fr": {
-   "name": "Info 83",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://www.info83.fr/feed/",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Raphaël"
-   ]
-  },
-  "lemessager.fr": {
-   "name": "Le Messager",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://lemessager.fr/rss.xml",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Gervais"
-   ]
-  },
-  "tv83.info": {
-   "name": "TV83",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://www.tv83.info/feed/",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Raphaël"
-   ]
-  },
-  "actumontagne.com": {
-   "name": "Actumontagne",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://www.actumontagne.com/feed/",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Gervais"
-   ]
-  },
-  "saint-nazaire.maville.com": {
-   "name": "maville.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://saint-nazaire.maville.com/flux/rss/actu.php?c=loc",
-   "region": "Saguenay--Lac-Saint-Jean",
-   "cities": [
-    "Saint-Nazaire"
-   ]
-  },
-  "presseagence.fr": {
-   "name": "Presse Agence",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://presseagence.fr/feed/",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Raphaël"
-   ]
-  },
-  "lessorsavoyard.lemessager.fr": {
-   "name": "L'Essor Savoyard",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://lessorsavoyard.lemessager.fr/rss.xml",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Gervais"
-   ]
-  },
-  "tribuca.net": {
-   "name": "Tribuca.net",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://tribuca.net/feed/",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Raphaël"
    ]
   },
   "fox5ny.com": {
@@ -3677,26 +3435,6 @@
    "region": "NY",
    "cities": [
     "New York"
-   ]
-  },
-  "lessorsavoyard.fr": {
-   "name": "L'Essor Savoyard",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://lessorsavoyard.fr/rss.xml",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Gervais"
-   ]
-  },
-  "le-mensuel.com": {
-   "name": "Le Mensuel",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://www.le-mensuel.com/feed/",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Raphaël"
    ]
   },
   "gothamist.com": {
@@ -3817,16 +3555,6 @@
    "region": "IL",
    "cities": [
     "Chicago"
-   ]
-  },
-  "unidivers.fr": {
-   "name": "Unidivers",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://unidivers.fr/feed/",
-   "region": "Montérégie",
-   "cities": [
-    "Léry"
    ]
   },
   "la.urbanize.city": {
@@ -8219,608 +7947,6 @@
    "lang": "en",
    "feed": "https://www.thegate.ca/feed/",
    "region": ""
-  },
-  "lannion-perros.maville.com": {
-   "name": "maville.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://lannion-perros.maville.com/flux/rss/actu.php?c=loc",
-   "region": "Montérégie",
-   "cities": [
-    "Saint-Clet"
-   ]
-  },
-  "guingamp.maville.com": {
-   "name": "maville.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://guingamp.maville.com/flux/rss/actu.php?c=loc",
-   "region": "Montérégie",
-   "cities": [
-    "Saint-Clet"
-   ]
-  },
-  "dinan.maville.com": {
-   "name": "maville.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://dinan.maville.com/flux/rss/actu.php?c=loc",
-   "region": "Montérégie",
-   "cities": [
-    "Saint-Clet"
-   ]
-  },
-  "saint-brieuc.maville.com": {
-   "name": "maville.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://saint-brieuc.maville.com/flux/rss/actu.php?c=loc",
-   "region": "Montérégie",
-   "cities": [
-    "Saint-Clet"
-   ]
-  },
-  "marsactu.fr": {
-   "name": "Marsactu",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://marsactu.fr/feed/",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Zacharie",
-    "Saint-Barnabé"
-   ]
-  },
-  "nordlittoral.fr": {
-   "name": "Nord Littoral",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://www.nordlittoral.fr/rss.xml",
-   "region": "Outaouais",
-   "cities": [
-    "Messines"
-   ]
-  },
-  "claap.fr": {
-   "name": "Claap",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://claap.fr/feed/",
-   "region": "Outaouais",
-   "cities": [
-    "Montpellier"
-   ]
-  },
-  "marseillesecrete.com": {
-   "name": "Marseille Secrète",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://marseillesecrete.com/feed/",
-   "region": "Mauricie",
-   "cities": [
-    "Saint-Barnabé"
-   ]
-  },
-  "algerie-eco.com": {
-   "name": "Algerie Eco",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://algerie-eco.com/feed/",
-   "region": "Centre-du-Québec",
-   "cities": [
-    "Saint-Eugène"
-   ]
-  },
-  "destimed.fr": {
-   "name": "Destimed",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://www.destimed.fr/feed/",
-   "region": "Mauricie",
-   "cities": [
-    "Saint-Barnabé"
-   ]
-  },
-  "lepoing.net": {
-   "name": "Le Poing",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://lepoing.net/feed/",
-   "region": "Outaouais",
-   "cities": [
-    "Montpellier"
-   ]
-  },
-  "toulon.maville.com": {
-   "name": "maville.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://toulon.maville.com/flux/rss/dma.php",
-   "region": "Mauricie",
-   "cities": [
-    "Saint-Barnabé"
-   ]
-  },
-  "frequence-sud.fr": {
-   "name": "frequence-sud.fr",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://www.frequence-sud.fr/rss/fluxactu.xml",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Zacharie",
-    "Saint-Barnabé"
-   ]
-  },
-  "lavoixdelain.fr": {
-   "name": "La Voix de l'Ain",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://www.lavoixdelain.fr/feed/",
-   "region": "Estrie",
-   "cities": [
-    "Saint-Claude"
-   ]
-  },
-  "lasemaineduroussillon.com": {
-   "name": "La Semaine du Roussillon",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://lasemaineduroussillon.com/feed/",
-   "region": "Bas-Saint-Laurent",
-   "cities": [
-    "Saint-Cyprien"
-   ]
-  },
-  "ouillade.eu": {
-   "name": "Ouillade",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://ouillade.eu/feed",
-   "region": "Bas-Saint-Laurent",
-   "cities": [
-    "Saint-Cyprien"
-   ]
-  },
-  "lejournaltoulousain.fr": {
-   "name": "Le Journal Toulousain",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://lejournaltoulousain.fr/feed/",
-   "region": "Outaouais",
-   "cities": [
-    "Montpellier"
-   ]
-  },
-  "lepaysgessien.lemessager.fr": {
-   "name": "Le Pays Gessien",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://lepaysgessien.lemessager.fr/rss.xml",
-   "region": "Estrie",
-   "cities": [
-    "Saint-Claude"
-   ]
-  },
-  "madeinmarseille.net": {
-   "name": "Made in Marseille",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://madeinmarseille.net/feed/",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Zacharie",
-    "Saint-Barnabé"
-   ]
-  },
-  "leresistant.fr": {
-   "name": "LeResistant",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://www.leresistant.fr/rss.xml",
-   "region": "Centre-du-Québec",
-   "cities": [
-    "Sainte-Eulalie"
-   ]
-  },
-  "lebonbon.fr": {
-   "name": "Le Bonbon",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://rss.lebonbon.fr/feeds/paris",
-   "region": "Centre-du-Québec",
-   "cities": [
-    "Sainte-Eulalie",
-    "Sainte-Paule",
-    "Saint-Médard"
-   ]
-  },
-  "limpartial.fr": {
-   "name": "L'Impartial de la Drôme",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://limpartial.fr/feed/",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Vallier"
-   ]
-  },
-  "bordeaux-metropole.fr": {
-   "name": "Bordeaux Métropole",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://bordeaux-metropole.fr/rss.xml",
-   "region": "Centre-du-Québec",
-   "cities": [
-    "Sainte-Eulalie",
-    "Saint-Médard"
-   ]
-  },
-  "hebdo39.net": {
-   "name": "Hebdo39",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://hebdo39.net/feed/",
-   "region": "Estrie",
-   "cities": [
-    "Saint-Claude"
-   ]
-  },
-  "placeco.fr": {
-   "name": "Placéco",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://placeco.fr/rss.xml",
-   "region": "Centre-du-Québec",
-   "cities": [
-    "Sainte-Eulalie",
-    "Saint-Médard"
-   ]
-  },
-  "caen.maville.com": {
-   "name": "maville.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://caen.maville.com/flux/rss/actu.php?c=loc",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Honfleur"
-   ]
-  },
-  "laval.maville.com": {
-   "name": "maville.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://laval.maville.com/flux/rss/actu.php?c=loc",
-   "region": "Laurentides",
-   "cities": [
-    "Notre-Dame-de-Pontmain"
-   ]
-  },
-  "bordeaux.fr": {
-   "name": "Site officiel de la ville de Bordeaux",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://bordeaux.fr/rss.xml",
-   "region": "Centre-du-Québec",
-   "cities": [
-    "Sainte-Eulalie",
-    "Saint-Médard"
-   ]
-  },
-  "aquitaineonline.com": {
-   "name": "AquitaineOnLine",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://aquitaineonline.com/rss",
-   "region": "Centre-du-Québec",
-   "cities": [
-    "Sainte-Eulalie",
-    "Saint-Médard"
-   ]
-  },
-  "honfleur-infos.com": {
-   "name": "Honfleur-Infos",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://www.honfleur-infos.com/feed/",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Honfleur"
-   ]
-  },
-  "trouville-deauville.maville.com": {
-   "name": "maville.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://trouville-deauville.maville.com/flux/rss/actu.php?c=loc",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Honfleur"
-   ]
-  },
-  "mediabask.eus": {
-   "name": "Mediabask",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://www.mediabask.eus/eu/rss/sections/mediabask.rss",
-   "region": "Estrie",
-   "cities": [
-    "Saint-Sébastien"
-   ]
-  },
-  "granville.maville.com": {
-   "name": "maville.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://granville.maville.com/flux/rss/actu.php?c=loc",
-   "region": "Laurentides",
-   "cities": [
-    "Mont-Saint-Michel"
-   ]
-  },
-  "saint-lo.maville.com": {
-   "name": "maville.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://saint-lo.maville.com/flux/rss/actu.php?c=loc",
-   "region": "Laurentides",
-   "cities": [
-    "Mont-Saint-Michel"
-   ]
-  },
-  "cherbourg.maville.com": {
-   "name": "maville.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://cherbourg.maville.com/flux/rss/actu.php?c=loc",
-   "region": "Laurentides",
-   "cities": [
-    "Mont-Saint-Michel"
-   ]
-  },
-  "charolais-news.com": {
-   "name": "Charolais News",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://charolais-news.com/feed/",
-   "region": "Bas-Saint-Laurent",
-   "cities": [
-    "Saint-Eusèbe"
-   ]
-  },
-  "saint-malo.maville.com": {
-   "name": "maville.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://saint-malo.maville.com/flux/rss/actu.php?c=loc",
-   "region": "Estrie",
-   "cities": [
-    "Saint-Malo"
-   ]
-  },
-  "radioscoop.com": {
-   "name": "Radio SCOOP",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://radioscoop.com/rss",
-   "region": "Outaouais",
-   "cities": [
-    "Saint-Sixte",
-    "Sainte-Paule"
-   ]
-  },
-  "lyoncapitale.fr": {
-   "name": "Lyon Capitale",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://www.lyoncapitale.fr/feed",
-   "region": "Outaouais",
-   "cities": [
-    "Saint-Sixte",
-    "Sainte-Paule"
-   ]
-  },
-  "lejsl.com": {
-   "name": "Le JSL",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://lejsl.com/rss",
-   "region": "Bas-Saint-Laurent",
-   "cities": [
-    "Saint-Eusèbe",
-    "Sainte-Paule"
-   ]
-  },
-  "echodumardi.com": {
-   "name": "L'Echo du Mardi",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://www.echodumardi.com/feed/",
-   "region": "Abitibi-Témiscamingue",
-   "cities": [
-    "Roquemaure"
-   ]
-  },
-  "infonormandie.com": {
-   "name": "InfoNormandie",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://infonormandie.com/xml/syndication.rss",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Marcel"
-   ]
-  },
-  "tvsudmagazine.fr": {
-   "name": "TV Sud Magazine, le magazine N°1 dans le Gard Rhodanien",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://tvsudmagazine.fr/feed/",
-   "region": "Abitibi-Témiscamingue",
-   "cities": [
-    "Roquemaure"
-   ]
-  },
-  "independantdelyonne.com": {
-   "name": "L'independant de L'yonne -",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://independantdelyonne.com/feed/",
-   "region": "Bas-Saint-Laurent",
-   "cities": [
-    "Saint-Clément"
-   ]
-  },
-  "lereveildumidi.fr": {
-   "name": "Le réveil de midi",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://lereveildumidi.fr/?format=feed&type=rss",
-   "region": "Abitibi-Témiscamingue",
-   "cities": [
-    "Roquemaure"
-   ]
-  },
-  "hebdo25.net": {
-   "name": "Hebdo25",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://hebdo25.net/feed/",
-   "region": "Abitibi-Témiscamingue",
-   "cities": [
-    "Clerval"
-   ]
-  },
-  "macommune.info": {
-   "name": "maCommune.info",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://macommune.info/feed/",
-   "region": "Abitibi-Témiscamingue",
-   "cities": [
-    "Clerval"
-   ]
-  },
-  "lorient.maville.com": {
-   "name": "maville.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://lorient.maville.com/flux/rss/actu.php?c=loc",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Philibert"
-   ]
-  },
-  "vannes.maville.com": {
-   "name": "maville.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://vannes.maville.com/flux/rss/actu.php?c=loc",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Philibert"
-   ]
-  },
-  "pontivy.maville.com": {
-   "name": "maville.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://pontivy.maville.com/flux/rss/actu.php?c=loc",
-   "region": "Chaudière-Appalaches",
-   "cities": [
-    "Saint-Philibert"
-   ]
-  },
-  "estrepublicain.fr": {
-   "name": "L'Est Républicain",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://estrepublicain.fr/rss",
-   "region": "Abitibi-Témiscamingue",
-   "cities": [
-    "Clerval"
-   ]
-  },
-  "liberation-champagne.fr": {
-   "name": "Libération Champagne",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://liberation-champagne.fr/rss.xml",
-   "region": "Bas-Saint-Laurent",
-   "cities": [
-    "Saint-Clément"
-   ]
-  },
-  "lyonmag.com": {
-   "name": "Lyon Mag",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://lyonmag.com/rss",
-   "region": "Bas-Saint-Laurent",
-   "cities": [
-    "Sainte-Paule"
-   ]
-  },
-  "tribunedelyon.fr": {
-   "name": "Tribune de Lyon",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://tribunedelyon.fr/feed/",
-   "region": "Bas-Saint-Laurent",
-   "cities": [
-    "Sainte-Paule"
-   ]
-  },
-  "lest-eclair.fr": {
-   "name": "L'Est éclair",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://lest-eclair.fr/rss.xml",
-   "region": "Bas-Saint-Laurent",
-   "cities": [
-    "Saint-Clément"
-   ]
-  },
-  "la-vie-nouvelle.fr": {
-   "name": "La Vie Nouvelle",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://www.la-vie-nouvelle.fr/feed/",
-   "region": "Bas-Saint-Laurent",
-   "cities": [
-    "Albertville"
-   ]
-  },
-  "lyonpeople.com": {
-   "name": "Lyon people",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://www.lyonpeople.com/feed",
-   "region": "Bas-Saint-Laurent",
-   "cities": [
-    "Sainte-Paule"
-   ]
-  },
-  "echos-judiciaires.com": {
-   "name": "Échos Judiciaires Girondins",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://echos-judiciaires.com/feed/",
-   "region": "Bas-Saint-Laurent",
-   "cities": [
-    "Saint-Médard"
-   ]
-  },
-  "toutmontbeliard.com": {
-   "name": "ToutMontbeliard.com",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://www.toutmontbeliard.com/feed/",
-   "region": "Abitibi-Témiscamingue",
-   "cities": [
-    "Clerval"
-   ]
   },
   "monvicto.com": {
    "cc": "CA",

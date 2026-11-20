@@ -1579,33 +1579,34 @@ async function viewVille(v, route) {
   const near = V.list.filter((x) => x !== city && x.pr === city.pr && (city.m ? x.m === city.m : x.r === city.r)).slice(0, 10);
   const nearRegion = near.length < 6 ? V.list.filter((x) => x !== city && x.pr === city.pr && x.r === city.r && !near.includes(x)).slice(0, 10 - near.length) : [];
   state.wf.media = "";
-  v.innerHTML = `<header class="page-h ville-head">
-      <div class="kicker">${pin}${esc(city.d || "Ville")} · ${esc(villeWhere(city))}</div>
-      <h1>${esc(villeLabel(city))}</h1>
-      <p>${city.p ? `${city.p.toLocaleString(LOCALE)} habitants. ` : ""}Les nouvelles qui parlent de ${esc(city.n)}, dans tous les médias lus par Prisme depuis 7 jours.</p>
-      <div class="actions">
-        <button class="btn${followed ? " ghost" : ""}" type="button" id="vFollow">${followed ? "✓ Suivie" : "★ Suivre cette ville"}</button>
-        <button class="btn ghost" type="button" id="vMine">${mine ? "✓ C'est ma ville" : "C'est ma ville"}</button>
-        ${shareBtn({ title: `${city.n} sur Prisme`, text: `Les nouvelles de ${city.n}`, url: absUrl(href({ ville: city.s })) }, true)}
-      </div>
+  v.innerHTML = `<header class="ville-top">
+      <div class="vt-row"><h1>${esc(villeLabel(city))}</h1>
+        <div class="vt-acts">
+          <button class="vt-btn" type="button" id="vFollow" aria-pressed="${followed}" title="${followed ? "Ville suivie" : "Suivre cette ville"}">${ico("star")}<span>${followed ? "Suivie" : "Suivre"}</span></button>
+          <button class="vt-btn" type="button" id="vMine" aria-pressed="${mine}" title="C'est ma ville">${pin}<span>${mine ? "Ma ville" : "C'est ma ville"}</span></button>
+          ${shareBtn({ title: `${city.n} sur Prisme`, text: `Les nouvelles de ${city.n}`, url: absUrl(href({ ville: city.s })) })}
+        </div></div>
+      <p class="vt-meta">${city.p ? `${city.p.toLocaleString(LOCALE)} hab. · ` : ""}${esc(villeWhere(city))}</p>
     </header>
+    <div class="vm-row" id="vLocal" hidden></div>
+    <section id="wide" class="sec v-wide"><div class="loader">Recherche des nouvelles de ${esc(city.n)}…</div></section>
     <section class="sec" id="vStories" hidden></section>
-    <section class="sec" id="vLocal" hidden></section>
-    <section id="wide" class="sec"><div class="loader">Recherche des nouvelles de ${esc(city.n)}…</div></section>
+    <details class="sec v-more" id="vMore" hidden></details>
     ${near.length + nearRegion.length ? `<section class="sec"><h2 class="block-h">Villes voisines <small>${esc(city.m ? mrcName(city.m) : city.r.replace(/--/g, "–"))}</small></h2>
       <div class="chips">${[...near, ...nearRegion].map((x) => `<a class="chip" href="${href({ ville: x.s })}" data-nav>${esc(x.n)}</a>`).join("")}</div></section>` : ""}`;
   $("#vFollow", v).onclick = (e) => {
     if (topics.has(city.n)) topics.remove(city.n); else topics.add(city.n);
     const on = topics.has(city.n);
-    e.target.textContent = on ? "✓ Suivie" : "★ Suivre cette ville";
-    e.target.classList.toggle("ghost", on);
+    const b = e.target.closest("button");
+    b.setAttribute("aria-pressed", on); $("span", b).textContent = on ? "Suivie" : "Suivre";
     toast(on ? `Tu suis ${city.n} : tu la retrouves dans « Mes sujets ».` : `Tu ne suis plus ${city.n}.`);
   };
   $("#vMine", v).onclick = (e) => {
     store.set("city", city.s);
     store.set("cityLabel", city.n);
     state.feeds.clear();
-    e.target.textContent = "✓ C'est ma ville";
+    const b = e.target.closest("button");
+    b.setAttribute("aria-pressed", "true"); $("span", b).textContent = "Ma ville";
     toast(`${city.n} est ta ville : le fil « Ma ville » montre ses nouvelles.`);
   };
   // Les histoires de l'édition qui parlent de la ville.
@@ -1618,7 +1619,7 @@ async function viewVille(v, route) {
     await withTitlesFr(stories.slice(0, 8));
     for (const s of stories) state.stories.set(s.id, s);
     $("#vStories").hidden = false;
-    $("#vStories").innerHTML = `<h2 class="block-h">Les histoires <small>couvertes par plusieurs médias</small></h2>${stories.slice(0, 8).map((s) => storyRow(s)).join("")}`;
+    $("#vStories").innerHTML = `<h2 class="block-h">Les grandes histoires <small>couvertes par plusieurs médias</small></h2>${stories.slice(0, 4).map((s) => storyRow(s)).join("")}`;
   }
   // Tous les articles des 7 derniers jours : ceux qui nomment la ville, et TOUS ceux de ses médias locaux
   // (un hebdo local n'écrit pas toujours le nom de sa ville). Seulement des médias canadiens (pas Warwick en Angleterre).
@@ -1639,7 +1640,6 @@ async function viewVille(v, route) {
       const extra = [];
       for (let id = 0; id < m.dom.length; id++) if (idx.has(m.dom[id]) && !have.has(id)) extra.push(id);
       r.ids = [...r.ids, ...extra].sort((x, y) => x - y);
-      if (extra.length) $("#wide").insertAdjacentHTML("beforebegin", `<p class="q-fix">Inclut toutes les nouvelles de ${cityMedia.length > 1 ? "ses médias locaux" : "son média local"} : <b>${cityMedia.slice(0, 4).map((x) => esc(x.n)).join(", ")}</b>.</p>`);
     }
     // Petite municipalité dont on a peu parlé : on ajoute les nouvelles de sa MRC et des villes voisines (au Canada).
     if (r.ids.length < 5 && city.pr === "QC") {
@@ -1656,6 +1656,7 @@ async function viewVille(v, route) {
       }
     }
     r.query = q;
+    r.light = true;
     drawWide($("#wide"), r);
   } else $("#wide").innerHTML = `<div class="empty"><p>La recherche n'est pas encore prête.</p></div>`;
   // Les médias de la ville, ceux qui en parlent le plus, puis ceux de la région.
@@ -1664,22 +1665,28 @@ async function viewVille(v, route) {
   const topList = [...top.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([di, n]) => ({ d: r.meta.D[di].domain, n: r.meta.D[di].name, c: n }));
   const count = (d) => topList.find((t) => t.d === d)?.c || (r ? r.ids.filter((id) => r.meta.D[r.meta.dom[id]].domain === d).length : 0);
   // Chaque média est un filtre : on ne voit que ses articles sur la ville. Le ↗ mène à la page du média.
-  const chip = (x) => { const n = x.c ?? count(x.d); return `<span class="mchip"><button class="chip" type="button" data-vmedia="${esc(x.d)}" aria-pressed="false"${n ? "" : " disabled"}>${favicon(x.d, x.n)} ${esc(x.n)} <span class="muted">${n}</span></button><a class="mchip-go" href="${href({ m: x.d })}" data-nav title="Page du média" aria-label="Page de ${esc(x.n)}">↗</a></span>`; };
-  if (cityMedia.length || regionMedia.length || topList.length) {
+  const withN = [...cityMedia, ...topList.filter((t) => !cityMedia.some((x) => x.d === t.d))].map((x) => ({ ...x, c: x.c ?? count(x.d) })).filter((x) => x.c > 0).sort((a, b) => b.c - a.c);
+  if (withN.length) {
     $("#vLocal").hidden = false;
-    const regionOnly = regionMedia.filter((x) => !topList.some((t) => t.d === x.d) && !cityMedia.some((c) => c.d === x.d)).slice(0, 16);
-    $("#vLocal").innerHTML = `<h2 class="block-h">Choisis un média <small>pour ne voir que ses articles sur ${esc(city.n)}</small></h2>
-      <div class="chips"><button class="chip" type="button" data-vmedia="" aria-pressed="true">Tous les médias</button>
-      ${cityMedia.map(chip).join("")}${topList.filter((t) => !cityMedia.some((x) => x.d === t.d)).map(chip).join("")}</div>
-      ${regionOnly.length ? `<p class="note" style="margin:12px 0 6px">Autres médias de la région (${esc(city.r.replace(/--/g, "–"))}) :</p><div class="chips">${regionOnly.map(chip).join("")}</div>` : ""}`;
+    $("#vLocal").innerHTML = `<button class="vm" type="button" data-vmedia="" aria-pressed="true">Tous <b>${r ? r.ids.length : ""}</b></button>${withN.map((x) => `<button class="vm" type="button" data-vmedia="${esc(x.d)}" aria-pressed="false">${favicon(x.d, x.n)}<span data-no-tr>${esc(x.n)}</span> <b>${x.c}</b></button>`).join("")}`;
     $("#vLocal").onclick = (e) => {
       const b = e.target.closest("[data-vmedia]");
       if (!b || !r) return;
       state.wf.media = state.wf.media === b.dataset.vmedia ? "" : b.dataset.vmedia;
       $$("[data-vmedia]", $("#vLocal")).forEach((x) => x.setAttribute("aria-pressed", x.dataset.vmedia === state.wf.media));
+      const row = $("#vLocal");
+      row.scrollTo({ left: b.offsetLeft - (row.clientWidth - b.offsetWidth) / 2, behavior: "smooth" });
       drawWide($("#wide"), r);
-      $("#wide").scrollIntoView({ behavior: "smooth", block: "start" });
+      const top = $("#topbar").getBoundingClientRect().bottom + $("#vLocal").offsetHeight;
+      if ($("#wide").getBoundingClientRect().top < top) scrollTo({ top: $("#wide").getBoundingClientRect().top + scrollY - top - 8, behavior: "smooth" });
     };
+  }
+  // Les autres médias de la région (sans article sur la ville cette semaine) : repliés, chacun mène à sa page.
+  const others = [...cityMedia, ...regionMedia].filter((x) => !withN.some((w) => w.d === x.d)).slice(0, 24);
+  if (others.length) {
+    $("#vMore").hidden = false;
+    $("#vMore").innerHTML = `<summary>Autres médias de la région <small>${others.length}</small></summary>
+      <div class="chips" style="margin-top:10px">${others.map((x) => `<a class="chip" href="${href({ m: x.d })}" data-nav>${favicon(x.d, x.n)} <span data-no-tr>${esc(x.n)}</span></a>`).join("")}</div>`;
   }
 }
 
@@ -3617,6 +3624,29 @@ async function drawWide(el, r) {
   else if (r.suggestion) notes.push(`<p class="q-fix">Vouliez-vous dire <a href="${href({ q: r.suggestion })}" data-nav>${esc(r.suggestion)}</a> ?</p>`);
   if (r.partial) notes.push(`<p class="q-fix">Aucun article ne contient tous les mots. Voici ceux qui contiennent <b>${r.found.map(esc).join(", ")}</b>.</p>`);
   if (countries && scope === "monde" && f.scope === "auto" && inRegion < 5 && r.ids.length) notes.push(`<p class="q-fix">${inRegion ? `Seulement ${plural(inRegion, "article")}` : "Aucun article"} dans les médias de l'édition ${esc(regionName)} : voici les résultats du monde entier.</p>`);
+  if (r.light) {
+    state.wideTab = "articles";
+    const mName = f.media ? m.D.find((d) => d.domain === f.media)?.name || f.media : "";
+    const used = f.hours || f.side !== "all" || f.lang !== "all" || f.cat !== "all";
+    el.innerHTML = `<h2 class="block-h">${mName ? `<span data-no-tr>${esc(mName)}</span>` : "Les nouvelles"} <small>${plural(ids.length, "article")} · 7 jours</small></h2>
+      ${mName ? `<p class="vm-sel">Seulement les articles de <b data-no-tr>${esc(mName)}</b> · <a class="link" href="${href({ m: f.media })}" data-nav>sa page ↗</a></p>` : ""}
+      ${notes.join("")}
+      <details class="wf-fold"${used ? " open" : ""}><summary>Filtrer ${used ? "· filtres actifs" : ""}</summary>${filters}</details>
+      ${ids.length ? `<div id="widePanel"></div>` : `<div class="empty"><p>Aucun article avec ces filtres.</p></div>`}`;
+    if (ids.length) drawWidePanel({ r, ids, query: r.query });
+    $(".wf", el).onclick = (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      if (b.dataset.scope) f.scope = b.dataset.scope;
+      if (b.dataset.hours != null) f.hours = Number(b.dataset.hours);
+      if (b.dataset.side) f.side = b.dataset.side;
+      if (b.dataset.lang) f.lang = b.dataset.lang;
+      if (b.dataset.cat) f.cat = b.dataset.cat;
+      if (b.dataset.media !== undefined) { f.media = b.dataset.media; $$("[data-vmedia]").forEach((x) => x.setAttribute("aria-pressed", x.dataset.vmedia === f.media)); }
+      drawWide(el, r);
+    };
+    return;
+  }
   const head = `<h2 class="block-h">Tous les articles <small>7 jours · ${plural(ids.length, "article")} · ${plural(seenD.size, "média")}</small></h2>
     <p class="note" style="margin:0 0 12px">Prisme fouille les titres et les textes de tous les articles lus depuis 7 jours, même ceux qui ne font pas partie d'une histoire. Du plus récent au plus ancien.</p>${notes.join("")}`;
   const tabs = [["articles", "Articles", ids.length], ["comparer", "Comparer", null], ["medias", "Médias", seenD.size], ["videos", "Vidéos", null]];
