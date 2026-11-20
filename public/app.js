@@ -708,8 +708,11 @@ function renderChrome(route) {
   const page = routePage(route);
   $("#mastLinks").innerHTML = PAGES.map(([v, l]) => `<a href="${href({ v })}" data-nav ${page === v ? 'aria-current="page"' : ""}>${l}</a>`).join("");
   $("#editionSel").innerHTML = REGIONS.map(([v, l]) => `<option value="${v}" ${v === state.region ? "selected" : ""}>${l}</option>`).join("");
-  $("#cats").innerHTML = CATS.map(([v, l]) => `<a href="${href({ cat: v, lens: route.view === "feed" ? route.lens : undefined })}" data-nav ${route.view === "feed" && route.cat === v ? 'aria-current="page"' : ""}>${l}</a>`).join("")
-    + `<span class="sep"></span><a class="cat-ville" href="${prefs.city ? href({ ville: prefs.city }) : href({ v: "villes" })}" data-nav ${["ville", "villes"].includes(route.view) ? 'aria-current="page"' : ""}>📍 ${esc(prefs.cityLabel || "Ma ville")}</a>`;
+  // « Ma ville » juste après « À la une » : visible tout de suite, sans glisser la barre.
+  const catLink = ([v, l]) => `<a href="${href({ cat: v, lens: route.view === "feed" ? route.lens : undefined })}" data-nav ${route.view === "feed" && route.cat === v ? 'aria-current="page"' : ""}>${l}</a>`;
+  $("#cats").innerHTML = catLink(CATS[0])
+    + `<a class="cat-ville" href="${prefs.city ? href({ ville: prefs.city }) : href({ v: "villes" })}" data-nav ${["ville", "villes"].includes(route.view) ? 'aria-current="page"' : ""}>📍 ${esc(prefs.cityLabel || "Ma ville")}</a><span class="sep"></span>`
+    + CATS.slice(1).map(catLink).join("");
   const onUne = ["feed", "story", "search", "outlet", "ville", "villes"].includes(route.view);
   const alerts = alertCount();
   $("#tabbar").innerHTML = `
