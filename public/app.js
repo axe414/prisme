@@ -224,7 +224,7 @@ function favBtn(item, label = false) {
 function shareBtn(data, label = false) {
   return `<button class="act${label ? " act-l" : ""}" type="button" data-share="${esc(JSON.stringify(data))}" title="Partager">${ico("share")}${label ? "<span>Partager</span>" : ""}</button>`;
 }
-const storyShare = (s) => ({ title: s.title, text: `${s.title} — ${plural(s.sources, "média")} en parlent, de la gauche à la droite, sur Prisme`, url: absUrl(href({ h: s.id })) });
+const storyShare = (s) => ({ title: s.title, text: `${s.title} — ${plural(s.sources, "média")} en parlent, de la gauche à la droite, sur Prisme`, url: absUrl(`h/${encodeURIComponent(s.id)}.html`) });
 const artShare = (a) => ({ title: a.title, text: `${a.title} (${a.sourceName})`, url: a.url });
 
 let toastTimer = null;
@@ -1173,14 +1173,14 @@ document.addEventListener("click", async (e) => {
 });
 // Le haut de « En bref » : À la une ou ta ville, la position, et fermer.
 const shBar = (mode, cityName) => `<div class="sh-bar">
-    <div class="sh-modes"><button type="button" data-shmode="une" aria-pressed="${mode === "une"}">À la une</button>${cityName ? `<button type="button" data-shmode="ville" aria-pressed="${mode === "ville"}">📍 <span data-no-tr>${esc(cityName)}</span></button>` : ""}</div>
+    <div class="sh-modes"><button type="button" data-shmode="une" aria-pressed="${mode === "une"}">À la une</button>${cityName ? `<button type="button" data-shmode="ville" aria-pressed="${mode === "ville"}">📍 <span data-no-tr>${esc(cityName)}</span></button>` : ""}<button type="button" data-shmode="video" aria-pressed="${mode === "video"}">▶ Vidéos</button></div>
     <button class="icon-btn sh-x" type="button" aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     <span class="sh-pos" id="shPos"></span>
   </div>`;
 function shClick(e) {
   if (e.target.closest(".sh-x, [data-sh-close]")) { closeShorts(); return; }
   const m = e.target.closest("[data-shmode]");
-  if (m && m.getAttribute("aria-pressed") !== "true") { if (m.dataset.shmode === "ville") openCityBref(); else { closeShorts(); openEnBref(); } return; }
+  if (m && m.getAttribute("aria-pressed") !== "true") { if (m.dataset.shmode === "ville") openCityBref(); else if (m.dataset.shmode === "video") openVideoBref(); else { closeShorts(); openEnBref(); } return; }
   const op = e.target.closest("[data-sh-open]");
   if (op) { e.preventDefault(); closeShorts(); go(op.getAttribute("href")); }
 }
@@ -1308,7 +1308,7 @@ addEventListener("keydown", (e) => {
 /* ---------- Préférences : taille du texte, ville, rubriques préférées ---------- */
 const SCALES = [[0.92, "Petit"], [1, "Normal"], [1.12, "Grand"], [1.25, "Très grand"]];
 const prefs = {
-  get scale() { return Number(store.get("scale", "1")) || 1; },
+  get scale() { const v = store.get("scale", ""); return v ? Number(v) || 1 : iosTextRatio() || 1; },
   get city() { return store.get("city", ""); },
   get cityLabel() { return store.get("city") ? store.get("cityLabel", "") || CITIES[store.get("city")]?.label || "" : ""; },
   get cats() { try { return JSON.parse(store.get("prefCats", "[]")); } catch { return []; } },
@@ -1392,6 +1392,7 @@ function openSettings() {
       const v = b.dataset.themeSet;
       store.set("theme", v);
       if (v === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = v;
+      syncThemeColor();
       $$("[data-theme-set]", box).forEach((x) => x.setAttribute("aria-pressed", x === b));
     }
     if (b.dataset.pcat) {
@@ -1561,6 +1562,11 @@ document.addEventListener("click", (e) => {
   ptr.className = "ptr";
   ptr.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/></svg>';
   document.body.appendChild(ptr);
+  // Tirer un peu : la recherche ; tirer plus loin : rafraîchir. Une étiquette dit ce qui va se passer.
+  const ptrL = document.createElement("div");
+  ptrL.className = "ptr-l";
+  document.body.appendChild(ptrL);
+  let zone = "";
   const NOSWIPE = "#feed .story, .sides-swipe, #smenu, .hcard, #selBar, .lenses, .topics, .cats, .wf-row, .o-chips, .o-days, .tl, .vgrid, .pack-wrap, input, select, textarea, .modal, .drawer, .tabs, .seg";
   addEventListener("touchstart", (e) => {
     if (e.touches.length !== 1) return;
@@ -1571,16 +1577,23 @@ document.addEventListener("click", (e) => {
   addEventListener("touchmove", (e) => {
     if (!pulling) return;
     const dy = e.touches[0].clientY - sy;
-    if (dy > 0 && scrollY <= 0) { const p = Math.min(1, dy / 110); ptr.style.opacity = p; ptr.style.transform = `translate(-50%, ${Math.min(dy, 110) * 0.6}px) rotate(${p * 270}deg)`; ptr.classList.toggle("ready", p >= 1); }
+    if (dy > 0 && scrollY <= 0) {
+      const p = Math.min(1, dy / 110); ptr.style.opacity = p; ptr.style.transform = `translate(-50%, ${Math.min(dy, 110) * 0.6}px) rotate(${p * 270}deg)`; ptr.classList.toggle("ready", p >= 1);
+      const z = p >= 1 ? "refresh" : dy > 45 ? "search" : "";
+      if (z !== zone) { zone = z; ptrL.textContent = z === "refresh" ? tr("Relâche pour rafraîchir") : z === "search" ? tr("Relâche pour chercher · tire plus pour rafraîchir") : ""; ptrL.classList.toggle("on", !!z); if (z) buzz(6); }
+      ptrL.style.transform = `translate(-50%, ${Math.min(dy, 110) * 0.6}px)`;
+    }
   }, { passive: true });
   addEventListener("touchend", (e) => {
     const x = e.changedTouches[0].clientX, y = e.changedTouches[0].clientY;
     const dx = x - sx, dy = y - sy;
     if (pulling) {
-      const ready = ptr.classList.contains("ready");
+      const ready = ptr.classList.contains("ready"), z = zone;
       ptr.style.opacity = ""; ptr.style.transform = ""; ptr.classList.remove("ready");
+      ptrL.classList.remove("on"); ptrL.style.transform = ""; zone = "";
       pulling = false;
       if (ready) { buzz(15); dataCache.clear(); state.feeds.clear(); toast("Fil mis à jour"); render(); return; }
+      if (z === "search") { const b = $("#searchBtn"); if (b && getComputedStyle(b).display !== "none") b.click(); else $("#search input").focus({ preventScroll: true }); return; }
     }
     // Glisser à gauche ou à droite : rubrique suivante ou précédente (fil seulement). Depuis le bord gauche : c'est « Retour ».
     if (sx < 24) return;
@@ -2059,11 +2072,25 @@ $("#backNav")?.addEventListener("click", () => history.back());
     sx = x < 24 && ((isStandalone() && (history.state?.d || 0) > 0) || state.panel) ? x : null;
     sy = e.touches[0].clientY;
   }, { passive: true });
+  // La page suit le doigt (comme les Réglages de l'iPhone) ; relâchée assez loin, on revient en arrière.
+  const page = () => (state.panel ? $(".panel-card") : $("#view"));
+  addEventListener("touchmove", (e) => {
+    if (sx == null || state.panel) return;
+    const dx = e.touches[0].clientX - sx, dy = Math.abs(e.touches[0].clientY - sy);
+    if (dy > 60) { sx = null; const v = page(); v.style.transition = "transform .2s ease"; v.style.transform = ""; return; }
+    if (dx > 0) { const v = page(); v.style.transition = "none"; v.style.transform = `translateX(${dx}px)`; document.body.classList.add("edge-back"); }
+  }, { passive: true });
   addEventListener("touchend", (e) => {
     if (sx == null) return;
     const dx = e.changedTouches[0].clientX - sx, dy = Math.abs(e.changedTouches[0].clientY - sy);
     sx = null;
-    if (dx > 80 && dy < 70) history.back();
+    const v = page();
+    const reset = () => { v.style.transition = ""; v.style.transform = ""; document.body.classList.remove("edge-back"); };
+    if (dx > 80 && dy < 70) {
+      if (state.panel) { history.back(); return; }
+      v.style.transition = "transform .18s ease-out"; v.style.transform = "translateX(100vw)";
+      setTimeout(() => { v.style.transition = "none"; v.style.transform = "translateX(-12px)"; history.back(); requestAnimationFrame(() => { v.style.transition = "transform .22s ease-out"; v.style.transform = ""; setTimeout(reset, 240); }); }, 170);
+    } else { v.style.transition = "transform .2s ease"; v.style.transform = ""; setTimeout(reset, 220); }
   }, { passive: true });
 }
 
@@ -2432,7 +2459,7 @@ function tryResume(f, key) {
 {
   let r = null;
   try { r = JSON.parse(store.get("resume", "null")); } catch { r = null; }
-  if (r && Date.now() - r.at < RESUME_MS && !location.search && (r.u || r.y)) {
+  if (r && Date.now() - r.at < RESUME_MS && (!location.search || location.search === "?source=app") && (r.u || r.y)) {
     if (r.u) history.replaceState({ y: 0, d: 0 }, "", r.u);
     state.resume = r;
   }
@@ -2776,6 +2803,147 @@ document.addEventListener("click", (e) => {
   if (s) toggleSel(s);
 }, true);
 addEventListener("keydown", (e) => { if (e.key === "Escape") exitSelect(); });
+
+/* ---------- Encore plus iPhone : vidéos en bref, titre qui se réduit, feuilles à glisser, raccourcis ---------- */
+// En bref · Vidéos : les vidéos des médias, une par écran, qui démarrent seules (sans le son, comme Instagram).
+const vidSlide = (v) => `<section class="sh sh-v" data-vid="${esc(v.id)}">
+    <img class="sh-blur" src="${esc(safeUrl(v.thumb))}" alt="" loading="lazy" referrerpolicy="no-referrer">
+    <div class="sh-player"><img src="${esc(safeUrl(v.thumb))}" alt="" loading="lazy" referrerpolicy="no-referrer"><span class="sh-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg></span></div>
+    <div class="sh-in">
+      <div class="sh-k">${badge(v.media)} <span class="sh-ch" data-no-tr>${esc(v.channel)}</span> · ${esc(ago(v.published))}</div>
+      <h2 data-no-tr>${esc(v.title)}</h2>
+      <p class="sh-hint">Touche la vidéo pour le son · glisse vers le haut</p>
+    </div>
+  </section>`;
+function playSlide(sec, on) {
+  const box = $(".sh-player", sec);
+  if (!box) return;
+  const f = $("iframe", box);
+  if (on && !f) box.insertAdjacentHTML("beforeend", `<iframe src="https://www.youtube-nocookie.com/embed/${sec.dataset.vid}?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1" title="Vidéo" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`);
+  if (!on && f) f.remove();
+}
+async function openVideoBref() {
+  closeShorts();
+  const o = document.createElement("div");
+  o.id = "shorts";
+  o.classList.add("sh-videos");
+  o.innerHTML = `${shBar("video", prefs.city ? prefs.cityLabel || "Ma ville" : "")}<div class="sh-sc" id="shSc"><section class="sh sh-div"><div class="sh-in"><h2>Les vidéos…</h2></div></section></div>`;
+  document.body.appendChild(o);
+  document.body.classList.add("shorts-open");
+  requestAnimationFrame(() => o.classList.add("on"));
+  o.onclick = shClick;
+  const d = await api(`/api/videos?region=${state.region}`).catch(() => null);
+  const list = (d?.videos || []).filter((v) => /^[\w-]{6,20}$/.test(v.id)).sort((a, b) => (b.published || "").localeCompare(a.published || ""));
+  const sc = $("#shSc", o);
+  if (!o.isConnected) return;
+  if (!list.length) { sc.innerHTML = `<section class="sh sh-div"><div class="sh-in"><h2>Aucune vidéo pour l'instant.</h2></div></section>`; return; }
+  let shown = 0;
+  const io = new IntersectionObserver((entries) => {
+    for (const en of entries) {
+      playSlide(en.target, en.isIntersecting);
+      if (!en.isIntersecting) continue;
+      const i = [...sc.children].indexOf(en.target);
+      $("#shPos", o).textContent = `${i + 1} / ${list.length} · ${en.target.querySelector(".sh-ch")?.textContent || ""}`;
+      if (i >= shown - 3) add();
+    }
+  }, { root: sc, threshold: 0.7 });
+  o._io = io;
+  const add = () => {
+    const next = list.slice(shown, shown + 12);
+    if (!next.length) return;
+    const before = sc.children.length;
+    sc.insertAdjacentHTML("beforeend", next.map(vidSlide).join(""));
+    shown += next.length;
+    for (const el of [...sc.children].slice(before)) io.observe(el);
+  };
+  sc.innerHTML = "";
+  add();
+  // Toucher l'image avant que la vidéo démarre : elle démarre.
+  sc.addEventListener("click", (e) => { const s = e.target.closest(".sh-v"); if (s && e.target.closest(".sh-player img, .sh-play")) playSlide(s, true); });
+}
+
+// Grand titre de page qui se range dans le bandeau quand on descend (comme Mail et Notes).
+{
+  const t = document.createElement("span");
+  t.className = "page-title";
+  t.setAttribute("aria-hidden", "true");
+  $(".logo")?.insertAdjacentElement("afterend", t);
+  let last = "";
+  const check = () => {
+    const h = $("#view h1");
+    const bar = $("#topbar");
+    if (!h || !bar || innerWidth > 760) { bar?.classList.remove("has-title"); return; }
+    const gone = h.getBoundingClientRect().bottom < bar.getBoundingClientRect().bottom;
+    const text = (h.firstChild?.textContent || h.textContent).replace(/\s+/g, " ").trim().slice(0, 40);
+    if (text !== last) { last = text; t.textContent = text; }
+    bar.classList.toggle("has-title", gone);
+  };
+  addEventListener("scroll", check, { passive: true });
+  addEventListener("popstate", () => setTimeout(check, 50));
+}
+
+// Les fenêtres (Réglages, Plus, fiches) : une poignée, et on les ferme en glissant vers le bas.
+{
+  let y0 = null, dy = 0, box = null;
+  addEventListener("touchstart", (e) => {
+    box = e.target.closest("#modal.open .modal-box");
+    if (!box || innerWidth > 760 || e.touches.length !== 1) { box = null; return; }
+    const scroller = box.querySelector(".modal-body") || box;
+    if (scroller.scrollTop > 0 && !e.target.closest(".modal-grab")) { box = null; return; }
+    y0 = e.touches[0].clientY; dy = 0;
+  }, { passive: true });
+  addEventListener("touchmove", (e) => {
+    if (!box) return;
+    dy = e.touches[0].clientY - y0;
+    if (dy > 0) { box.style.transition = "none"; box.style.transform = `translateY(${dy}px)`; }
+  }, { passive: true });
+  addEventListener("touchend", () => {
+    if (!box) return;
+    const b = box; box = null;
+    b.style.transition = "transform .22s ease";
+    if (dy > 110) { b.style.transform = "translateY(100%)"; setTimeout(() => { closeLayer("#modal"); b.style.transform = ""; b.style.transition = ""; }, 200); }
+    else { b.style.transform = ""; setTimeout(() => { b.style.transition = ""; }, 230); }
+  }, { passive: true });
+}
+
+// La couleur de la barre d'état suit le bandeau (noir, ou vrai noir en mode OLED).
+function syncThemeColor() {
+  const m = $('meta[name="theme-color"]');
+  if (m) m.content = document.documentElement.dataset.theme === "oled" ? "#000000" : "#141414";
+}
+
+// La taille du texte suit celle choisie dans les réglages de l'iPhone (tant qu'on ne l'a pas choisie dans Prisme).
+function iosTextRatio() {
+  if (iosTextRatio.v !== undefined) return iosTextRatio.v;
+  iosTextRatio.v = 0;
+  try {
+    if (!/iphone|ipad|ipod/i.test(navigator.userAgent) && !(navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)) return 0;
+    const p = document.createElement("span");
+    p.style.font = "-apple-system-body";
+    if (!p.style.font) return 0;
+    p.style.position = "absolute"; p.style.visibility = "hidden";
+    document.body.appendChild(p);
+    const px = parseFloat(getComputedStyle(p).fontSize);
+    p.remove();
+    if (px) iosTextRatio.v = Math.max(0.9, Math.min(1.4, Math.round((px / 17) * 100) / 100));
+  } catch { /* pas d'iPhone */ }
+  return iosTextRatio.v;
+}
+
+// Raccourcis de l'icône (Android) et liens directs : ?bref=une|ville|video, ?focus=search.
+function bootShortcut() {
+  const p = new URLSearchParams(location.search);
+  const bref = p.get("bref"), focus = p.get("focus");
+  if (!bref && !focus) return;
+  history.replaceState({ y: 0, d: 0 }, "", "./");
+  render();
+  setTimeout(() => {
+    if (bref === "ville") openCityBref();
+    else if (bref === "video") openVideoBref();
+    else if (bref) openEnBref();
+    else if (focus === "search") $("#search input").focus();
+  }, 400);
+}
 
 /* ---------- Le fil ---------- */
 // Montrée une seule fois : comment lire un bloc du fil.
@@ -4842,7 +5010,7 @@ $("#themeBtn").addEventListener("click", () => {
   const dark = cur === "dark" || cur === "oled" || (cur !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
   const next = dark ? "light" : "dark";
   document.documentElement.dataset.theme = next;
-  $('meta[name="theme-color"]').content = next === "light" ? "#F4F2EC" : "#121211";
+  syncThemeColor();
   store.set("theme", next);
 });
 document.addEventListener("keydown", (e) => {
@@ -4860,6 +5028,8 @@ $("#langBtn").title = LANG === "en" ? "Passer en français" : "Switch to English
 $("#langBtn").onclick = () => setLang(LANG === "en" ? "fr" : "en");
 render({ scroll: history.state?.y || 0 });
 window.__prismeReady = true;
+syncThemeColor();
+bootShortcut();
 $("#prefsBtn").onclick = openSettings;
 // La première fois (sur l'accueil seulement) : quelques questions pour personnaliser Prisme.
 if (!store.get("onboarded") && state.route.view === "feed" && !location.search) setTimeout(openOnboarding, 600);

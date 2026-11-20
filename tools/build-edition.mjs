@@ -60,6 +60,36 @@ for (const region of REGIONS) {
   log(`édition ${region} : ${file.stories.length} histoires publiées sur ${file.totals.stories}, ${file.totals.outlets} médias`);
 }
 
+// 3 a) Pages de partage : un lien Prisme collé dans Messages ou Messenger montre la photo, le titre et la couverture.
+{
+  const H = join(OUT, "h");
+  mkdirSync(H, { recursive: true });
+  const e = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const seen = new Set();
+  let n = 0;
+  for (const [region, file] of Object.entries(editions)) {
+    const top = [...file.stories].sort((a, b) => (b.scores?.essentiel || 0) - (a.scores?.essentiel || 0)).slice(0, 250);
+    for (const s of top) {
+      if (seen.has(s.id) || !/^[\w-]+$/.test(s.id)) continue;
+      seen.add(s.id);
+      const c = s.counts || {};
+      const L = (c.l2 || 0) + (c.l1 || 0), C = c.c || 0, R = (c.r1 || 0) + (c.r2 || 0);
+      const desc = `${s.sources} médias en parlent · gauche ${L} · centre ${C} · droite ${R}. Compare sur Prisme.`;
+      const to = `../?h=${s.id}${region !== "qc" ? `&r=${region}` : ""}`;
+      writeFileSync(join(H, `${s.id}.html`), `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${e(s.title)} — Prisme</title>
+<meta name="description" content="${e(desc)}">
+<meta property="og:type" content="article"><meta property="og:site_name" content="Prisme">
+<meta property="og:title" content="${e(s.title)}"><meta property="og:description" content="${e(desc)}">
+${s.image ? `<meta property="og:image" content="${e(s.image)}"><meta name="twitter:card" content="summary_large_image">` : ""}
+<meta http-equiv="refresh" content="0; url=${e(to)}"><script>location.replace(${JSON.stringify(to)})</script>
+</head><body><p><a href="${e(to)}">${e(s.title)}</a></p></body></html>`);
+      n++;
+    }
+  }
+  log(`${n} pages de partage (aperçu dans Messages, Messenger…)`);
+}
+
 // 3 b) L'archive de 7 jours : page de chaque média et recherche sur 7 jours.
 {
   const { loadArchive, mergeArchive, saveArchive, outletFiles, outletFileName } = await import("../lib/archive.mjs");

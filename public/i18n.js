@@ -203,6 +203,7 @@ const EXACT = {
   // Fil épuré
   "C'est tout pour": "That's all for", "Rien de neuf à": "Nothing new in", "cette semaine": "this week",
   "ville voisine": "nearby town", "Nouvelle de": "Story from", "Nouvelles de": "Stories from", ", ville voisine": ", a nearby town",
+  "▶ Vidéos": "▶ Videos", "Touche la vidéo pour le son · glisse vers le haut": "Tap the video for sound · swipe up", "Aucune vidéo pour l'instant.": "No videos yet.", "Relâche pour rafraîchir": "Release to refresh", "Relâche pour chercher · tire plus pour rafraîchir": "Release to search · pull more to refresh",
   "En bref": "Quick read", "▶ En bref": "▶ Quick read", "Lire l'article →": "Read the article →", "Glisse vers le haut ↑": "Swipe up ↑", "Tu as fait le tour": "You're all caught up", "Ville voisine": "Nearby town", "Choisis d'abord ta ville.": "Pick your town first.", "Maintenant :": "Now:", "une nouvelle par écran": "one story per screen", "glisse vers le haut": "swipe up",
   "Tout voir →": "See all →", "Toute l'histoire →": "The whole story →", "personne": "nobody", "Angle mort": "Blindspot", "Shorts": "Shorts",
   "Expliquer cette lentille": "Explain this lens", "1 nouvelle cette semaine": "1 story this week", "Voir tout →": "See all →",

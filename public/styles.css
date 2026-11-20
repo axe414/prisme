@@ -1646,3 +1646,45 @@ body.shorts-open { overflow: hidden; }
 #shorts .sh-pos[data-city] { font: 600 14px var(--sans); opacity: 1; }
 #shorts .sh-pos.flash { animation: shflash 1.2s ease; }
 @keyframes shflash { 0% { color: #F6E7B8; transform: scale(1.08); } 100% { color: inherit; transform: none; } }
+
+/* ================= Encore plus iPhone ================= */
+/* En bref : trois choix en haut (À la une, ta ville, Vidéos), qui tiennent sur un iPhone */
+.sh-modes { max-width: calc(100vw - 70px); overflow-x: auto; scrollbar-width: none; }
+.sh-modes::-webkit-scrollbar { display: none; }
+.sh-modes button { padding: 0 11px; font-size: 13px; flex: none; }
+
+/* En bref · Vidéos : la vidéo au centre, le fond flou de la même image, le titre en bas */
+.sh-v { align-items: flex-end; }
+.sh-blur { position: absolute; inset: -40px; width: calc(100% + 80px); height: calc(100% + 80px); object-fit: cover; filter: blur(28px) brightness(.45); }
+.sh-v::after { background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .85) 85%, #000 100%); }
+.sh-player { position: absolute; z-index: 2; left: 0; right: 0; top: 42%; transform: translateY(-50%); aspect-ratio: 16 / 9; background: #000; max-width: 900px; margin: 0 auto; }
+.sh-player img, .sh-player iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: cover; }
+.sh-player iframe { z-index: 2; }
+.sh-play { position: absolute; z-index: 1; left: 50%; top: 50%; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; background: rgba(0, 0, 0, .55); display: grid; place-items: center; }
+.sh-play svg { width: 28px; height: 28px; fill: #fff; }
+.sh-v .sh-in { z-index: 3; }
+.sh-v h2 { font-size: clamp(21px, 5.6vw, 30px); }
+.sh-v .sh-k .bb { font-size: 10px; }
+
+/* Tirer pour chercher ou rafraîchir : l'étiquette */
+.ptr-l { position: fixed; z-index: 25; left: 50%; top: calc(var(--top-h, 100px) + 46px); transform: translate(-50%, 0); padding: 6px 12px; border-radius: 999px; background: var(--ink); color: var(--paper); font: 600 12.5px var(--sans); white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s; }
+.ptr-l.on { opacity: 1; }
+
+/* Glisser du bord gauche : la page suit le doigt, avec une ombre */
+body.edge-back #view, body.edge-back .panel-card { box-shadow: -18px 0 28px -18px rgba(0, 0, 0, .45); }
+body.edge-back { overflow-x: hidden; }
+
+/* Le grand titre se range dans le bandeau en descendant (téléphone) */
+.page-title { display: none; }
+@media (max-width: 760px) {
+  .topbar.has-title .page-title { display: block; flex: 1; min-width: 0; font: 700 17px/1.1 var(--serif); color: #F2EFE8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: pt-in .2s ease; }
+  .topbar.has-title .logo-word { display: none; }
+  @keyframes pt-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
+
+/* Fenêtres en feuilles arrondies, avec une poignée, qu'on ferme en glissant vers le bas (téléphone) */
+@media (max-width: 760px) {
+  .modal { padding: 0; }
+  .modal-box { width: 100%; max-height: calc(100vh - env(safe-area-inset-top) - 24px); border-radius: 16px 16px 0 0; border: 0; box-shadow: 0 -10px 40px -12px rgba(0, 0, 0, .45); padding-bottom: env(safe-area-inset-bottom); transform: translateY(40px); }
+  .modal-box::before { content: ""; display: block; position: sticky; top: 0; z-index: 3; width: 40px; height: 5px; margin: 8px auto -13px; border-radius: 3px; background: var(--hair); }
+}

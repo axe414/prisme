@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prisme</title>
+<script>
+  // Un lien de partage d'une histoire sortie de la une (h/<id>.html) : on ouvre l'histoire dans l'app.
+  (function () {
+    var m = location.pathname.match(/^(.*\/)h\/([\w-]+)\.html$/);
+    if (m) location.replace(m[1] + "?h=" + m[2]);
+  })();
+</script>
+<style>body{font:17px/1.5 Georgia,serif;background:#F4F2EC;color:#121212;display:grid;place-items:center;min-height:100vh;margin:0}a{color:inherit}</style>
+</head>
+<body><p>Page introuvable. <a href="/prisme/">Retour à Prisme</a></p></body>
+</html>
