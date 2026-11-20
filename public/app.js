@@ -1097,9 +1097,62 @@ function rankArticles(s) {
   const one = (s.articles || []).filter((a) => a.url && !seen.has(a.domain) && seen.add(a.domain));
   const want = LANG === "en" ? "en" : "fr";
   const fav = favDomains();
-  const score = (a) => ((a.lang || "fr") === want ? 4 : 0) + (a.media?.known ? 2 : 0) + (a.domain === s.leadDomain ? 1 : 0) + Math.min(3, (fav.get(a.domain) || 0) * 0.6);
+  const pref = prefMed.set();
+  const score = (a) => (pref.has(a.domain) ? 20 : 0) + ((a.lang || "fr") === want ? 4 : 0) + (a.media?.known ? 2 : 0) + (a.domain === s.leadDomain ? 1 : 0) + Math.min(3, (fav.get(a.domain) || 0) * 0.6);
   return one.sort((a, b) => score(b) - score(a));
 }
+// Tes médias préférés (⭐) : quand ils couvrent une nouvelle, le titre s'ouvre chez eux. Sur cet appareil seulement.
+const prefMed = {
+  list() { try { return JSON.parse(store.get("prefMed", "[]")); } catch { return []; } },
+  set() { return new Set(this.list().map((x) => x.d)); },
+  toggle(d, n) { const l = this.list(); const on = !l.some((x) => x.d === d); store.set("prefMed", JSON.stringify(on ? [{ d, n }, ...l].slice(0, 12) : l.filter((x) => x.d !== d))); return on; },
+};
+// « Lire chez… » : tous les médias qui couvrent la nouvelle, leur titre, leur côté. On touche, ça s'ouvre.
+function openPicker(s) {
+  const all = rankArticles(s);
+  if (!all.length) return;
+  const pref = prefMed.set();
+  const side = (a) => sideOf(a.media) || "other";
+  const counts = { left: 0, center: 0, right: 0, other: 0 };
+  for (const a of all) counts[side(a)]++;
+  const row = (a) => `<li data-side="${side(a)}"><a class="pk-go" href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener noreferrer" data-read="${readAttr(a)}" data-card-read="${esc(s.id)}" data-close-modal>
+      <span class="pk-src">${favicon(a.domain, a.sourceName)}<b data-no-tr>${esc(a.sourceName)}</b>${badge(a.media)}${langTag(a.lang)}<time>${esc(agoShort(a.published))}</time></span>
+      <span class="pk-tt" data-no-tr>${esc(a.title)}</span></a>
+    <button class="pk-star" type="button" data-pref-med="${esc(a.domain)}" data-name="${esc(a.sourceName)}" aria-pressed="${pref.has(a.domain)}" aria-label="Média préféré">${ico("star")}</button></li>`;
+  const tabs = all.length >= 6 ? `<div class="seg pk-tabs" role="group">${[["all", "Tous", all.length], ["left", "Gauche", counts.left], ["center", "Centre", counts.center], ["right", "Droite", counts.right]]
+    .filter(([k, , n]) => k === "all" || n).map(([k, l, n]) => `<button type="button" data-pk-tab="${k}" aria-pressed="${k === "all"}">${l} <small>${n}</small></button>`).join("")}</div>` : "";
+  openModal(`<div class="modal-pad pk-sheet">
+    <div class="kicker">Lire chez…</div>
+    <h2 class="pk-h2" data-no-tr>${titleOf(s)}</h2>
+    ${tabs}
+    <ul class="pk-list">${all.map(row).join("")}</ul>
+    <p class="note pk-note">⭐ Touche l'étoile d'un média : quand il couvre une nouvelle, le titre s'ouvrira chez lui en premier.</p>
+  </div>`, true);
+  const box = $("#modalBody .pk-sheet");
+  box.addEventListener("click", (e) => {
+    const t = e.target.closest("[data-pk-tab]");
+    if (t) {
+      $$("[data-pk-tab]", box).forEach((x) => x.setAttribute("aria-pressed", x === t));
+      $$(".pk-list li", box).forEach((li) => { li.hidden = t.dataset.pkTab !== "all" && li.dataset.side !== t.dataset.pkTab; });
+      return;
+    }
+    const st = e.target.closest("[data-pref-med]");
+    if (st) {
+      const on = prefMed.toggle(st.dataset.prefMed, st.dataset.name);
+      st.setAttribute("aria-pressed", on);
+      buzz(10);
+      toast(on ? `⭐ ${st.dataset.name} : ses articles s'ouvriront en premier.` : `${st.dataset.name} n'est plus un média préféré.`);
+      favDomCache = null;
+    }
+  });
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-pick]");
+  if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  const s = state.stories.get(b.dataset.pick);
+  if (s) openPicker(s);
+}, true);
 const bestArticle = (s) => rankArticles(s)[0] || null;
 // Toucher le titre ou la photo d'une carte : l'article s'ouvre directement (le meilleur pour toi).
 // Sans article (rare), on retombe sur la page de l'histoire.
@@ -1120,7 +1173,9 @@ document.addEventListener("click", (e) => {
   if (s) setTimeout(() => setSeen(s, true), 400);
 });
 const peekBtn = `<button class="c2-peek" type="button" data-peek aria-expanded="false" aria-label="Aperçu ici" title="Aperçu ici"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>`;
-const metaLine = (s, st) => `<p class="c2-meta">${newTag(s)}${logoStack(s)}${sourcesLine(s, 1)} · <time title="${esc(ago(s.lastSeen || s.firstSeen))}">${agoShort(s.lastSeen || s.firstSeen)}</time>${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}</p>`;
+// Les sources d'une carte sont un bouton : « Le Devoir +11 ▾ » ouvre « Lire chez… » pour choisir le média.
+const srcPick = (s, n = 1, logos = 3) => `<button class="src-pick" type="button" data-pick="${esc(s.id)}" title="Choisir le média à lire">${logoStack(s, logos)}${sourcesLine(s, n)}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>`;
+const metaLine = (s, st) => `<p class="c2-meta">${newTag(s)}${srcPick(s)} · <time title="${esc(ago(s.lastSeen || s.firstSeen))}">${agoShort(s.lastSeen || s.firstSeen)}</time>${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}</p>`;
 
 // La rubrique d'une histoire, en couleur, et l'angle mort : en haut de chaque carte. La rubrique mène à son fil.
 const catOf = (s, cat) => s.categories?.find((x) => x !== cat && x !== "une" && CAT_LABEL[x]) || null;
@@ -1174,7 +1229,7 @@ function heroStory(s, cat) {
     <div class="hero-why"><b><span data-count="${s.sources}">${s.sources}</span> ${s.sources > 1 ? "médias en parlent" : "média en parle"}</b><span>${all3 ? "La gauche, le centre et la droite" : "L'histoire la plus couverte"} · ${esc(ago(s.lastSeen || s.firstSeen))}</span></div>
     ${sideStrip(s)}
     ${dek ? `<p class="dek" data-no-tr>${esc(dek)}</p>` : ""}
-    <p class="c2-meta">${newTag(s)}${logoStack(s, 5)}${sourcesLine(s, 2)}${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}</p>
+    <p class="c2-meta">${newTag(s)}${srcPick(s, 2, 5)}${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}</p>
     ${cmpRow(s)}
   </article>`;
 }
@@ -2537,6 +2592,7 @@ function openStoryMenu(s) {
         <button type="button" role="menuitem" data-sm="share">${ico("share")}<span>Partager</span></button>
         <button type="button" role="menuitem" data-sm="select"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg><span>Sélectionner plusieurs</span></button>
         ${canSpeak ? `<button type="button" role="menuitem" data-sm="listen"><svg viewBox="0 0 24 24" aria-hidden="true">${MI.listen}</svg><span>Écouter</span></button>` : ""}
+        <button type="button" role="menuitem" data-sm="pick"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Lire chez un autre média</span></button>
         <button type="button" role="menuitem" data-sm="open"><svg viewBox="0 0 24 24" aria-hidden="true">${MI.sides}</svg><span>Comparer les côtés</span></button>
         <button type="button" role="menuitem" data-sm="read"><svg viewBox="0 0 24 24" aria-hidden="true">${MI.read}</svg><span>${st?.seen ? "Marquer comme non lu" : "Marquer comme lu"}</span></button>
         ${cat ? `<button type="button" role="menuitem" data-sm="lesscat"><svg viewBox="0 0 24 24" aria-hidden="true">${MI.less}</svg><span>Moins de « ${esc(CAT_LABEL[cat] || cat)} »</span></button>` : ""}
@@ -2556,6 +2612,7 @@ function openStoryMenu(s) {
     else if (k === "select") enterSelect(s);
     else if (k === "listen") speak(storySpeech(s), null);
     else if (k === "open") go(href({ h: s.id }));
+    else if (k === "pick") openPicker(s);
     else if (k === "read") { const was = !!seenState(s)?.seen; setSeen(s, !was); }
     else if (k === "lesscat") {
       less.addCat(cat); dropOtherFeeds(); collapseCard(s);
@@ -3520,6 +3577,7 @@ function storyReadBar(v, s) {
   if (!col || (!a && !nx)) return;
   col.insertAdjacentHTML("beforeend", `<div class="s-readbar">
     ${a ? `<a class="rb-read" href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener noreferrer" data-read="${readAttr(a)}"><b>Lire l'article</b><small>chez <span data-no-tr>${esc(a.sourceName)}</span> ↗</small></a>` : ""}
+    ${(s.sources || 0) > 1 ? `<button class="rb-pick" type="button" data-pick="${esc(s.id)}" aria-label="Choisir le média" title="Choisir le média"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>` : ""}
     ${nx ? `<button class="rb-next" type="button" data-next title="Histoire suivante"><span>Suivante</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>` : ""}
   </div>`);
   if (nx && matchMedia("(pointer: coarse)").matches && !store.get("hintNext")) {
