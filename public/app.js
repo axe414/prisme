@@ -1451,7 +1451,7 @@ const hasPrefs = () => topics.list().length || follows.list().length || prefs.ca
 
 /* ---------- Réglages ---------- */
 function openSettings() {
-  const theme = store.get("theme", "auto");
+  const theme = store.get("theme", "dark");
   const regionOpts = REGIONS.map(([v, l]) => `<option value="${v}" ${v === state.region ? "selected" : ""}>${esc(l)}</option>`).join("");
   openModal(`<div class="modal-pad settings">
     <div class="kicker">Prisme</div>
