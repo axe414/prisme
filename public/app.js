@@ -1942,7 +1942,7 @@ async function viewCompare(v, route) {
 
 /* ---------- Partager une histoire en image (pour Messenger, Facebook…) ---------- */
 async function storyImage(s) {
-  try { await Promise.all([document.fonts.load("700 60px Newsreader"), document.fonts.load("600 30px 'IBM Plex Sans'"), document.fonts.load("500 26px 'IBM Plex Mono'")]); } catch { /* polices par défaut */ }
+  try { await Promise.all([document.fonts.load("700 60px Newsreader"), document.fonts.load("600 30px Inter"), document.fonts.load("500 26px 'IBM Plex Mono'")]); } catch { /* polices par défaut */ }
   const W = 1080, H = 1500, P = 80;
   const c = document.createElement("canvas");
   c.width = W; c.height = H;
@@ -1985,7 +1985,7 @@ async function storyImage(s) {
   }
   // Les médias.
   const names = [...new Set(s.articles.map((a) => a.sourceName))];
-  g.fillStyle = "#3A3833"; g.font = "400 32px 'IBM Plex Sans', sans-serif";
+  g.fillStyle = "#3A3833"; g.font = "400 32px -apple-system, 'Inter', 'Segoe UI', sans-serif";
   const cov = `Couvert par ${names.slice(0, 4).join(", ")}${names.length > 4 ? ` et ${s.sources - 4} autres` : ""}`;
   line = ""; let n = 0;
   for (const w of cov.split(" ")) { const t = line ? `${line} ${w}` : w; if (g.measureText(t).width > W - 2 * P) { g.fillText(line, P, y); y += 44; line = w; n++; if (n > 2) break; } else line = t; }
@@ -1993,7 +1993,7 @@ async function storyImage(s) {
   // Pied, juste sous le contenu ; l'image est ensuite coupée à la bonne hauteur.
   const F = Math.max(y + 80, 760);
   g.fillStyle = "#121212"; g.fillRect(0, F, W, 120);
-  g.fillStyle = "#F2EFE8"; g.font = "600 32px 'IBM Plex Sans', sans-serif"; g.fillText("Voir tous les côtés sur Prisme", P, F + 68);
+  g.fillStyle = "#F2EFE8"; g.font = "600 32px -apple-system, 'Inter', 'Segoe UI', sans-serif"; g.fillText("Voir tous les côtés sur Prisme", P, F + 68);
   g.fillStyle = "#C9C5BC"; g.font = "500 26px 'IBM Plex Mono', monospace"; g.textAlign = "right"; g.fillText("axe414.github.io/prisme", W - P, F + 68); g.textAlign = "left";
   const out = document.createElement("canvas");
   out.width = W; out.height = Math.min(H, F + 120);
@@ -2004,7 +2004,7 @@ async function shareStoryImage(s) {
   toast("Préparation de l'image…");
   const blob = await storyImage(s);
   const file = new File([blob], `prisme-${s.id}.png`, { type: "image/png" });
-  const url = absUrl(href({ h: s.id }));
+  const url = storyShare(s).url; // la page de partage : l'aperçu montre la photo et la couverture
   if (navigator.canShare?.({ files: [file] })) {
     try { await navigator.share({ files: [file], title: s.titleFr || s.title, text: `${s.titleFr || s.title} — ${url}` }); return; } catch (e) { if (e.name === "AbortError") return; }
   }
@@ -2797,19 +2797,31 @@ function drawNewPill(f) {
   const n = f.fresh || 0;
   if (!n || visit.pillDone || f.params.q) { el.hidden = true; return; }
   el.hidden = false;
-  el.innerHTML = `<span class="np-dot"></span>${n > 1 ? `${n} nouvelles depuis ta dernière visite` : "1 nouvelle depuis ta dernière visite"}<span class="np-go" aria-hidden="true">↓</span>`;
-  el.onclick = () => {
-    const top = $("#topbar")?.getBoundingClientRect().bottom || 0;
-    const next = $$("#feed .new-tag").map((t) => t.closest(".lead, .story")).find((c) => c && c.getBoundingClientRect().top > top + 60);
-    if (!next) {
-      // La suivante n'est pas encore chargée : on charge la page d'après, puis on y va.
-      const key = feedKey(state.route), f2 = state.feeds.get(key);
-      if (f2?.hasMore && (el._tries = (el._tries || 0) + 1) <= 3) { loadMore(key).then(() => el.click()); return; }
-      visit.pillDone = true; el.hidden = true; return;
-    }
-    el._tries = 0;
-    scrollTo({ top: next.getBoundingClientRect().top + scrollY - top - 12, behavior: reduceMotion() ? "auto" : "smooth" });
-  };
+  el.innerHTML = `<span class="np-dot"></span>${n > 1 ? `${n} nouvelles depuis ta visite` : "1 nouvelle depuis ta visite"}<span class="np-go" aria-hidden="true">›</span>`;
+  // Toucher la pastille : seulement ce qui est nouveau, dans une feuille, à lire en un toucher.
+  el.onclick = () => openNewSheet(feedKey(state.route));
+}
+async function openNewSheet(key) {
+  const f = state.feeds.get(key);
+  if (!f) return;
+  openModal(`<div class="modal-pad"><div class="loader">Les nouvelles depuis ta visite…</div></div>`, true);
+  // Les nouvelles comptées sont dans les 3 premières pages : on les charge si besoin.
+  for (let i = 0; i < 3 && f.hasMore && f.stories.length < 45; i++) await loadMore(key);
+  const list = f.stories.slice(0, 45).filter(isNew);
+  const body = $("#modalBody");
+  if (!body) return;
+  visit.pillDone = true;
+  $("#newPill")?.setAttribute("hidden", "");
+  body.innerHTML = `<div class="modal-pad ns-sheet">
+    <div class="kicker">Depuis ta dernière visite</div>
+    <h2>${list.length > 1 ? `${list.length} nouvelles` : list.length ? "1 nouvelle" : "Rien de neuf"}</h2>
+    ${list.length ? `<ul class="ns-list">${list.map((s) => {
+      const c = catOf(s, "une");
+      return `<li>${c ? `<span class="ck cc-${c}">${esc(CAT_LABEL[c])}</span>` : ""}
+        <a class="ns-t" ${openAttrs(s)} data-close-modal data-no-tr>${titleOf(s)}</a>
+        <span class="ns-m">${sourcesLine(s, 1)} · ${esc(agoShort(s.lastSeen || s.firstSeen))} · <a class="link" href="${href({ h: s.id })}" data-nav data-close-modal>Comparer ${s.sources > 1 ? `les ${s.sources} médias` : ""} ›</a></span></li>`;
+    }).join("")}</ul>` : `<p class="note">Tout ce qui est dans ton fil, tu l'as déjà vu.</p>`}
+  </div>`;
 }
 // En continu (du plus récent au plus ancien) : une seule ligne, avant la première histoire qui n'a pas bougé
 // depuis ta dernière visite. Tout ce qui est au-dessus est arrivé (ou a été mis à jour) depuis.
@@ -3620,6 +3632,91 @@ addEventListener("visibilitychange", () => {
   for (const c of storyCards()) { const s = state.stories.get(cardId(c)); if (s) c.classList.toggle("is-seen", !!seenState(s)?.seen); }
 });
 
+// Le rappel du matin, sans serveur : un événement de calendrier qui revient chaque jour, avec une alerte.
+// Le calendrier du téléphone fait sonner le rappel ; le toucher ouvre « Le matin » de Prisme.
+function reminderCard() {
+  const t = store.get("remTime", "07:00");
+  return `<aside class="rem-card"><div class="rem-h"><span aria-hidden="true">⏰</span><b>Un rappel chaque matin</b></div>
+    <p class="note">Ton téléphone te rappelle de lire ton matin Prisme, à l'heure choisie. Ça passe par ton calendrier : rien n'est envoyé à Prisme.</p>
+    <div class="rem-row"><label>À <input type="time" id="remTime" value="${esc(t)}"></label>
+      <select id="remDays" aria-label="Quels jours"><option value="all">tous les jours</option><option value="week"${store.get("remDays") === "week" ? " selected" : ""}>en semaine</option></select>
+      <button class="btn" type="button" id="remAdd">Ajouter à mon calendrier</button></div></aside>`;
+}
+function reminderIcs(time, days) {
+  const [hh, mm] = String(time || "07:00").split(":").map(Number);
+  const d = new Date();
+  if (d.getHours() * 60 + d.getMinutes() >= hh * 60 + mm) d.setDate(d.getDate() + 1);
+  const p = (n) => String(n).padStart(2, "0");
+  const day = `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}`;
+  const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z");
+  const url = absUrl(href({ v: "matin" }));
+  return ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Prisme//Rappel du matin//FR", "CALSCALE:GREGORIAN", "BEGIN:VEVENT",
+    `UID:prisme-matin-${Date.now()}@axe414.github.io`, `DTSTAMP:${stamp}`, `DTSTART:${day}T${p(hh)}${p(mm)}00`, "DURATION:PT10M",
+    `RRULE:FREQ=${days === "week" ? "WEEKLY;BYDAY=MO,TU,WE,TH,FR" : "DAILY"}`,
+    "SUMMARY:☀️ Ton matin Prisme", `DESCRIPTION:Les nouvelles du jour\\, de la gauche à la droite : ${url}`, `URL:${url}`,
+    "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:Ton matin Prisme est prêt", "TRIGGER:PT0M", "END:VALARM",
+    "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+}
+document.addEventListener("click", async (e) => {
+  if (!e.target.closest("#remAdd")) return;
+  const time = $("#remTime")?.value || "07:00", days = $("#remDays")?.value || "all";
+  store.set("remTime", time); store.set("remDays", days);
+  const file = new File([reminderIcs(time, days)], "prisme-matin.ics", { type: "text/calendar" });
+  // iPhone : Safari ouvre ce type de fichier directement avec « Ajouter au calendrier ».
+  if (isIOS()) {
+    const u = URL.createObjectURL(file);
+    if (!window.open(u, "_blank")) location.href = u;
+    setTimeout(() => URL.revokeObjectURL(u), 60e3);
+    toast("Touche « Ajouter » : le rappel sonnera chaque matin.");
+    return;
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(file); a.download = file.name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  toast("Ouvre le fichier « prisme-matin.ics » et touche « Ajouter » : le rappel sonnera chaque matin.");
+});
+
+// « Aa » dans une histoire : la taille du texte en un toucher, sans passer par les réglages.
+const textSizeBtn = `<button class="act act-l" type="button" data-textsize title="Taille du texte"><span class="aa" aria-hidden="true">Aa</span><span>Texte</span></button>`;
+function openTextSize() {
+  const cur = prefs.scale;
+  openModal(`<div class="modal-pad ts-sheet"><div class="kicker">Lecture</div><h2>Taille du texte</h2>
+    <div class="ob-grid ob-sizes">${SCALES.map(([v, l]) => `<button type="button" data-ts="${v}" aria-pressed="${Math.abs(cur - v) < 0.01}"><span style="font-size:${Math.round(20 * v)}px">Aa</span>${l}</button>`).join("")}</div>
+    <p class="ob-preview" id="tsPrev" style="font-size:${Math.round(17 * cur)}px">Les histoires du jour, vues de tous les côtés.</p></div>`, true);
+  $("#modalBody .ts-sheet").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-ts]");
+    if (!b) return;
+    store.set("scale", b.dataset.ts);
+    applyScale();
+    $$("[data-ts]").forEach((x) => x.setAttribute("aria-pressed", x === b));
+    $("#tsPrev").style.fontSize = `${Math.round(17 * Number(b.dataset.ts))}px`;
+    buzz(8);
+  });
+}
+document.addEventListener("click", (e) => { if (e.target.closest("[data-textsize]")) { e.preventDefault(); openTextSize(); } });
+
+// Partager une histoire : un seul bouton, deux choix clairs (le lien avec son aperçu, ou une image avec la barre).
+const storyShareBtn = (s) => `<button class="act act-l" type="button" data-share-story="${esc(s.id)}" title="Partager">${ico("share")}<span>Partager</span></button>`;
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-share-story]");
+  if (!b) return;
+  e.preventDefault();
+  const s = state.stories.get(b.dataset.shareStory);
+  if (!s) return;
+  openModal(`<div class="modal-pad sh-sheet"><div class="kicker">Partager</div><h2 class="pk-h2" data-no-tr>${titleOf(s)}</h2>
+    <ul class="sheet-list">
+      <li><button type="button" data-shs="link">${ico("share")}<span>Le lien<small>Dans Messages ou Messenger, il s'affiche avec la photo et « ${plural(s.sources, "média")} en parlent ».</small></span></button></li>
+      <li><button type="button" data-shs="img"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><circle cx="9" cy="10" r="1.8"/><path d="m20.5 16-5-5-8 8.5"/></svg><span>Une image<small>Le titre et la barre gauche, centre, droite, prête à envoyer.</small></span></button></li>
+    </ul></div>`, true);
+  $("#modalBody .sh-sheet").addEventListener("click", (ev) => {
+    const o = ev.target.closest("[data-shs]");
+    if (!o) return;
+    closeLayer("#modal");
+    if (o.dataset.shs === "link") shareIt(storyShare(s)); else shareStoryImage(s);
+  });
+});
+
 // Recherche : les articles les plus récents tout en haut, à lire en un toucher.
 async function searchTopArticles(q) {
   const el = $("#topArts");
@@ -3849,22 +3946,20 @@ function drawRail(f) {
   const sm = f.summary;
   const blinds = f.stories.filter((s) => s.blindspot).slice(0, 4);
   const maxOwner = sm?.owners?.[0]?.n || 1;
+  // Une colonne aérée : la météo de ta ville, tes sujets (s'il y en a), les angles morts. Les chiffres du fil sont repliés.
   el.innerHTML = `
-    ${meCard()}
-    <section>
+    ${prefs.city ? `<section class="rail-wx" id="railWx" hidden></section>` : ""}
+    ${topics.list().length ? `<section>
       <h2 class="block-h">Mes sujets <small>sur cet appareil</small></h2>
-      ${topics.list().length ? `<div class="chips">${topics.list().map(topicChip).join("")}</div>`
-        : `<p class="note" style="margin-top:0">Suis un sujet (une personne, une ville, un enjeu) pour le retrouver ici en un clic.</p>`}
-      <form class="add-topic" id="addTopic"><input name="t" placeholder="ex. Hydro-Québec" aria-label="Ajouter un sujet" maxlength="60"><button class="btn" type="submit">Suivre</button></form>
-      ${topics.list().length && "Notification" in window && Notification.permission === "default" ? `<button class="link small" type="button" id="notifBtn" style="margin-top:10px">Recevoir une alerte quand un de mes sujets bouge</button>` : ""}
-      ${topics.list().length && "Notification" in window && Notification.permission === "granted" ? `<p class="note">Alertes activées pour tes sujets.</p>` : ""}
-    </section>
+      <div class="chips">${topics.list().map(topicChip).join("")}</div>
+      ${"Notification" in window && Notification.permission === "default" ? `<button class="link small" type="button" id="notifBtn" style="margin-top:10px">Recevoir une alerte quand un de mes sujets bouge</button>` : ""}
+    </section>` : ""}
     ${blinds.length && f.params.lens !== "angles" ? `<section>
       <h2 class="block-h">Angles morts <small>dans ce fil</small></h2>
       <ul class="mini-stories">${blinds.map((s) => `<li><span class="flag ${s.blindspot === "right" ? "r" : "l"}">Peu couvert ${s.blindspot === "right" ? "à droite" : "à gauche"}</span>
         <a href="${href({ h: s.id })}" data-nav>${esc(s.title)}</a>${bar(s.counts)}</li>`).join("")}</ul>
     </section>` : ""}
-    ${sm ? `<section>
+    ${sm ? `<details class="rail-more"><summary>Ce fil en chiffres <small>propriétaires, médias</small></summary><section>
       <h2 class="block-h">Qui possède ce fil <small>${plural(sm.outlets, "média")}</small></h2>
       <ul class="rank">${sm.owners.map((o) => `<li><span class="nm">${esc(o.owner.replace(/\s*\(.*\)$/, ""))}</span><span class="n">${plural(o.n, "histoire")}</span><span class="track"><span style="width:${(o.n / maxOwner) * 100}%"></span></span></li>`).join("")}</ul>
       <p class="note">Nombre d'histoires de ce fil où chaque propriétaire a au moins un média.</p>
@@ -3874,16 +3969,23 @@ function drawRail(f) {
       ${bigBar(sm.counts, { rated: true })}
       <div style="margin-top:8px">${splitHtml(sm.counts)}</div>
       <p class="note">${sm.counts.unk ? `${plural(sm.counts.unk, "autre média", "autres médias")} non évalués. ` : ""}${plural(sm.sourcesOnline, "média lu", "médias lus")} directement par Prisme dans cette édition. <button class="link" type="button" data-about>Comment Prisme choisit</button></p>
-    </section>` : ""}`;
+    </section></details>` : ""}`;
   const nb = $("#notifBtn", el);
   if (nb) nb.onclick = async () => { await Notification.requestPermission(); drawRail(f); };
-  $("#addTopic", el).onsubmit = (e) => {
-    e.preventDefault();
-    const t = e.target.t.value.trim();
-    if (t.length < 2) return;
-    topics.add(t);
-    go(href({ q: t }));
-  };
+  fillRailWx($("#railWx", el));
+}
+// La météo de ta ville dans la colonne de droite (ordinateur) : un toucher ouvre la feuille météo.
+async function fillRailWx(el) {
+  if (!el || !navigator.onLine) return;
+  const city = (await villesData().catch(() => null))?.bySlug.get(wxSlug());
+  const w = city && await weather(city).catch(() => null);
+  if (!w?.hours || !el.isConnected) return;
+  const [, lbl] = WMO(w.code);
+  el.innerHTML = `<button class="rw-btn" type="button" data-wx-city="${esc(city.s)}">
+    <span class="rw-ico" aria-hidden="true">${wxIco(w.code, w.day)}</span>
+    <span class="rw-main"><b>${w.t}°</b><span>${pin} <span data-no-tr>${esc(city.n)}</span></span><small>${esc(lbl)} · max ${w.max}° · min ${w.min}°</small></span>
+    <span class="rw-go">Les prochains jours ›</span></button>`;
+  el.hidden = false;
 }
 
 /* ---------- Une histoire ---------- */
@@ -3927,7 +4029,7 @@ async function viewStory(v, route) {
           <h1 data-no-tr>${titleOf(s)}</h1>
           ${s.titleFr ? `<p class="s-orig">Titre original : <span data-no-tr>${esc(s.title)}</span></p>` : ""}
           ${readBox(s)}
-          <div class="s-acts">${listenBtn(s.id)}${favBtn(storyFav(s), true)}${shareBtn(storyShare(s), true)}${imgShareBtn(s)}</div>
+          <div class="s-acts">${listenBtn(s.id)}${favBtn(storyFav(s), true)}${storyShareBtn(s)}${textSizeBtn}</div>
         </header>
         <!-- L'essentiel d'abord : le résumé, deux titres face à face, qui en parle. Le reste se déplie. -->
         ${keyPoints(s)}
@@ -5061,6 +5163,7 @@ async function viewMatin(v) {
     state.matinSpeech = [`${hello}. Voici ton matin Prisme : cinq histoires.`, ...picked.flatMap((s, i) => { const sd = sides(s.counts); return [`${i + 1}. ${s.titleFr || s.title}.`, s.ai?.summary || s.summary || "", `${plural(s.sources, "média")} en parlent : ${sd.left} à gauche, ${sd.center} au centre, ${sd.right} à droite.`]; })];
     $("#matin").innerHTML = `
       <div class="matin-listen">${listenBtn("matin")}<span class="note">Écoute les cinq histoires, environ trois minutes.</span></div>
+      ${reminderCard()}
       <ol class="matin-list">${picked.map((s, i) => `<li>
         <span class="num">${i + 1}</span>
         <div>
@@ -5503,7 +5606,7 @@ async function drawWeb(el, groups) {
       const cy = isGroup ? -r * 0.55 + (lines.length - 1) * lh * 0.15 : 0;
       const k2 = isGroup ? null : biasKey(d.data.m);
       t.attr("display", null).attr("font-size", size).attr("font-weight", isGroup ? 700 : 600)
-        .attr("font-family", isGroup ? "Newsreader, Georgia, serif" : "IBM Plex Sans, system-ui, sans-serif")
+        .attr("font-family", isGroup ? "Newsreader, Georgia, serif" : "-apple-system, Inter, system-ui, sans-serif")
         .attr("fill", isGroup ? ink : darkText(k2) ? "#1E1D1A" : "#FFFFFF")
         .attr("stroke", isGroup ? paper : null).attr("stroke-width", isGroup ? 4 : 0);
       lines.forEach((line, i) => t.append("tspan")
