@@ -1185,3 +1185,127 @@ html, body { overflow-x: clip; }
 .cb-closed { display: none; }
 .cb-change { justify-self: start; font: 600 13px var(--sans); }
 .cats .cat-ville { color: var(--b-l2); }
+
+/* ================= Comme une vraie app (iPhone, iPad) ================= */
+
+/* Mode noir OLED : vrai noir, économise la batterie des écrans OLED */
+:root[data-theme="oled"] { --paper: #000; --paper-2: #0d0d0c; --card: #0a0a09; --ink: #ECEAE4; --ink-2: #BDB9B0; --ink-3: #8C887F; --rule: #ECEAE4; --hair: #242321; --hair-2: #1a1918; --focus: #6FB3C4; --b-l2: #3F95AB; --b-l1: #7DB5C4; --b-c: #9C978A; --b-r1: #E09A7E; --b-r2: #D0614A; --b-state: #9479C6; --b-unk: #34332f; color-scheme: dark; }
+:root[data-theme="oled"] .band { background: #000; border-bottom: 1px solid #1d1c1a; }
+:root[data-theme="oled"] .ico-sun { display: block; }
+:root[data-theme="oled"] .ico-moon { display: none; }
+:root[data-theme="oled"] .ai-tag { color: #F6E7B8; background: #3a2e0c; }
+
+/* Bouton Retour dans le bandeau (app installée) */
+.back-nav { color: #F2EFE8 !important; margin-right: -10px; }
+.back-nav svg { width: 22px; height: 22px; stroke-width: 2.2; }
+
+/* L'histoire en panneau (téléphone) ou en deux colonnes (iPad) */
+#panel .panel-scrim { position: fixed; inset: 0; z-index: 55; background: rgba(0, 0, 0, .38); opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+#panel .panel-card { position: fixed; z-index: 56; background: var(--paper); display: flex; flex-direction: column; transition: transform .32s cubic-bezier(.2, .8, .2, 1); }
+.panel-bar { display: flex; align-items: center; justify-content: flex-end; padding: 6px 10px 2px; position: relative; flex: none; }
+.panel-bar .grab { position: absolute; left: 50%; top: 8px; width: 40px; height: 5px; margin-left: -20px; border-radius: 3px; background: var(--hair); }
+.panel-body { overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 0 var(--gut) calc(30px + env(safe-area-inset-bottom)); flex: 1; }
+.panel-body .layout { grid-template-columns: 1fr; padding-top: 0 !important; }
+.panel-body .rail { border-left: 0; padding-left: 0; border-top: 1px solid var(--rule); margin-top: 20px; padding-top: 10px; }
+.panel-body .rail-in { position: static; }
+/* Téléphone : monte du bas */
+body.panel-sheet #panel .panel-card { left: 0; right: 0; bottom: 0; top: calc(env(safe-area-inset-top) + 18px); border-radius: 14px 14px 0 0; transform: translateY(105%); box-shadow: 0 -10px 40px -10px rgba(0, 0, 0, .4); }
+body.panel-sheet.panel-open #panel .panel-card { transform: translateY(0); }
+body.panel-sheet.panel-open #panel .panel-scrim { opacity: 1; pointer-events: auto; }
+body.panel-sheet.panel-open { overflow: hidden; }
+/* iPad : à droite, la liste reste à gauche */
+body.panel-split #panel .panel-card { top: var(--top-h, 110px); right: 0; bottom: 0; width: 56%; border-left: 1px solid var(--rule); transform: translateX(102%); box-shadow: -14px 0 30px -24px rgba(0, 0, 0, .5); }
+body.panel-split.panel-open #panel .panel-card { transform: translateX(0); }
+body.panel-split .panel-bar .grab { display: none; }
+body.panel-split.panel-open #view { max-width: none; margin: 0; width: 44%; padding-right: 18px; }
+body.panel-split.panel-open #view .layout { grid-template-columns: 1fr; }
+body.panel-split.panel-open #view .rail, body.panel-split.panel-open .foot { display: none; }
+body.panel-split.panel-open #view .lead { grid-template-columns: 1fr; }
+.kbd-sel { outline: 2px solid var(--ink); outline-offset: 4px; border-radius: 2px; }
+body.panel-split .kbd-sel { outline: 0; box-shadow: inset 4px 0 0 var(--b-l2); background: var(--paper-2); }
+
+/* Recherche plein écran (téléphone) */
+.search-cancel { display: none; }
+@media (max-width: 760px) {
+  body.search-full .search { display: flex !important; position: fixed; left: 0; right: 0; top: 0; z-index: 60; width: auto !important; padding: calc(env(safe-area-inset-top) + 10px) 12px 10px; gap: 10px; background: var(--paper); border-bottom: 1px solid var(--hair); }
+  body.search-full .search > svg { left: 24px; top: calc(env(safe-area-inset-top) + 21px); }
+  body.search-full .search input { flex: 1; height: 40px; font-size: 16px; }
+  body.search-full .search-cancel { display: block; font: 600 15px var(--sans); color: var(--b-l2); flex: none; }
+  body.search-full .mic { right: 92px; }
+  body.search-full .suggest { position: fixed; top: calc(env(safe-area-inset-top) + 61px); left: 0; right: 0; bottom: 0; max-height: none; width: auto; border: 0; box-shadow: none; padding-bottom: 80px; }
+  body.search-full .tabbar { display: none; }
+}
+
+/* Guide d'installation (iPhone/iPad, Safari) */
+.install-card { display: flex; gap: 14px; align-items: flex-start; margin: 16px 0 6px; padding: 14px 14px 12px; background: var(--card); border: 1px solid var(--hair); border-radius: 12px; box-shadow: 0 10px 30px -22px rgba(0, 0, 0, .6); }
+.ic-icon img { width: 54px; height: 54px; border-radius: 12px; }
+.ic-body { flex: 1; font: 14px/1.45 var(--sans); }
+.ic-body > b { font: 600 16px var(--serif); display: block; margin-bottom: 4px; }
+.ic-body ol { margin: 4px 0 6px; padding-left: 18px; }
+.ic-body small { color: var(--ink-3); }
+.ic-share { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; background: var(--paper-2); vertical-align: middle; }
+.ic-share svg { width: 15px; height: 15px; fill: none; stroke: #2F7BF6; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Les 3 côtés en carrousel (téléphone seulement) */
+.sides-swipe { display: none; }
+@media (max-width: 760px) {
+  .story .sides-swipe { grid-column: 1 / -1; display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin: 4px calc(-1 * var(--gut)) 12px; padding: 0 var(--gut); }
+  .sides-swipe::-webkit-scrollbar { display: none; }
+  .ss-card { flex: 0 0 78%; scroll-snap-align: start; padding: 10px 12px; background: var(--card); border: 1px solid var(--hair); border-radius: 10px; display: grid; gap: 4px; align-content: start; }
+  .ss-side { display: inline-flex; align-items: center; gap: 6px; font: 600 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+  .ss-side i { width: 8px; height: 8px; border-radius: 2px; }
+  .ss-t { font: 500 15.5px/1.3 var(--serif); text-decoration: none; color: var(--ink); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .ss-by { font: 12px var(--sans); color: var(--ink-3); }
+  .ss-none { font: 13.5px/1.4 var(--serif); color: var(--ink-3); font-style: italic; }
+}
+
+/* Barre d'onglets translucide, comme iOS */
+@media (max-width: 1100px) and (pointer: coarse), (max-width: 760px) {
+  .tabbar { background: color-mix(in srgb, var(--paper) 78%, transparent) !important; -webkit-backdrop-filter: saturate(180%) blur(18px); backdrop-filter: saturate(180%) blur(18px); }
+  .tabbar [aria-current="page"] svg { fill: currentColor; fill-opacity: .14; stroke-width: 2; }
+  .tabbar [aria-current="page"]::before { left: 34%; right: 34%; border-radius: 0 0 3px 3px; }
+}
+
+/* iPad en paysage : barre latérale à gauche au lieu des onglets du bas */
+@media (pointer: coarse) and (min-width: 1024px) and (orientation: landscape) {
+  .mast-links, #aboutBtn { display: none; }
+  .tabbar { display: flex !important; flex-direction: column; gap: 4px; position: fixed; left: 0; top: var(--top-h, 110px); bottom: 0; width: 86px; padding: 12px 0 calc(12px + env(safe-area-inset-bottom)) !important; z-index: 40; border-top: 0 !important; border-right: 1px solid var(--rule); background: var(--paper) !important; }
+  .tabbar a, .tabbar button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 66px; font: 600 11px var(--sans); color: var(--ink-3); text-decoration: none; position: relative; }
+  .tabbar svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .tabbar [aria-current="page"] { color: var(--ink); }
+  .tabbar [aria-current="page"]::before { content: ""; position: absolute; left: 0; top: 18%; bottom: 18%; width: 3px; background: var(--ink); }
+  body { padding-bottom: 0 !important; padding-left: 86px; }
+  body.panel-split #panel .panel-card { width: calc(56% - 40px); }
+}
+
+/* Animations douces (désactivées si « Réduire les animations ») */
+@media (prefers-reduced-motion: no-preference) {
+  .story, .lead, .art2, .oa, .fv, .o-stories li, .ville-link { animation: rise .42s cubic-bezier(.2, .8, .2, 1) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .bar > *, .bigbar .seg { animation: grow .7s cubic-bezier(.2, .8, .2, 1) both; transform-origin: left center; }
+  @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  ::view-transition-old(root) { animation: vt-out .18s ease both; }
+  ::view-transition-new(root) { animation: vt-in .24s ease both; }
+  @keyframes vt-out { to { opacity: 0; transform: translateY(-4px); } }
+  @keyframes vt-in { from { opacity: 0; transform: translateY(6px); } }
+  .chip, .btn, .act, .lenses button, .tabbar a, .tabbar button { transition: transform .12s ease, background-color .15s ease, border-color .15s ease; }
+  .chip:active, .btn:active, .act:active, .lenses button:active, .tabbar a:active, .tabbar button:active { transform: scale(.96); }
+}
+/* Pas de surlignage bleu au toucher (iOS) */
+a, button { -webkit-tap-highlight-color: transparent; }
+
+/* Téléphone : les lentilles sur deux lignes avec des noms courts (rien de caché à glisser) */
+.ln-s { display: none; }
+@media (max-width: 760px) {
+  .lenses { flex-wrap: wrap !important; overflow: visible !important; margin: 0 !important; padding: 0 !important; gap: 6px; }
+  .lenses button { flex: 0 0 auto; padding: 7px 11px; }
+  .ln-l { display: none; }
+  .ln-s { display: inline; }
+  /* Les rangées qui défilent encore : un fondu au bord montre qu'il y a plus à voir */
+  .topics, .cats, .wf-row, .o-chips, .s-read-alt { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
+}
+@media (max-width: 760px) {
+  .lenses { gap: 5px; }
+  .lenses button { padding: 6px 9px; font-size: 12.5px; gap: 5px; }
+  .lenses .sw { width: 7px; height: 7px; }
+}

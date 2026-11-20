@@ -246,6 +246,7 @@ document.addEventListener("click", (e) => {
     e.preventDefault(); e.stopPropagation();
     const item = JSON.parse(f.dataset.fav);
     const on = favs.toggle(item);
+    if (item.type === "s") { const st = state.stories.get(item.id); if (on && st) saveFavStory(st); }
     for (const b of $$(`[data-fav-key="${CSS.escape(item.k)}"]`)) {
       b.setAttribute("aria-pressed", on);
       b.title = on ? "Retirer des favoris" : "Enregistrer dans mes favoris";
@@ -367,7 +368,9 @@ async function findStory(id, region) {
     const s = ed?.stories.find((x) => x.id === id);
     if (s) return { s, ed };
   }
-  return {};
+  // Une histoire enregistrée dans les favoris reste lisible, même hors ligne ou sortie de l'édition.
+  const saved = savedStory(id);
+  return saved ? { s: saved, ed: { active: [], stories: [] } } : {};
 }
 
 async function feedLocal(p) {
@@ -621,8 +624,11 @@ function href(o = {}) {
 
 function go(url, { replace = false } = {}) {
   history.replaceState({ ...(history.state || {}), y: scrollY }, "");
-  history[replace ? "replaceState" : "pushState"]({ y: 0 }, "", url);
-  render({ scroll: 0 });
+  const d = (history.state?.d || 0) + (replace ? 0 : 1);
+  history[replace ? "replaceState" : "pushState"]({ y: 0, d }, "", url);
+  const run = () => render({ scroll: 0 });
+  // Changement de page en douceur (navigateurs récents), sauf quand l'histoire s'ouvre en panneau.
+  if (document.startViewTransition && !reduceMotion() && !panelWanted(url)) document.startViewTransition(run); else run();
 }
 
 document.addEventListener("click", (e) => {
@@ -635,6 +641,19 @@ addEventListener("popstate", () => render({ scroll: history.state?.y || 0 }));
 
 function render({ scroll = 0 } = {}) {
   const route = parseRoute();
+  // L'histoire s'ouvre en panneau (téléphone) ou à droite (iPad) : la page d'en dessous reste en place.
+  if (route.view === "story" && panelMode() && (state.panel || (state.route && PANEL_BASES.includes(state.route.view)))) {
+    if (!state.panel) state.panel = { base: state.lastSearch ?? "", baseRoute: state.route, title: document.title };
+    state.route = route;
+    openPanel(route);
+    updateBackBtn();
+    return;
+  }
+  if (state.panel) {
+    const { base, baseRoute, title } = state.panel;
+    closePanel();
+    if (location.search === base) { state.route = baseRoute; document.title = title; updateBackBtn(); return; }
+  }
   state.route = route;
   if (route.region !== state.region) { state.region = route.region; store.set("region", route.region); }
   state.observer?.disconnect();
@@ -655,6 +674,8 @@ function render({ scroll = 0 } = {}) {
   else if (route.view === "ville") viewVille(v, route);
   else if (route.view === "villes") viewVilles(v);
   else viewFeed(v, route);
+  state.lastSearch = location.search;
+  updateBackBtn();
   requestAnimationFrame(() => scrollTo(0, scroll));
 }
 
@@ -969,6 +990,7 @@ function storyRow(s, cat) {
       <h3 data-no-tr><a href="${link}" data-nav>${titleOf(s)}</a>${trTag(s)}</h3>
       ${dekOf(s)}
       ${coveredBy(s)}
+      ${sidesSwipe(s)}
       <div class="story-foot">${bar(s.counts)}${splitHtml(s.counts)}${flags(s)}${s.articles.some((a) => reads.has(a.url)) ? `<span class="flag read">Lu</span>` : ""}<span class="acts">${favBtn(storyFav(s))}${shareBtn(storyShare(s))}</span></div>
     </div>
     ${s.image ? `<a class="thumb" href="${link}" data-nav tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(s.image))}" alt="" loading="lazy" referrerpolicy="no-referrer"></a>` : ""}
@@ -1073,7 +1095,7 @@ function openSettings() {
     <section><h3>Langue de l'app</h3>
       <div class="seg seg-big" role="group"><button type="button" data-lang-set="fr" aria-pressed="${LANG === "fr"}">Français</button><button type="button" data-lang-set="en" aria-pressed="${LANG === "en"}">English</button></div></section>
     <section><h3>Thème</h3>
-      <div class="seg seg-big" role="group">${[["light", "Clair"], ["dark", "Sombre"], ["auto", "Automatique"]].map(([v, l]) => `<button type="button" data-theme-set="${v}" aria-pressed="${theme === v}">${l}</button>`).join("")}</div></section>
+      <div class="seg seg-big" role="group">${[["light", "Clair"], ["dark", "Sombre"], ["oled", "Noir (OLED)"], ["auto", "Automatique"]].map(([v, l]) => `<button type="button" data-theme-set="${v}" aria-pressed="${theme === v}">${l}</button>`).join("")}</div></section>
     <section><h3>Mon édition</h3><select id="setRegion" class="set-select">${regionOpts}</select></section>
     <section><h3>Ma ville <small>pour le fil « Ma ville »</small></h3>
       <input id="setCity" class="set-select" list="villesList" placeholder="Tape le nom de ta ville…" autocomplete="off"><datalist id="villesList"></datalist>
@@ -1282,7 +1304,8 @@ document.addEventListener("click", (e) => {
       pulling = false;
       if (ready) { dataCache.clear(); state.feeds.clear(); toast("Fil mis à jour"); render(); return; }
     }
-    // Glisser à gauche ou à droite : rubrique suivante ou précédente (fil seulement).
+    // Glisser à gauche ou à droite : rubrique suivante ou précédente (fil seulement). Depuis le bord gauche : c'est « Retour ».
+    if (sx < 24) return;
     if (blocked || state.route?.view !== "feed" || innerWidth > 1100) return;
     if (Math.abs(dx) < 70 || Math.abs(dy) > 45 || Date.now() - t0 > 600) return;
     const i = CATS.findIndex(([c]) => c === state.route.cat);
@@ -1631,6 +1654,175 @@ async function viewVilles(v) {
   };
 }
 
+/* ---------- Comme une vraie app (iPhone, iPad) ---------- */
+const coarse = matchMedia("(pointer: coarse)");
+const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+// Téléphone : l'histoire monte en panneau par-dessus la page. iPad : elle s'ouvre à droite, la liste reste à gauche.
+const panelMode = () => (innerWidth <= 760 ? "sheet" : coarse.matches && innerWidth >= 900 ? "split" : null);
+const PANEL_BASES = ["feed", "search", "ville", "outlet", "favoris", "matin"];
+const panelWanted = (url) => {
+  try { return !!panelMode() && !!new URL(url, location.href).searchParams.get("h") && (!!state.panel || PANEL_BASES.includes(state.route?.view)); } catch { return false; }
+};
+
+function openPanel(route) {
+  const mode = panelMode();
+  let p = $("#panel");
+  if (!p) {
+    p = document.createElement("div");
+    p.id = "panel";
+    p.innerHTML = `<div class="panel-scrim" data-panel-close></div>
+      <section class="panel-card" role="dialog" aria-label="Histoire">
+        <div class="panel-bar"><span class="grab" aria-hidden="true"></span><button class="icon-btn panel-x" type="button" data-panel-close aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="panel-body" id="panelBody"></div>
+      </section>`;
+    document.body.appendChild(p);
+    bindPanelGestures(p);
+  }
+  document.body.classList.toggle("panel-sheet", mode === "sheet");
+  document.body.classList.toggle("panel-split", mode === "split");
+  requestAnimationFrame(() => document.body.classList.add("panel-open"));
+  const body = $("#panelBody");
+  body.scrollTop = 0;
+  $(".panel-card").style.transform = "";
+  viewStory(body, route);
+  markSelected(route.id);
+}
+function closePanel() {
+  document.body.classList.remove("panel-open");
+  setTimeout(() => {
+    if (document.body.classList.contains("panel-open")) return;
+    document.body.classList.remove("panel-sheet", "panel-split");
+    const b = $("#panelBody");
+    if (b) b.innerHTML = "";
+  }, 320);
+  $$(".kbd-sel").forEach((x) => x.classList.remove("kbd-sel"));
+  state.panel = null;
+}
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-panel-close]")) { e.preventDefault(); history.back(); }
+});
+// Glisser le panneau vers le bas pour le fermer (téléphone).
+function bindPanelGestures(p) {
+  const card = $(".panel-card", p), body = $(".panel-body", p);
+  let y0 = null, dy = 0;
+  card.addEventListener("touchstart", (e) => {
+    if (!document.body.classList.contains("panel-sheet")) return;
+    const onBar = e.target.closest(".panel-bar");
+    if (!onBar && body.scrollTop > 0) return;
+    y0 = e.touches[0].clientY; dy = 0;
+  }, { passive: true });
+  card.addEventListener("touchmove", (e) => {
+    if (y0 == null) return;
+    dy = e.touches[0].clientY - y0;
+    if (dy > 0) card.style.transform = `translateY(${dy}px)`;
+  }, { passive: true });
+  card.addEventListener("touchend", () => {
+    if (y0 == null) return;
+    y0 = null;
+    if (dy > 110) history.back(); else card.style.transform = "";
+  }, { passive: true });
+}
+
+// Bouton Retour (app installée : Safari n'affiche plus le sien) et glisser du bord gauche pour revenir.
+function updateBackBtn() {
+  const b = $("#backNav");
+  if (!b) return;
+  const deep = (history.state?.d || 0) > 0;
+  b.hidden = !(deep && (isStandalone() || coarse.matches) && !state.panel);
+}
+$("#backNav")?.addEventListener("click", () => history.back());
+{
+  let sx = null, sy = 0;
+  addEventListener("touchstart", (e) => {
+    const x = e.touches[0].clientX;
+    sx = x < 24 && ((isStandalone() && (history.state?.d || 0) > 0) || state.panel) ? x : null;
+    sy = e.touches[0].clientY;
+  }, { passive: true });
+  addEventListener("touchend", (e) => {
+    if (sx == null) return;
+    const dx = e.changedTouches[0].clientX - sx, dy = Math.abs(e.changedTouches[0].clientY - sy);
+    sx = null;
+    if (dx > 80 && dy < 70) history.back();
+  }, { passive: true });
+}
+
+// Raccourcis clavier (iPad avec clavier, ordinateur) : j / k ou ↓ / ↑ pour passer d'une histoire à l'autre,
+// Entrée pour l'ouvrir, Échap pour fermer le panneau.
+let kbdIndex = -1;
+const storyCards = () => $$("#view .lead, #view .story");
+function markSelected(id) {
+  $$(".kbd-sel").forEach((x) => x.classList.remove("kbd-sel"));
+  const cards = storyCards();
+  const k = cards.findIndex((c) => c.querySelector(`a[href*="h=${CSS.escape(id)}"]`));
+  if (k >= 0) { kbdIndex = k; cards[k].classList.add("kbd-sel"); }
+}
+document.addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey || /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || "")) return;
+  if (e.key === "Escape" && state.panel) { history.back(); return; }
+  const arrows = state.panel && document.body.classList.contains("panel-split");
+  const next = e.key === "j" || (arrows && e.key === "ArrowDown"), prev = e.key === "k" || (arrows && e.key === "ArrowUp");
+  if (!next && !prev && !(e.key === "Enter" && kbdIndex >= 0)) return;
+  const cards = storyCards();
+  if (!cards.length) return;
+  e.preventDefault();
+  if (e.key === "Enter") { cards[kbdIndex]?.querySelector("h2 a, h3 a")?.click(); return; }
+  kbdIndex = Math.max(0, Math.min(cards.length - 1, kbdIndex + (next ? 1 : -1)));
+  $$(".kbd-sel").forEach((x) => x.classList.remove("kbd-sel"));
+  const c = cards[kbdIndex];
+  c.classList.add("kbd-sel");
+  c.scrollIntoView({ block: "center", behavior: reduceMotion() ? "auto" : "smooth" });
+  // En deux colonnes, l'histoire choisie s'ouvre tout de suite à droite.
+  if (arrows) { const a = c.querySelector("h2 a, h3 a"); if (a) go(a.getAttribute("href"), { replace: true }); }
+});
+
+// Recherche plein écran sur téléphone.
+{
+  const input = $("#search input");
+  input.addEventListener("focus", () => { if (innerWidth <= 760) document.body.classList.add("search-full"); });
+  input.addEventListener("blur", () => setTimeout(() => document.body.classList.remove("search-full"), 160));
+  $("#searchCancel")?.addEventListener("click", () => { input.value = ""; input.blur(); document.body.classList.remove("search-full"); });
+}
+
+// Guide d'installation sur iPhone/iPad (Safari, pas encore installée), après quelques visites.
+store.set("visits", String(Number(store.get("visits", "0")) + 1));
+function installCard() {
+  if (isStandalone() || !isIOS() || store.get("installDone") || Number(store.get("visits", "0")) < 2) return "";
+  return `<aside class="install-card" id="installCard">
+    <div class="ic-icon"><img src="icons/apple-touch-icon.png" alt=""></div>
+    <div class="ic-body"><b>Ajoute Prisme à ton écran d'accueil</b>
+      <ol><li>Touche <span class="ic-share" aria-label="Partager"><svg viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 12v6.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V12"/></svg></span> en bas de Safari</li>
+        <li>Choisis <b>« Sur l'écran d'accueil »</b></li><li>Touche <b>Ajouter</b></li></ol>
+      <small>Prisme s'ouvrira en plein écran, comme une vraie app.</small></div>
+    <button class="icon-btn" type="button" id="installX" aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </aside>`;
+}
+document.addEventListener("click", (e) => { if (e.target.closest("#installX")) { store.set("installDone", "1"); $("#installCard")?.remove(); } });
+
+// Les histoires enregistrées restent lisibles hors ligne (et après leur sortie de l'édition).
+const favStoryKey = (id) => `fs:${id}`;
+function saveFavStory(s) {
+  const slim = { ...s, articles: (s.articles || []).slice(0, 24).map((a) => ({ title: a.title, url: a.url, published: a.published, sourceName: a.sourceName, domain: a.domain, lang: a.lang, media: a.media })), world: undefined };
+  try {
+    store.set(favStoryKey(s.id), JSON.stringify(slim));
+    const ids = JSON.parse(store.get("fsIds", "[]")).filter((x) => x !== s.id);
+    ids.unshift(s.id);
+    for (const old of ids.slice(80)) localStorage.removeItem(`prisme.${favStoryKey(old)}`);
+    store.set("fsIds", JSON.stringify(ids.slice(0, 80)));
+  } catch { /* stockage plein : tant pis */ }
+}
+const savedStory = (id) => { try { return JSON.parse(store.get(favStoryKey(id), "null")); } catch { return null; } };
+
+// Les 3 côtés en carrousel (téléphone) : on glisse d'un titre à l'autre.
+function sidesSwipe(s) {
+  if ((s.sources || 0) < 2) return "";
+  const by = pickBySide(s);
+  return `<div class="sides-swipe" aria-label="Le titre de chaque côté">${SIDES.map((side) => {
+    const a = by[side.key];
+    return `<div class="ss-card"><span class="ss-side"><i style="background:${side.color}"></i>${side.label}</span>
+      ${a ? `${artLink(a, "ss-t")}<span class="ss-by">${esc(a.sourceName)}</span>` : `<span class="ss-none">Aucun média de ${side.label.toLowerCase()} n'en parle.</span>`}</div>`;
+  }).join("")}</div>`;
+}
+
 /* ---------- Le fil ---------- */
 // Montrée une seule fois : comment lire un bloc du fil.
 const HOWTO = `<aside class="howto" aria-label="Comment lire Prisme">
@@ -1642,6 +1834,8 @@ const HOWTO = `<aside class="howto" aria-label="Comment lire Prisme">
     <li><b>Touche le titre</b> pour comparer : chaque article, média par média, les mots de chaque côté et qui possède ces médias.</li>
   </ol>
 </aside>`;
+// Noms courts des lentilles (téléphone : tout tient sur deux lignes, rien à glisser).
+const LENS_SHORT = { essentiel: "Essentiel", angles: "Angles morts", gauche: "Gauche", droite: "Droite", horsradar: "Hors radar", recent: "En continu", pourtoi: "Pour toi" };
 const feedKey = (r) => (r.q ? `q|${r.q.toLowerCase()}|${state.region}` : `f|${r.cat}|${r.lens}|${state.region}`);
 
 function viewFeed(v, route) {
@@ -1649,7 +1843,7 @@ function viewFeed(v, route) {
   const lensHtml = `<div class="lensbar">
       <span class="label">Voir par</span>
       <div class="lenses" role="group" aria-label="Lentille">${Object.entries(LENSES).filter(([k, l]) => !l.qc || ["qc", "ca"].includes(state.region)).map(([k, l]) =>
-        `<button type="button" data-lens="${k}" aria-pressed="${route.lens === k}">${l.sw ? `<span class="sw" style="background:${l.sw}"></span>` : ""}${k === "local" ? `📍 ${esc(prefs.cityLabel || "Ma ville")}` : l.label}</button>`).join("")}</div>
+        `<button type="button" data-lens="${k}" aria-pressed="${route.lens === k}">${l.sw ? `<span class="sw" style="background:${l.sw}"></span>` : ""}${k === "local" ? `📍 ${esc(prefs.cityLabel || "Ma ville")}` : `<span class="ln-l">${l.label}</span><span class="ln-s">${LENS_SHORT[k] || l.label}</span>`}</button>`).join("")}</div>
       <p class="lens-desc">${esc(LENSES[route.lens].desc)}</p>
       <div class="legend-row"><span class="label">Orientation des médias</span>${legend()}</div>
     </div>`;
@@ -1657,7 +1851,7 @@ function viewFeed(v, route) {
     ${route.lens === "local" ? `<div class="city-bar" id="cityBar"></div>` : ""}
     <div class="topics" id="topics"></div>
     <div class="layout">
-      <div class="main-col">${store.get("howto") ? "" : HOWTO}<div id="feed"></div><div id="sentinel"></div><div id="feedStatus"></div></div>
+      <div class="main-col">${installCard()}${store.get("howto") ? "" : HOWTO}<div id="feed"></div><div id="sentinel"></div><div id="feedStatus"></div></div>
       <aside class="rail" aria-label="Autour du fil"><div class="rail-in" id="rail"></div></aside>
     </div>`;
   const ht = $("#howtoOk", v);
@@ -3634,7 +3828,7 @@ $("#aboutBtn").addEventListener("click", openAbout);
 $("#aboutBtn2").addEventListener("click", openAbout);
 $("#themeBtn").addEventListener("click", () => {
   const cur = document.documentElement.dataset.theme;
-  const dark = cur === "dark" || (cur !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+  const dark = cur === "dark" || cur === "oled" || (cur !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
   const next = dark ? "light" : "dark";
   document.documentElement.dataset.theme = next;
   $('meta[name="theme-color"]').content = next === "light" ? "#F4F2EC" : "#121211";

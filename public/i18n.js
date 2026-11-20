@@ -109,6 +109,9 @@ const EXACT = {
   "Prisme fouille chaque article publié par les médias de cette édition, même ceux qui ne font pas partie d'une histoire. Aucun tri : du plus récent au plus ancien.": "Prisme searches every article published by this edition's outlets, even those not part of a story. No sorting: newest first.",
   "Aucun article avec ces filtres. Essaie « 7 jours » ou « Tous les côtés ».": "No article with these filters. Try “7 days” or “All sides”.",
   "Liste": "List", "Cartes": "Cards",
+  "Essentiel": "Essentials", "Annuler": "Cancel", "Ajoute Prisme à ton écran d'accueil": "Add Prisme to your home screen", "en bas de Safari": "at the bottom of Safari",
+  "Choisis": "Choose", "Touche": "Tap", "Ajouter": "Add", "Prisme s'ouvrira en plein écran, comme une vraie app.": "Prisme will open full screen, like a real app.",
+  "Noir (OLED)": "Black (OLED)", "Le titre de chaque côté": "Each side's headline",
   // Réglages, accueil, écoute, comparer, recherche (index)
   "Réglages": "Settings", "Taille du texte": "Text size", "Petit": "Small", "Normal": "Normal", "Grand": "Large", "Très grand": "Extra large",
   "Voici à quoi ressemble le texte des histoires.": "This is how story text looks.", "Langue de l'app": "App language", "Thème": "Theme",
