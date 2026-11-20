@@ -1135,7 +1135,7 @@ function openShorts() {
   closeShorts();
   const o = document.createElement("div");
   o.id = "shorts";
-  o.innerHTML = `<div class="sh-bar"><span class="sh-pos" id="shPos">1 / ${f.stories.length}</span><button class="icon-btn sh-x" type="button" aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  o.innerHTML = `<div class="sh-bar"><span class="sh-pos"><b>En bref</b> · <span id="shPos">1 / ${f.stories.length}</span> · glisse vers le haut</span><button class="icon-btn sh-x" type="button" aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div class="sh-sc" id="shSc">${f.stories.map(shortSlide).join("")}</div>`;
   document.body.appendChild(o);
   document.body.classList.add("shorts-open");
@@ -2680,7 +2680,7 @@ function viewFeed(v, route) {
     ${route.lens === "local" ? `<div class="city-bar" id="cityBar"></div>` : ""}
     <div class="topics" id="topics"></div>
     <div class="layout">
-      <div class="main-col"><button class="new-pill" id="newPill" type="button" hidden></button><div class="feed-top"><p class="fresh" id="fresh" hidden></p><button class="sh-btn" type="button" id="shortsBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="3"/><path d="m10.5 9.5 4 2.5-4 2.5Z"/></svg>Shorts</button></div>${homeCards(route)}${installCard()}${store.get("howto") ? "" : HOWTO}<div id="feed"></div><div id="sentinel"></div><div id="feedStatus"></div></div>
+      <div class="main-col"><button class="new-pill" id="newPill" type="button" hidden></button><div class="feed-top"><p class="fresh" id="fresh" hidden></p><button class="sh-btn" type="button" id="shortsBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="3"/><path d="m10.5 9.5 4 2.5-4 2.5Z"/></svg><span class="sh-lbl"><b>En bref</b><small>une nouvelle par écran</small></span></button></div>${homeCards(route)}${installCard()}${store.get("howto") ? "" : HOWTO}<div id="feed"></div><div id="sentinel"></div><div id="feedStatus"></div></div>
       <aside class="rail" aria-label="Autour du fil"><div class="rail-in" id="rail"></div></aside>
     </div>`;
   $("#shortsBtn", v).onclick = openShorts;

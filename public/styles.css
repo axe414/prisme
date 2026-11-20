@@ -1598,3 +1598,10 @@ body.shorts-open { overflow: hidden; }
 .mgroup .a2-top .src { display: none; }
 .mgroup .art2 { padding-top: 12px; padding-bottom: 12px; }
 .v-wide .a2-foot .acts { opacity: .7; }
+/* « En bref » : bouton bien visible, avec ce qu'il fait */
+.sh-btn { height: auto; padding: 7px 16px 7px 12px; gap: 9px; border-radius: 12px; }
+.sh-btn svg { width: 22px; height: 22px; }
+.sh-lbl { display: grid; text-align: left; line-height: 1.15; }
+.sh-lbl b { font: 700 14.5px var(--sans); }
+.sh-lbl small { font: 500 11.5px var(--sans); opacity: .75; }
+.sh-pos b { letter-spacing: .02em; }
