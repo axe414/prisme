@@ -1540,36 +1540,54 @@ async function viewVille(v, route) {
     $("#vStories").hidden = false;
     $("#vStories").innerHTML = `<h2 class="block-h">Les histoires <small>couvertes par plusieurs médias</small></h2>${stories.slice(0, 8).map((s) => storyRow(s)).join("")}`;
   }
-  // Tous les articles des 7 derniers jours qui la nomment (moteur de recherche).
+  // Tous les articles des 7 derniers jours : ceux qui nomment la ville, et TOUS ceux de ses médias locaux
+  // (un hebdo local n'écrit pas toujours le nom de sa ville). Seulement des médias canadiens (pas Warwick en Angleterre).
   const q = city.s === "quebec" ? `"ville de Québec"` : `"${city.n}"`;
-  const r = await indexSearch(q).catch(() => null);
+  const [r, loc] = await Promise.all([indexSearch(q).catch(() => null), localMedia()]);
   if (state.route.view !== "ville" || state.route.ville !== city.s) return;
-  // Petite municipalité dont on a peu parlé : on ajoute les nouvelles de sa MRC et des villes voisines.
-  if (r && r.ids.length < 5 && city.pr === "QC") {
-    const mrc = city.m ? city.m.replace(/^MRC\s+(de |du |des |d')?/i, "").trim() : "";
-    const others = [...(mrc ? [`"${mrc}"`] : []), ...[...near, ...nearRegion].slice(0, 4).map((x) => `"${x.n}"`)];
-    const more = await Promise.all(others.map((x) => indexSearch(x).catch(() => null)));
-    if (state.route.view !== "ville" || state.route.ville !== city.s) return;
-    const own = new Set(r.ids);
-    const extra = [...new Set(more.flatMap((x) => x?.ids || []))].filter((id) => !own.has(id)).sort((a, b) => a - b);
-    if (extra.length) {
-      r.ids = [...r.ids, ...extra];
-      r.marks = [...(r.marks || []), ...more.flatMap((x) => x?.marks || [])];
-      $("#wide").insertAdjacentHTML("beforebegin", `<p class="q-fix">Peu de nouvelles nomment ${esc(city.n)} cette semaine : voici aussi celles de ${esc(city.m ? mrcName(city.m) : "la région")} et des villes voisines.</p>`);
+  const sameCity = (x) => (x.cities || []).some((c) => foldText(c) === city.f);
+  const cityMedia = Object.entries(loc).map(([d, [n, reg, cities]]) => ({ d, n, reg, cities })).filter(sameCity);
+  const regionMedia = Object.entries(loc).map(([d, [n, reg, cities]]) => ({ d, n, reg, cities })).filter((x) => x.reg === city.r && !sameCity(x));
+  if (r) {
+    const m = r.meta;
+    const inCanada = (id) => m.D[m.dom[id]].country === "CA";
+    r.ids = r.ids.filter(inCanada);
+    const own = new Set(cityMedia.map((x) => x.d));
+    if (own.size) {
+      const idx = new Set(m.D.map((d, i) => (own.has(d.domain) ? i : -1)).filter((i) => i >= 0));
+      const have = new Set(r.ids);
+      const extra = [];
+      for (let id = 0; id < m.dom.length; id++) if (idx.has(m.dom[id]) && !have.has(id)) extra.push(id);
+      r.ids = [...r.ids, ...extra].sort((x, y) => x - y);
+      if (extra.length) $("#wide").insertAdjacentHTML("beforebegin", `<p class="q-fix">Inclut toutes les nouvelles de ${cityMedia.length > 1 ? "ses médias locaux" : "son média local"} : <b>${cityMedia.slice(0, 4).map((x) => esc(x.n)).join(", ")}</b>.</p>`);
     }
-  }
-  if (r) { r.query = q; drawWide($("#wide"), r); } else $("#wide").innerHTML = `<div class="empty"><p>La recherche n'est pas encore prête.</p></div>`;
-  // Les médias locaux de la région, et ceux qui parlent le plus de la ville.
-  const loc = await localMedia();
-  const regionMedia = Object.entries(loc).filter(([, [, reg]]) => reg === city.r).map(([d, [n]]) => ({ d, n }));
+    // Petite municipalité dont on a peu parlé : on ajoute les nouvelles de sa MRC et des villes voisines (au Canada).
+    if (r.ids.length < 5 && city.pr === "QC") {
+      const mrc = city.m ? city.m.replace(/^MRC\s+(de |du |des |d')?/i, "").trim() : "";
+      const others = [...(mrc ? [`"${mrc}"`] : []), ...[...near, ...nearRegion].slice(0, 4).map((x) => `"${x.n}"`)];
+      const more = await Promise.all(others.map((x) => indexSearch(x).catch(() => null)));
+      if (state.route.view !== "ville" || state.route.ville !== city.s) return;
+      const have = new Set(r.ids);
+      const extra = [...new Set(more.flatMap((x) => x?.ids || []))].filter((id) => !have.has(id) && inCanada(id)).sort((x, y) => x - y);
+      if (extra.length) {
+        r.ids = [...r.ids, ...extra];
+        r.marks = [...(r.marks || []), ...more.flatMap((x) => x?.marks || [])];
+        $("#wide").insertAdjacentHTML("beforebegin", `<p class="q-fix">Peu de nouvelles nomment ${esc(city.n)} cette semaine : voici aussi celles de ${esc(city.m ? mrcName(city.m) : "la région")} et des villes voisines.</p>`);
+      }
+    }
+    r.query = q;
+    drawWide($("#wide"), r);
+  } else $("#wide").innerHTML = `<div class="empty"><p>La recherche n'est pas encore prête.</p></div>`;
+  // Les médias de la ville, ceux qui en parlent le plus, puis ceux de la région.
   const top = new Map();
   if (r) for (const id of r.ids) { const di = r.meta.dom[id]; top.set(di, (top.get(di) || 0) + 1); }
   const topList = [...top.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([di, n]) => ({ d: r.meta.D[di].domain, n: r.meta.D[di].name, c: n }));
-  if (regionMedia.length || topList.length) {
+  const chip = (x) => `<a class="chip" href="${href({ m: x.d })}" data-nav>${favicon(x.d, x.n)} ${esc(x.n)}${x.c ? ` <span class="muted">${x.c}</span>` : ""}</a>`;
+  if (cityMedia.length || regionMedia.length || topList.length) {
     $("#vLocal").hidden = false;
-    $("#vLocal").innerHTML = `<h2 class="block-h">Les médias <small>qui en parlent le plus, et ceux de la région</small></h2>
-      <div class="chips">${topList.map((x) => `<a class="chip" href="${href({ m: x.d })}" data-nav>${favicon(x.d, x.n)} ${esc(x.n)} <span class="muted">${x.c}</span></a>`).join("")}
-      ${regionMedia.filter((x) => !topList.some((t) => t.d === x.d)).map((x) => `<a class="chip" href="${href({ m: x.d })}" data-nav>${favicon(x.d, x.n)} ${esc(x.n)}</a>`).join("")}</div>`;
+    $("#vLocal").innerHTML = `<h2 class="block-h">Les médias <small>de la ville, ceux qui en parlent le plus, et ceux de la région</small></h2>
+      <div class="chips">${cityMedia.map(chip).join("")}${topList.filter((t) => !cityMedia.some((x) => x.d === t.d)).map(chip).join("")}
+      ${regionMedia.filter((x) => !topList.some((t) => t.d === x.d)).slice(0, 16).map(chip).join("")}</div>`;
   }
 }
 

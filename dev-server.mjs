@@ -113,7 +113,13 @@ async function dataFile(name) {
   }
   if (name === "directory.json") return JSON.stringify({ media: directory() });
   if (name === "local-media.json") {
-    try { const loc = JSON.parse(readFileSync(join(root, "data", "sources-local.json"), "utf8")).sources; return JSON.stringify(Object.fromEntries(Object.entries(loc).map(([d, m]) => [d, [m.name, m.region]]))); } catch { return "{}"; }
+    const index = await getIndex();
+    if (archCache.stamp !== index.fetchedAt) {
+      const f = join(root, ".data", "archive.json");
+      archCache = { stamp: index.fetchedAt, arch: existsSync(f) ? mergeArchive(loadArchive(f), index) : archiveFromIndex(index) };
+    }
+    const { localMediaMap } = await import("./lib/local-cities.mjs");
+    return JSON.stringify(localMediaMap(root, archCache.arch));
   }
   if (name === "translations.json") { try { return readFileSync(join(root, ".data", "translations.json"), "utf8"); } catch { return "{}"; } }
   if (name === "summaries.json") { try { return readFileSync(join(root, ".data", "summaries.json"), "utf8"); } catch { return "{}"; } }
