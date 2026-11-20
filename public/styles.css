@@ -1143,3 +1143,26 @@ html, body { overflow-x: clip; }
 @media (pointer: coarse) { .read-chip { min-height: 36px; } }
 .vgrid + .vgrid { padding-top: 6px; }
 .vid-world { margin-top: 30px; }
+
+/* ---------- Villes ---------- */
+.kicker .sg-ico, .ville-card .sg-ico { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.ville-card { display: flex; align-items: center; gap: 12px; padding: 14px 16px; margin: 0 0 16px; background: var(--card); border: 1px solid var(--ink); border-left: 4px solid var(--b-l2); text-decoration: none; color: var(--ink); }
+.ville-card .sg-ico { width: 22px; height: 22px; flex: none; }
+.ville-card span:not(.go) { flex: 1; min-width: 0; }
+.ville-card b { display: block; font: 600 17px var(--serif); }
+.ville-card small { font: 12.5px var(--sans); color: var(--ink-3); }
+.ville-card .go { font: 600 20px var(--sans); }
+.ville-card:hover b { text-decoration: underline; }
+.villes-search { margin: 6px 0 14px; }
+.ville-region { border-top: 1px solid var(--hair); }
+.ville-region > summary { cursor: pointer; padding: 12px 0; font: 600 16px var(--serif); list-style: none; display: flex; justify-content: space-between; align-items: baseline; }
+.ville-region > summary::-webkit-details-marker { display: none; }
+.ville-region > summary small { font: 500 11px var(--mono); color: var(--ink-3); }
+.ville-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 4px 14px; padding: 0 0 14px; }
+.ville-link { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--hair-2); text-decoration: none; }
+.ville-link b { font: 500 14.5px var(--sans); }
+.ville-link small { font: 11px var(--mono); color: var(--ink-3); white-space: nowrap; }
+.ville-link:hover b { text-decoration: underline; }
+.ville-hits { margin-bottom: 16px; padding: 10px 14px; background: var(--card); border: 1px solid var(--hair); }
+.ville-hits .ville-link { flex-direction: column; gap: 2px; }
+.chip .fav { width: 14px; height: 14px; }

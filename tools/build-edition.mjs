@@ -78,6 +78,10 @@ mkdirSync(STATE, { recursive: true });
 const videos = await allVideos({ memory: join(STATE, "videos.json") });
 writeFileSync(join(DATA, "videos.json"), JSON.stringify({ builtAt: new Date().toISOString(), videos }));
 writeFileSync(join(DATA, "directory.json"), JSON.stringify({ media: directory() }));
+try {
+  const loc = JSON.parse(readFileSync(join(ROOT, "data", "sources-local.json"), "utf8")).sources;
+  writeFileSync(join(DATA, "local-media.json"), JSON.stringify(Object.fromEntries(Object.entries(loc).map(([d, m]) => [d, [m.name, m.region]]))));
+} catch { writeFileSync(join(DATA, "local-media.json"), "{}"); }
 log(`${videos.length} vidéos sur 7 jours (${(await import("../lib/videos.mjs")).channelCount()} chaînes)`);
 
 // 5) Résumés neutres des grandes histoires (gardés d'une fois à l'autre ; seuls les nouveaux sont écrits).

@@ -421,8 +421,14 @@ async function feedLocal(p) {
     list = [...list, ...byOutlet];
   }
   const key = q ? "essentiel" : lens;
-  if (key === "pourtoi") { const sc = forYouScorer(); for (const s of list) s.scores.pourtoi = sc(s); }
-  if (key === "local") for (const s of list) s.scores.local = localScore(s) * (s.scores.essentiel + 0.2);
+  // « Ma ville » : le nom de la municipalité, ou les médias locaux de sa région.
+  let villeCtx = null;
+  if (key === "local" || key === "pourtoi") {
+    const mv = await myVille();
+    if (mv) { const loc = await localMedia(); villeCtx = { words: villeWords(mv), domains: Object.entries(loc).filter(([, [, reg]]) => reg === mv.r).map(([d]) => d) }; }
+  }
+  if (key === "pourtoi") { const sc = forYouScorer(villeCtx); for (const s of list) s.scores.pourtoi = sc(s); }
+  if (key === "local") for (const s of list) s.scores.local = localScore(s, villeCtx) * (s.scores.essentiel + 0.2);
   if (key !== "recent") list = list.filter((s) => s.scores[key] > 0);
   list = [...list].sort((a, b) => b.scores[key] - a.scores[key]);
 
@@ -588,6 +594,8 @@ function parseRoute() {
   if (p.get("v") === "moi") return { view: "me", region: r };
   if (["matin", "videos", "quiz", "favoris"].includes(p.get("v"))) return { view: p.get("v"), region: r };
   if (p.get("m")) return { view: "outlet", m: p.get("m").toLowerCase(), region: r };
+  if (p.get("ville")) return { view: "ville", ville: p.get("ville").toLowerCase(), region: r };
+  if (p.get("v") === "villes") return { view: "villes", region: r };
   if (p.get("v") === "comparer") return { view: "comparer", a: (p.get("a") || "").toLowerCase(), b: (p.get("b") || "").toLowerCase(), region: r };
   const cat = CATS.some(([v]) => v === p.get("c")) ? p.get("c") : "une";
   const lens = p.get("l") in LENSES ? p.get("l") : "essentiel";
@@ -601,6 +609,7 @@ function href(o = {}) {
   else if (o.q) p.set("q", o.q);
   else if (o.v) p.set("v", o.v);
   else if (o.m) p.set("m", o.m);
+  else if (o.ville) p.set("ville", o.ville);
   else {
     if (o.cat && o.cat !== "une") p.set("c", o.cat);
     if (o.lens && o.lens !== "essentiel") p.set("l", o.lens);
@@ -643,6 +652,8 @@ function render({ scroll = 0 } = {}) {
   else if (route.view === "outlet") viewOutlet(v, route);
   else if (route.view === "favoris") viewFavs(v);
   else if (route.view === "comparer") viewCompare(v, route);
+  else if (route.view === "ville") viewVille(v, route);
+  else if (route.view === "villes") viewVilles(v);
   else viewFeed(v, route);
   requestAnimationFrame(() => scrollTo(0, scroll));
 }
@@ -659,6 +670,7 @@ const ICON = {
   quiz: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"/>',
   about: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
   theme: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/>',
+  ville: '<path d="M12 21s-6.5-6.2-6.5-11A6.5 6.5 0 0 1 18.5 10c0 4.8-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/>',
   reglages: '<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>',
   comparer: '<rect x="3" y="5" width="7" height="14" rx="1"/><rect x="14" y="5" width="7" height="14" rx="1"/>',
   favoris: '<path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z"/>',
@@ -672,7 +684,7 @@ function renderChrome(route) {
   $("#mastLinks").innerHTML = PAGES.map(([v, l]) => `<a href="${href({ v })}" data-nav ${page === v ? 'aria-current="page"' : ""}>${l}</a>`).join("");
   $("#editionSel").innerHTML = REGIONS.map(([v, l]) => `<option value="${v}" ${v === state.region ? "selected" : ""}>${l}</option>`).join("");
   $("#cats").innerHTML = CATS.map(([v, l]) => `<a href="${href({ cat: v, lens: route.view === "feed" ? route.lens : undefined })}" data-nav ${route.view === "feed" && route.cat === v ? 'aria-current="page"' : ""}>${l}</a>`).join("");
-  const onUne = ["feed", "story", "search", "outlet"].includes(route.view);
+  const onUne = ["feed", "story", "search", "outlet", "ville", "villes"].includes(route.view);
   const alerts = alertCount();
   $("#tabbar").innerHTML = `
     <a href="${href({})}" data-nav ${onUne ? 'aria-current="page"' : ""}>${svg("une")}À la une${alerts ? `<span class="dot">${alerts}</span>` : ""}</a>
@@ -720,6 +732,7 @@ function openMoreSheet() {
     <h2>Plus</h2>
     <ul class="sheet-list">
       <li><button type="button" data-open-settings>${svg("reglages")}<span>Réglages<small>Taille du texte, langue, thème, ta ville, ce qui t'intéresse.</small></span></button></li>
+      <li><a href="${href({ v: "villes" })}" data-nav data-close-modal>${svg("ville")}<span>Nouvelles par ville<small>Toutes les municipalités du Québec et les villes du Canada.</small></span></a></li>
       <li><a href="${href({ v: "comparer" })}" data-nav data-close-modal>${svg("comparer")}<span>Comparer deux médias<small>Les mêmes histoires, deux titres, côte à côte.</small></span></a></li>
       <li><a href="${href({ v: "favoris" })}" data-nav data-close-modal>${svg("favoris")}<span>Mes favoris<small>Les histoires et articles enregistrés, et les médias que tu suis.</small></span></a></li>
       <li><a href="${href({ v: "proprietaires" })}" data-nav data-close-modal>${svg("proprietaires")}<span>Qui possède quoi<small>Les médias regroupés par propriétaire, et la toile des familles.</small></span></a></li>
@@ -825,9 +838,10 @@ function markWords(text, words) {
     const themes = [...new Set([...topics.list(), ...recent.list(), ...trending])].filter((t) => foldText(t).includes(fq) && foldText(t) !== fq).slice(0, 3);
     const stories = (ed?.stories || []).filter((s) => words.length && words.every((w) => foldText(s.title).includes(w)))
       .sort((a, b) => b.sources - a.sources).slice(0, 4);
-    const draw = (outlets) => {
+    const draw = (outlets, vs = []) => {
       if (my !== token) return;
       open(`${sgSearch(q, "search", "Les histoires sur ce sujet")}
+        ${vs.length ? `<div class="sg-h">Villes</div>${vs.map((x) => item(`href="${href({ ville: x.s })}" data-nav`, `${pin}<span class="sg-main"><b>${markWords(villeLabel(x), words)}</b><small>${esc(villeWhere(x))}${x.p ? ` · ${x.p.toLocaleString(LOCALE)} hab.` : ""}</small></span>`)).join("")}` : ""}
         ${themes.map((t) => sgSearch(t, "trend")).join("")}
         ${outlets.length ? `<div class="sg-h">Médias</div>${outlets.map((d) => item(`href="${href({ m: d.domain })}" data-nav`,
           `${favicon(d.domain, d.name)}<span class="sg-main" data-no-tr><b>${markWords(d.name, words)}</b><small>${d.media.known ? esc(d.media.owner.replace(/\s*\(.*\)$/, "")) : esc(d.domain)}</small></span><span class="sg-side">${badge(d.media)}</span>`)).join("")}` : ""}
@@ -836,7 +850,7 @@ function markWords(text, words) {
         ${item(`href="${href({ q })}" data-q="${esc(q)}" data-wide`, `${sgIcon("all")}<span class="sg-main">Chercher « ${esc(q)} » dans tous les articles (48 h)</span>`).replace('class="sg"', 'class="sg sg-all"')}`);
     };
     draw([]);
-    searchBase().then((m) => draw(matchOutlets(m.D, q).slice(0, 4))).catch(() => {});
+    Promise.all([searchBase().catch(() => null), villesData().catch(() => null)]).then(([m, V]) => draw(m ? matchOutlets(m.D, q).slice(0, 4) : [], V ? matchVilles(V, q, 3) : []));
   }
 
   input.addEventListener("focus", () => { suggest(); searchBase().catch(() => {}); });
@@ -1018,15 +1032,15 @@ const CITIES = {
 const storyFold = (s) => s._fold || (s._fold = foldText(`${s.title} ${s.summary || ""} ${s.articles.map((a) => a.title).join(" ")}`));
 
 // « Ma ville » : les histoires qui nomment la ville choisie ou viennent de ses médias.
-function localScore(s) {
-  const c = CITIES[prefs.city];
+function localScore(s, ctx = null) {
+  const c = ctx || CITIES[prefs.city];
   if (!c) return 0;
   const t = storyFold(s);
   const hit = c.words.some((w) => hasWord(t, w)) || s.articles.some((a) => c.domains.includes(a.domain));
   return hit ? 1 + Math.max(0, 48 - (s.age || 0)) / 48 : 0;
 }
 // « Pour toi » : sujets et médias suivis, rubriques préférées, médias que tu lis souvent.
-function forYouScorer() {
+function forYouScorer(villeCtx = null) {
   const tps = topics.list().map((t) => parseQuery(t));
   const fol = new Set(follows.list().map((x) => x.d));
   const cats = new Set(prefs.cats);
@@ -1037,7 +1051,7 @@ function forYouScorer() {
     if (tps.some((pq) => matchQuery(storyFold(s), pq))) boost += 3;
     if (s.articles.some((a) => fol.has(a.domain))) boost += 2;
     if (s.categories.some((c) => cats.has(c))) boost += 1.5;
-    if (prefs.city && localScore(s)) boost += 1.5;
+    if (prefs.city && localScore(s, villeCtx)) boost += 1.5;
     boost += Math.min(1.5, s.articles.reduce((n, a) => n + (readN.get(a.domain) ? 0.3 : 0), 0));
     return boost > 0 ? (s.scores.essentiel || 0.05) * (1 + boost) : 0;
   };
@@ -1059,8 +1073,9 @@ function openSettings() {
     <section><h3>Thème</h3>
       <div class="seg seg-big" role="group">${[["light", "Clair"], ["dark", "Sombre"], ["auto", "Automatique"]].map(([v, l]) => `<button type="button" data-theme-set="${v}" aria-pressed="${theme === v}">${l}</button>`).join("")}</div></section>
     <section><h3>Mon édition</h3><select id="setRegion" class="set-select">${regionOpts}</select></section>
-    <section><h3>Ma ville <small>pour le fil « Ma ville » (Québec)</small></h3>
-      <select id="setCity" class="set-select"><option value="">Aucune</option>${Object.entries(CITIES).map(([k, c]) => `<option value="${k}" ${prefs.city === k ? "selected" : ""}>${esc(c.label)}</option>`).join("")}</select></section>
+    <section><h3>Ma ville <small>pour le fil « Ma ville »</small></h3>
+      <input id="setCity" class="set-select" list="villesList" placeholder="Tape le nom de ta ville…" autocomplete="off"><datalist id="villesList"></datalist>
+      <p class="note" id="setCityNote" style="margin:6px 0 0"></p></section>
     <section><h3>Ce qui m'intéresse <small>pour le fil « Pour toi »</small></h3>
       <div class="chips">${CATS.slice(1).map(([c, l]) => `<button class="chip" type="button" data-pcat="${c}" aria-pressed="${prefs.cats.includes(c)}">${esc(l)}</button>`).join("")}</div></section>
     <section class="set-foot"><button class="btn ghost" type="button" id="setOnboard">Revoir l'accueil</button></section>
@@ -1086,7 +1101,19 @@ function openSettings() {
     if (b.id === "setOnboard") { closeLayer("#modal"); setTimeout(openOnboarding, 250); }
   };
   $("#setRegion").onchange = (e) => { state.region = e.target.value; store.set("region", state.region); closeLayer("#modal"); go(href({})); };
-  $("#setCity").onchange = (e) => { store.set("city", e.target.value); state.feeds.clear(); if (state.route.view === "feed") render(); };
+  villesData().then((V) => {
+    $("#villesList").innerHTML = V.list.map((x) => `<option value="${esc(villeLabel(x))}">`).join("");
+    const cur = V.bySlug.get(prefs.city);
+    if (cur) { $("#setCity").value = villeLabel(cur); $("#setCityNote").textContent = villeWhere(cur); }
+    $("#setCity").onchange = (e) => {
+      const f = foldText(e.target.value).trim();
+      const hit = V.list.find((x) => foldText(villeLabel(x)) === f) || matchVilles(V, e.target.value, 1)[0];
+      if (!hit) { $("#setCityNote").textContent = "Ville introuvable : choisis-la dans la liste."; return; }
+      store.set("city", hit.s); state.feeds.clear();
+      e.target.value = villeLabel(hit); $("#setCityNote").textContent = `✓ ${villeWhere(hit)}`;
+      if (state.route.view === "feed") render();
+    };
+  }).catch(() => {});
 }
 
 /* ---------- Accueil, la première fois ---------- */
@@ -1103,7 +1130,9 @@ function openOnboarding() {
         </ul></div>`,
     () => `<h2>Tes nouvelles viennent d'où ?</h2><p class="ob-sub">Tu pourras changer en tout temps.</p>
       <div class="ob-grid">${REGIONS.map(([v, l]) => `<button type="button" data-ob-region="${v}" aria-pressed="${choice.region === v}">${esc(l)}</button>`).join("")}</div>
-      ${choice.region === "qc" ? `<h3 class="ob-h3">Ta région au Québec <small>(facultatif)</small></h3><div class="ob-grid ob-small">${Object.entries(CITIES).map(([k, c]) => `<button type="button" data-ob-city="${k}" aria-pressed="${choice.city === k}">${esc(c.label)}</button>`).join("")}</div>` : ""}`,
+      ${["qc", "ca"].includes(choice.region) ? `<h3 class="ob-h3">Ta ville <small>(facultatif)</small></h3>
+        <input class="set-select" id="obCity" list="obVilles" placeholder="Tape le nom de ta ville…" autocomplete="off" value="${esc(choice.cityLabel || "")}"><datalist id="obVilles"></datalist>
+        <div class="ob-grid ob-small" style="margin-top:8px">${[["montreal", "Montréal"], ["quebec", "Québec"], ["laval", "Laval"], ["gatineau", "Gatineau"], ["longueuil", "Longueuil"], ["sherbrooke", "Sherbrooke"], ["saguenay", "Saguenay"], ["levis", "Lévis"]].map(([k, l]) => `<button type="button" data-ob-city="${k}" data-label="${l}" aria-pressed="${choice.city === k}">${l}</button>`).join("")}</div>` : ""}`,
     () => `<h2>Qu'est-ce qui t'intéresse ?</h2><p class="ob-sub">Ça sert au fil « Pour toi ». Choisis-en autant que tu veux.</p>
       <div class="ob-grid">${CATS.slice(1).map(([c, l]) => `<button type="button" data-ob-cat="${c}" aria-pressed="${choice.cats.has(c)}">${esc(l)}</button>`).join("")}</div>`,
     () => `<h2>La taille du texte</h2><p class="ob-sub">Choisis ce qui est le plus confortable à lire.</p>
@@ -1120,14 +1149,24 @@ function openOnboarding() {
     $("#modalBody").onclick = (e) => {
       const b = e.target.closest("button");
       if (!b) return;
-      if (b.dataset.obRegion) { choice.region = b.dataset.obRegion; if (choice.region !== "qc") choice.city = ""; draw(); }
-      else if (b.dataset.obCity) { choice.city = choice.city === b.dataset.obCity ? "" : b.dataset.obCity; draw(); }
+      if (b.dataset.obRegion) { choice.region = b.dataset.obRegion; if (!["qc", "ca"].includes(choice.region)) { choice.city = ""; choice.cityLabel = ""; } draw(); }
+      else if (b.dataset.obCity) { choice.city = choice.city === b.dataset.obCity ? "" : b.dataset.obCity; choice.cityLabel = choice.city ? b.dataset.label : ""; draw(); }
       else if (b.dataset.obCat) { choice.cats.has(b.dataset.obCat) ? choice.cats.delete(b.dataset.obCat) : choice.cats.add(b.dataset.obCat); b.setAttribute("aria-pressed", choice.cats.has(b.dataset.obCat)); }
       else if (b.dataset.obScale) { choice.scale = Number(b.dataset.obScale); draw(); }
       else if (b.dataset.ob === "back") { step--; draw(); }
       else if (b.dataset.ob === "skip") finish();
       else if (b.dataset.ob === "next") { if (step < steps.length - 1) { step++; draw(); } else finish(); }
     };
+    // Choisir n'importe quelle ville en tapant son nom.
+    const oc = $("#obCity");
+    if (oc) villesData().then((V) => {
+      $("#obVilles").innerHTML = V.list.map((x) => `<option value="${esc(villeLabel(x))}">`).join("");
+      oc.onchange = () => {
+        const f = foldText(oc.value).trim();
+        const hit = V.list.find((x) => foldText(villeLabel(x)) === f) || matchVilles(V, oc.value, 1)[0];
+        if (hit) { choice.city = hit.s; choice.cityLabel = villeLabel(hit); oc.value = choice.cityLabel; $$("[data-ob-city]").forEach((x) => x.setAttribute("aria-pressed", x.dataset.obCity === hit.s)); }
+      };
+    }).catch(() => {});
   };
   const finish = () => {
     store.set("onboarded", "1");
@@ -1414,6 +1453,148 @@ function dekOf(s, lead = false) {
 const titleOf = (s) => esc(s.titleFr || s.title);
 const trTag = (s) => (s.titleFr ? `<span class="trd" title="Titre original : ${esc(s.title)}">traduit</span>` : "");
 
+/* ---------- Les villes : toutes les municipalités du Québec et les villes du Canada ---------- */
+const PROV_NAME = { QC: "Québec", ON: "Ontario", BC: "Colombie-Britannique", AB: "Alberta", MB: "Manitoba", SK: "Saskatchewan", NS: "Nouvelle-Écosse", NB: "Nouveau-Brunswick", NL: "Terre-Neuve-et-Labrador", PE: "Île-du-Prince-Édouard", YT: "Yukon", NT: "Territoires du Nord-Ouest", NU: "Nunavut" };
+let villesP = null;
+function villesData() {
+  if (!villesP) villesP = fetch(new URL("villes.json", document.baseURI).href).then((r) => r.json()).then((list) => {
+    for (const v of list) { v.f = foldText(v.n); v.short = v.f.replace(/^(ville de |municipalite de |paroisse de )/, ""); }
+    return { list, bySlug: new Map(list.map((v) => [v.s, v])) };
+  }).catch((e) => { villesP = null; throw e; });
+  return villesP;
+}
+// Les villes dont le nom commence par (ou est) ce qu'on tape, les plus peuplées d'abord.
+function matchVilles(V, q, n = 5) {
+  const f = foldText(q).trim().replace(/\s+/g, " ");
+  if (f.length < 3) return [];
+  const exact = V.list.filter((v) => v.f === f);
+  // Au Québec, les municipalités québécoises passent devant (Victoriaville avant Victoria).
+  const qc = state.region === "qc" ? (v) => (v.pr === "QC" ? 0 : 1) : () => 0;
+  const starts = V.list.filter((v) => v.f !== f && (v.f.startsWith(f) || v.f.replace(/-/g, " ").startsWith(f))).sort((a, b) => qc(a) - qc(b) || b.p - a.p);
+  return [...exact, ...starts].slice(0, n);
+}
+const mrcName = (m) => (!m ? "" : /^(MRC|Communauté|Agglomération|Ville|TÉ|Territoire)/i.test(m) ? m : `MRC ${m}`);
+const villeWhere = (v) => (v.pr === "QC" ? `${v.r.replace(/--/g, "–")}${v.m && v.m !== v.n ? ` · ${mrcName(v.m)}` : ""}` : `${PROV_NAME[v.pr] || v.pr}`);
+const villeLabel = (v) => `${v.n}${v.pr !== "QC" ? `, ${v.pr}` : ""}`;
+// Les mots qui désignent la ville dans un texte (sans accents). « Québec » seul désigne surtout la province.
+const villeWords = (v) => (v.s === "quebec" ? ["ville de quebec", "a quebec", "capitale-nationale"] : [v.f]);
+const pin = '<svg viewBox="0 0 24 24" aria-hidden="true" class="sg-ico"><path d="M12 21s-6.5-6.2-6.5-11A6.5 6.5 0 0 1 18.5 10c0 4.8-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>';
+
+// La ville choisie pour « Ma ville » : une municipalité (nouveau) ou une région (ancien réglage).
+async function myVille() {
+  const key = prefs.city;
+  if (!key || CITIES[key]) return null;
+  return (await villesData().catch(() => null))?.bySlug.get(key) || null;
+}
+const localMedia = () => dataJson("local-media.json", 864e5).catch(() => ({}));
+
+/* ---------- La page d'une ville ---------- */
+async function viewVille(v, route) {
+  v.innerHTML = `<div class="page-h"><div class="skel" style="height:44px;width:40%;margin-top:10px"></div></div>`;
+  const V = await villesData().catch(() => null);
+  const city = V?.bySlug.get(route.ville);
+  if (state.route.view !== "ville") return;
+  if (!city) { v.innerHTML = `<div class="empty"><h3>Ville introuvable.</h3><p><a class="btn" href="${href({ v: "villes" })}" data-nav>Toutes les villes</a></p></div>`; return; }
+  document.title = `${city.n} — Prisme`;
+  const followed = topics.has(city.n);
+  const mine = prefs.city === city.s;
+  const near = V.list.filter((x) => x !== city && x.pr === city.pr && (city.m ? x.m === city.m : x.r === city.r)).slice(0, 10);
+  const nearRegion = near.length < 6 ? V.list.filter((x) => x !== city && x.pr === city.pr && x.r === city.r && !near.includes(x)).slice(0, 10 - near.length) : [];
+  v.innerHTML = `<header class="page-h ville-head">
+      <div class="kicker">${pin}${esc(city.d || "Ville")} · ${esc(villeWhere(city))}</div>
+      <h1>${esc(villeLabel(city))}</h1>
+      <p>${city.p ? `${city.p.toLocaleString(LOCALE)} habitants. ` : ""}Les nouvelles qui parlent de ${esc(city.n)}, dans tous les médias lus par Prisme depuis 7 jours.</p>
+      <div class="actions">
+        <button class="btn${followed ? " ghost" : ""}" type="button" id="vFollow">${followed ? "✓ Suivie" : "★ Suivre cette ville"}</button>
+        <button class="btn ghost" type="button" id="vMine">${mine ? "✓ C'est ma ville" : "C'est ma ville"}</button>
+        ${shareBtn({ title: `${city.n} sur Prisme`, text: `Les nouvelles de ${city.n}`, url: absUrl(href({ ville: city.s })) }, true)}
+      </div>
+    </header>
+    <section class="sec" id="vStories" hidden></section>
+    <section class="sec" id="vLocal" hidden></section>
+    <section id="wide" class="sec"><div class="loader">Recherche des nouvelles de ${esc(city.n)}…</div></section>
+    ${near.length + nearRegion.length ? `<section class="sec"><h2 class="block-h">Villes voisines <small>${esc(city.m ? mrcName(city.m) : city.r.replace(/--/g, "–"))}</small></h2>
+      <div class="chips">${[...near, ...nearRegion].map((x) => `<a class="chip" href="${href({ ville: x.s })}" data-nav>${esc(x.n)}</a>`).join("")}</div></section>` : ""}`;
+  $("#vFollow", v).onclick = (e) => {
+    if (topics.has(city.n)) topics.remove(city.n); else topics.add(city.n);
+    const on = topics.has(city.n);
+    e.target.textContent = on ? "✓ Suivie" : "★ Suivre cette ville";
+    e.target.classList.toggle("ghost", on);
+    toast(on ? `Tu suis ${city.n} : tu la retrouves dans « Mes sujets ».` : `Tu ne suis plus ${city.n}.`);
+  };
+  $("#vMine", v).onclick = (e) => {
+    store.set("city", city.s);
+    state.feeds.clear();
+    e.target.textContent = "✓ C'est ma ville";
+    toast(`${city.n} est ta ville : le fil « Ma ville » montre ses nouvelles.`);
+  };
+  // Les histoires de l'édition qui parlent de la ville.
+  const words = villeWords(city);
+  const eds = await Promise.all([edition(city.pr === "QC" ? "qc" : "ca").catch(() => null), edition("monde").catch(() => null)]);
+  const seenS = new Set();
+  const stories = eds.flatMap((e) => e?.stories || []).filter((s) => !seenS.has(s.id) && seenS.add(s.id) && words.some((w) => hasWord(storyFold(s), w)));
+  if (state.route.view !== "ville" || state.route.ville !== city.s) return;
+  if (stories.length) {
+    await withTitlesFr(stories.slice(0, 8));
+    for (const s of stories) state.stories.set(s.id, s);
+    $("#vStories").hidden = false;
+    $("#vStories").innerHTML = `<h2 class="block-h">Les histoires <small>couvertes par plusieurs médias</small></h2>${stories.slice(0, 8).map((s) => storyRow(s)).join("")}`;
+  }
+  // Tous les articles des 7 derniers jours qui la nomment (moteur de recherche).
+  const q = city.s === "quebec" ? `"ville de Québec"` : `"${city.n}"`;
+  const r = await indexSearch(q).catch(() => null);
+  if (state.route.view !== "ville" || state.route.ville !== city.s) return;
+  // Petite municipalité dont on a peu parlé : on ajoute les nouvelles de sa MRC et des villes voisines.
+  if (r && r.ids.length < 5 && city.pr === "QC") {
+    const mrc = city.m ? city.m.replace(/^MRC\s+(de |du |des |d')?/i, "").trim() : "";
+    const others = [...(mrc ? [`"${mrc}"`] : []), ...[...near, ...nearRegion].slice(0, 4).map((x) => `"${x.n}"`)];
+    const more = await Promise.all(others.map((x) => indexSearch(x).catch(() => null)));
+    if (state.route.view !== "ville" || state.route.ville !== city.s) return;
+    const own = new Set(r.ids);
+    const extra = [...new Set(more.flatMap((x) => x?.ids || []))].filter((id) => !own.has(id)).sort((a, b) => a - b);
+    if (extra.length) {
+      r.ids = [...r.ids, ...extra];
+      r.marks = [...(r.marks || []), ...more.flatMap((x) => x?.marks || [])];
+      $("#wide").insertAdjacentHTML("beforebegin", `<p class="q-fix">Peu de nouvelles nomment ${esc(city.n)} cette semaine : voici aussi celles de ${esc(city.m ? mrcName(city.m) : "la région")} et des villes voisines.</p>`);
+    }
+  }
+  if (r) { r.query = q; drawWide($("#wide"), r); } else $("#wide").innerHTML = `<div class="empty"><p>La recherche n'est pas encore prête.</p></div>`;
+  // Les médias locaux de la région, et ceux qui parlent le plus de la ville.
+  const loc = await localMedia();
+  const regionMedia = Object.entries(loc).filter(([, [, reg]]) => reg === city.r).map(([d, [n]]) => ({ d, n }));
+  const top = new Map();
+  if (r) for (const id of r.ids) { const di = r.meta.dom[id]; top.set(di, (top.get(di) || 0) + 1); }
+  const topList = [...top.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([di, n]) => ({ d: r.meta.D[di].domain, n: r.meta.D[di].name, c: n }));
+  if (regionMedia.length || topList.length) {
+    $("#vLocal").hidden = false;
+    $("#vLocal").innerHTML = `<h2 class="block-h">Les médias <small>qui en parlent le plus, et ceux de la région</small></h2>
+      <div class="chips">${topList.map((x) => `<a class="chip" href="${href({ m: x.d })}" data-nav>${favicon(x.d, x.n)} ${esc(x.n)} <span class="muted">${x.c}</span></a>`).join("")}
+      ${regionMedia.filter((x) => !topList.some((t) => t.d === x.d)).map((x) => `<a class="chip" href="${href({ m: x.d })}" data-nav>${favicon(x.d, x.n)} ${esc(x.n)}</a>`).join("")}</div>`;
+  }
+}
+
+/* ---------- Toutes les villes, par région ---------- */
+async function viewVilles(v) {
+  document.title = "Nouvelles par ville — Prisme";
+  v.innerHTML = `<header class="page-h"><div class="kicker">${pin}Nouvelles par ville</div><h1>Les nouvelles de ta ville</h1>
+      <p>Toutes les municipalités du Québec et les villes du Canada. Choisis une ville pour voir tout ce que les médias en disent.</p></header>
+    <label class="o-search villes-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" id="vQ" placeholder="Tape le nom d'une ville (ex. Granby, Rimouski, Calgary)…" autocomplete="off"></label>
+    <div id="vHits"></div><div id="vRegions"><div class="loader">Chargement des villes…</div></div>`;
+  const V = await villesData().catch(() => null);
+  if (!V || state.route.view !== "villes") return;
+  const cityLink = (x) => `<a class="ville-link" href="${href({ ville: x.s })}" data-nav><b>${esc(x.n)}</b><small>${x.p ? x.p.toLocaleString(LOCALE) : ""}</small></a>`;
+  const regions = new Map();
+  for (const x of V.list) { const k = x.pr === "QC" ? x.r : PROV_NAME[x.pr] || x.pr; if (!regions.has(k)) regions.set(k, []); regions.get(k).push(x); }
+  const qcFirst = [...regions.entries()].sort((a, b) => (a[1][0].pr === "QC" ? 0 : 1) - (b[1][0].pr === "QC" ? 0 : 1) || a[0].localeCompare(b[0], "fr"));
+  $("#vRegions").innerHTML = qcFirst.map(([k, list]) => `<details class="ville-region"${k === "Montréal" || k === "Capitale-Nationale" ? " open" : ""}><summary>${esc(k.replace(/--/g, "–"))} <small>${plural(list.length, list[0].pr === "QC" ? "municipalité" : "ville")}</small></summary>
+    <div class="ville-grid">${list.map(cityLink).join("")}</div></details>`).join("");
+  $("#vQ").oninput = (e) => {
+    const hits = matchVilles(V, e.target.value, 12);
+    $("#vHits").innerHTML = hits.length ? `<div class="ville-grid ville-hits">${hits.map((x) => `<a class="ville-link" href="${href({ ville: x.s })}" data-nav><b>${esc(villeLabel(x))}</b><small>${esc(villeWhere(x))}</small></a>`).join("")}</div>` : "";
+  };
+}
+
 /* ---------- Le fil ---------- */
 // Montrée une seule fois : comment lire un bloc du fil.
 const HOWTO = `<aside class="howto" aria-label="Comment lire Prisme">
@@ -1431,7 +1612,7 @@ function viewFeed(v, route) {
   const key = feedKey(route);
   const lensHtml = `<div class="lensbar">
       <span class="label">Voir par</span>
-      <div class="lenses" role="group" aria-label="Lentille">${Object.entries(LENSES).filter(([k, l]) => !l.qc || state.region === "qc").map(([k, l]) =>
+      <div class="lenses" role="group" aria-label="Lentille">${Object.entries(LENSES).filter(([k, l]) => !l.qc || ["qc", "ca"].includes(state.region)).map(([k, l]) =>
         `<button type="button" data-lens="${k}" aria-pressed="${route.lens === k}">${l.sw ? `<span class="sw" style="background:${l.sw}"></span>` : ""}${l.label}</button>`).join("")}</div>
       <p class="lens-desc">${esc(LENSES[route.lens].desc)}</p>
       <div class="legend-row"><span class="label">Orientation des médias</span>${legend()}</div>
@@ -1543,7 +1724,7 @@ function emptyFeed(f) {
   if (f.params.q) return "";
   if (f.params.lens === "pourtoi" && !hasPrefs()) return `<div class="empty"><h3>Dis à Prisme ce qui t'intéresse.</h3><p>Choisis des rubriques, ta ville, suis des sujets ou des médias : ce fil se remplira avec ce qui te touche.</p><button class="btn" type="button" data-open-settings>Choisir ce qui m'intéresse</button></div>`;
   if (f.params.lens === "local" && !prefs.city) return `<div class="empty"><h3>Choisis ta ville ou ta région.</h3><p>Prisme te montrera les histoires qui en parlent.</p><button class="btn" type="button" data-open-settings>Choisir ma ville</button></div>`;
-  if (f.params.lens === "local") return `<div class="empty"><h3>Rien sur ${esc(CITIES[prefs.city]?.label || "ta ville")} en ce moment.</h3><p>Reviens plus tard, ou change de région dans les réglages.</p><button class="btn ghost" type="button" data-open-settings>Réglages</button></div>`;
+  if (f.params.lens === "local") return `<div class="empty"><h3>Rien sur ${esc(CITIES[prefs.city]?.label || "ta ville")} dans les grandes histoires en ce moment.</h3><p><a class="btn" href="${href({ ville: prefs.city })}" data-nav>Voir toutes les nouvelles de ma ville</a></p><p>Reviens plus tard, ou change de région dans les réglages.</p><button class="btn ghost" type="button" data-open-settings>Réglages</button></div>`;
   const lens = LENSES[f.params.lens];
   return `<div class="empty"><h3>Rien dans « ${esc(lens.label)} » pour l'instant.</h3>
     <p>${f.params.lens === "angles" ? "Aucune histoire n'est assez couverte d'un seul côté en ce moment. C'est plutôt bon signe." : "Essaie une autre lentille ou une autre édition."}</p>
@@ -1949,15 +2130,23 @@ function viewSearch(v, route) {
   state.pendingWide = null;
   loadWide(route.q, goWide);
   // La recherche nomme peut-être un média : on le propose en premier.
+  villesData().then((V) => {
+    const f = foldText(route.q).trim();
+    const city = V.list.find((x) => x.f === f || x.short === f);
+    const el = $("#outletHits");
+    if (!city || !el || state.route.view !== "search" || state.route.q !== route.q) return;
+    el.hidden = false;
+    el.insertAdjacentHTML("afterbegin", `<a class="ville-card" href="${href({ ville: city.s })}" data-nav>${pin}<span><b>Toutes les nouvelles de ${esc(villeLabel(city))}</b><small>${esc(villeWhere(city))} · histoires, articles, médias locaux, villes voisines</small></span><span class="go">→</span></a>`);
+  }).catch(() => {});
   searchBase().then((m) => {
     const hits = matchOutlets(m.D, route.q);
     const el = $("#outletHits");
     if (!el || !hits.length || state.route.view !== "search" || state.route.q !== route.q) return;
     el.hidden = false;
-    el.innerHTML = `<h2 class="block-h">Médias <small>qui correspondent à « ${esc(route.q)} »</small></h2>
+    el.insertAdjacentHTML("beforeend", `<h2 class="block-h">Médias <small>qui correspondent à « ${esc(route.q)} »</small></h2>
       <div class="outlet-hits">${hits.map((d) => `<a class="outlet-hit" href="${href({ m: d.domain })}" data-nav>
         ${favicon(d.domain, d.name)}<span class="oh-main"><b>${esc(d.name)}</b><small>${d.media.known ? esc(d.media.owner.replace(/\s*\(.*\)$/, "")) : esc(d.domain)}</small></span>
-        <span class="oh-side">${badge(d.media)}<small>${plural(d.count, "article")} en 7 jours</small></span></a>`).join("")}</div>`;
+        <span class="oh-side">${badge(d.media)}<small>${plural(d.count, "article")} en 7 jours</small></span></a>`).join("")}</div>`);
   }).catch(() => {});
 }
 

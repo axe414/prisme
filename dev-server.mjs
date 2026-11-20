@@ -112,6 +112,9 @@ async function dataFile(name) {
     return videosCache.body;
   }
   if (name === "directory.json") return JSON.stringify({ media: directory() });
+  if (name === "local-media.json") {
+    try { const loc = JSON.parse(readFileSync(join(root, "data", "sources-local.json"), "utf8")).sources; return JSON.stringify(Object.fromEntries(Object.entries(loc).map(([d, m]) => [d, [m.name, m.region]]))); } catch { return "{}"; }
+  }
   if (name === "translations.json") { try { return readFileSync(join(root, ".data", "translations.json"), "utf8"); } catch { return "{}"; } }
   if (name === "summaries.json") { try { return readFileSync(join(root, ".data", "summaries.json"), "utf8"); } catch { return "{}"; } }
   if (name === "meta.json") { const i = await getIndex(); return JSON.stringify({ builtAt: new Date().toISOString(), articles: i.articles.length }); }

@@ -1,0 +1,56 @@
+{
+ "cbc.ca": [
+  "https://www.cbc.ca/webfeed/rss/rss-canada-montreal",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-toronto",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-ottawa",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-calgary",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-edmonton",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-britishcolumbia",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-manitoba",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-saskatchewan",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-saskatoon",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-newbrunswick",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-novascotia",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-pei",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-newfoundland",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-north",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-kitchenerwaterloo",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-hamiltonnews",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-london",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-windsor",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-sudbury",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-thunderbay"
+ ],
+ "globalnews.ca": [
+  "https://globalnews.ca/montreal/feed/",
+  "https://globalnews.ca/toronto/feed/",
+  "https://globalnews.ca/calgary/feed/",
+  "https://globalnews.ca/edmonton/feed/",
+  "https://globalnews.ca/winnipeg/feed/",
+  "https://globalnews.ca/halifax/feed/",
+  "https://globalnews.ca/bc/feed/",
+  "https://globalnews.ca/okanagan/feed/",
+  "https://globalnews.ca/regina/feed/",
+  "https://globalnews.ca/saskatoon/feed/",
+  "https://globalnews.ca/lethbridge/feed/",
+  "https://globalnews.ca/guelph/feed/",
+  "https://globalnews.ca/kingston/feed/",
+  "https://globalnews.ca/london/feed/",
+  "https://globalnews.ca/peterborough/feed/",
+  "https://globalnews.ca/hamilton/feed/",
+  "https://globalnews.ca/ottawa/feed/"
+ ],
+ "citynews.ca": [
+  "https://toronto.citynews.ca/feed/",
+  "https://vancouver.citynews.ca/feed/",
+  "https://calgary.citynews.ca/feed/",
+  "https://edmonton.citynews.ca/feed/",
+  "https://winnipeg.citynews.ca/feed/",
+  "https://ottawa.citynews.ca/feed/",
+  "https://halifax.citynews.ca/feed/",
+  "https://kitchener.citynews.ca/feed/"
+ ],
+ "neomedia.com": [
+  "https://www.neomedia.com/vaudreuil-soulanges/rss"
+ ]
+}

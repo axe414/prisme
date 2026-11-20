@@ -1,0 +1,8870 @@
+{
+ "builtAt": "2026-11-20T03:30:59.825Z",
+ "sources": {
+  "journalmetro.com": {
+   "name": "Métro",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://journalmetro.com/feed/",
+   "region": "Montréal"
+  },
+  "24heures.ca": {
+   "name": "24 heures",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://24heures.ca/rss.xml",
+   "region": "Montréal"
+  },
+  "mtlblog.com": {
+   "name": "MTL Blog",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://mtlblog.com/feeds/feed.rss",
+   "region": "Montréal"
+  },
+  "journaldesvoisins.com": {
+   "name": "Journal des voisins",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://journaldesvoisins.com/feed/",
+   "region": "Montréal"
+  },
+  "courrierlaval.com": {
+   "name": "Courrier Laval",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://courrierlaval.com/feed/",
+   "region": "Laval"
+  },
+  "lechodelaval.ca": {
+   "name": "L'Écho de Laval",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lechodelaval.ca/feed/",
+   "region": "Laval"
+  },
+  "cultmtl.com": {
+   "name": "Cult MTL",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://cultmtl.com/feed/",
+   "region": "Montréal"
+  },
+  "canadafrancais.com": {
+   "name": "Le Canada Français",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.canadafrancais.com/feed/",
+   "region": "Montérégie"
+  },
+  "granbyexpress.com": {
+   "name": "Granby Express",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://granbyexpress.com/feed/",
+   "region": "Montérégie"
+  },
+  "lereflet.qc.ca": {
+   "name": "Le Reflet",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lereflet.qc.ca/feed/",
+   "region": "Montérégie"
+  },
+  "lecourrierdusud.ca": {
+   "name": "Le Courrier du Sud",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lecourrierdusud.ca/feed/",
+   "region": "Montérégie"
+  },
+  "journaldechambly.com": {
+   "name": "Journal de Chambly",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://journaldechambly.com/feed/",
+   "region": "Montérégie"
+  },
+  "leclairon.qc.ca": {
+   "name": "Le Clairon",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://leclairon.qc.ca/feed/",
+   "region": "Montérégie"
+  },
+  "soreltracy.com": {
+   "name": "Sorel-Tracy Express",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://soreltracy.com/feed/",
+   "region": "Montérégie"
+  },
+  "les2rives.com": {
+   "name": "Les 2 Rives",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://les2rives.com/feed/",
+   "region": "Montérégie"
+  },
+  "oeilregional.com": {
+   "name": "L'Œil Régional",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://oeilregional.com/feed/",
+   "region": "Montérégie"
+  },
+  "infosuroit.com": {
+   "name": "Info Suroît",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://infosuroit.com/feed/",
+   "region": "Montérégie"
+  },
+  "monquartier.quebec": {
+   "name": "Monquartier",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://monquartier.quebec/feed/",
+   "region": "Capitale-Nationale"
+  },
+  "courrierdeportneuf.com": {
+   "name": "Courrier de Portneuf",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.courrierdeportneuf.com/feed/",
+   "region": "Capitale-Nationale"
+  },
+  "leplacoteux.com": {
+   "name": "Le Placoteux",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://leplacoteux.com/feed/",
+   "region": "Bas-Saint-Laurent"
+  },
+  "enbeauce.com": {
+   "name": "EnBeauce.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://enbeauce.com/feed/",
+   "region": "Chaudière-Appalaches"
+  },
+  "beaucemedia.ca": {
+   "name": "Beauce Média",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://beaucemedia.ca/feed/",
+   "region": "Chaudière-Appalaches"
+  },
+  "monthetford.com": {
+   "name": "Mon Thetford",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://monthetford.com/feed/",
+   "region": "Chaudière-Appalaches"
+  },
+  "ckiafm.org": {
+   "name": "CKIA",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://ckiafm.org/feed/articles",
+   "region": "Capitale-Nationale"
+  },
+  "radiox.com": {
+   "name": "Radio X",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://radiox.com/feed/",
+   "region": "Capitale-Nationale"
+  },
+  "journaldesherbrooke.com": {
+   "name": "Journal de Sherbrooke",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.journaldesherbrooke.com/feed/",
+   "region": "Estrie"
+  },
+  "sherbrookerecord.com": {
+   "name": "The Sherbrooke Record",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.sherbrookerecord.com/feed/",
+   "region": "Estrie"
+  },
+  "journalexpress.ca": {
+   "name": "L'Express (Drummondville)",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://journalexpress.ca/feed/",
+   "region": "Centre-du-Québec"
+  },
+  "lanouvelle.net": {
+   "name": "La Nouvelle Union",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lanouvelle.net/feed/",
+   "region": "Centre-du-Québec"
+  },
+  "vingt55.ca": {
+   "name": "Vingt55",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://vingt55.ca/feed/",
+   "region": "Centre-du-Québec"
+  },
+  "lechodelatuque.com": {
+   "name": "L'Écho de La Tuque",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lechodelatuque.com/feed/",
+   "region": "Mauricie"
+  },
+  "monsaguenay.ca": {
+   "name": "Mon Saguenay",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://monsaguenay.ca/feed/",
+   "region": "Saguenay--Lac-Saint-Jean"
+  },
+  "lenord-cotier.com": {
+   "name": "Le Nord-Côtier",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lenord-cotier.com/feed/",
+   "region": "Côte-Nord"
+  },
+  "lemanic.ca": {
+   "name": "Le Manic",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lemanic.ca/feed/",
+   "region": "Côte-Nord"
+  },
+  "infodimanche.com": {
+   "name": "Info Dimanche",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://infodimanche.com/feed/",
+   "region": "Bas-Saint-Laurent"
+  },
+  "graffici.ca": {
+   "name": "Graffici",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://graffici.ca/feed/",
+   "region": "Gaspésie--Îles-de-la-Madeleine"
+  },
+  "cfim.ca": {
+   "name": "CFIM",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://cfim.ca/feed/",
+   "region": "Gaspésie--Îles-de-la-Madeleine"
+  },
+  "monjoliette.com": {
+   "name": "Mon Joliette",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://monjoliette.com/feed/",
+   "region": "Lanaudière"
+  },
+  "tremblantexpress.ca": {
+   "name": "Tremblant Express",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://tremblantexpress.com/feed/",
+   "region": "Laurentides"
+  },
+  "neomedia.com": {
+   "name": "Néomédia",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://neomedia.com/feed/",
+   "region": "Montérégie"
+  },
+  "cignfm.ca": {
+   "name": "CIGN",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://cignfm.ca/feed/",
+   "region": "Montérégie"
+  },
+  "dailyxtra.com": {
+   "name": "Xtra Ottawa",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://xtramagazine.com/feed",
+   "region": ""
+  },
+  "xtra.ca": {
+   "name": "Xtra Vancouver",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://xtramagazine.com/feed",
+   "region": ""
+  },
+  "bandersnatch.ca": {
+   "name": "Bandersnatch",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://bandersnatch.ca/feed/",
+   "region": "Montréal"
+  },
+  "saltwire.com": {
+   "name": "Annapolis Valley Register",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://saltwire.com/feed/",
+   "region": "Nouvelle-Écosse"
+  },
+  "bullandbearmcgill.com": {
+   "name": "The Bull & Bear",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://bullandbearmcgill.com/feed/",
+   "region": ""
+  },
+  "themedium.ca": {
+   "name": "The Medium",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://themedium.ca/rss",
+   "region": "Ontario"
+  },
+  "themacdonaldnotebook.ca": {
+   "name": "The Macdonald Notebook",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.themacdonaldnotebook.ca/feed/",
+   "region": "Nouvelle-Écosse"
+  },
+  "curling.ca": {
+   "name": "Eye Opener",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://curling.ca/feed/",
+   "region": ""
+  },
+  "yukon-news.com": {
+   "name": "Yukon News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://yukon-news.com/feed/",
+   "region": ""
+  },
+  "whitecourtstar.com": {
+   "name": "Whitecourt Star",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://whitecourtstar.com/feed/",
+   "region": ""
+  },
+  "signalhfx.ca": {
+   "name": "The Signal",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://signalhfx.ca/feed/",
+   "region": ""
+  },
+  "halifaxexaminer.ca": {
+   "name": "Halifax Examiner",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.halifaxexaminer.ca/feed/",
+   "region": ""
+  },
+  "tridentnewspaper.com": {
+   "name": "Trident Military Newspaper",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://tridentnewspaper.com/feed/",
+   "region": "Nouvelle-Écosse"
+  },
+  "trurodaily.com": {
+   "name": "Truro Daily News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://trurodaily.com/feed/",
+   "region": ""
+  },
+  "journallesoir.ca": {
+   "name": "journal le soir",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://journallesoir.ca/feed/",
+   "region": "Capitale-Nationale"
+  },
+  "canadianaffairs.news": {
+   "name": "Canadian Affairs",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.canadianaffairs.news/feed/",
+   "region": ""
+  },
+  "betakit.com": {
+   "name": "BetaKit",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://betakit.com/feed/",
+   "region": "Ontario"
+  },
+  "besedanews.com": {
+   "name": "Conversation",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://besedanews.com/?feed=rss2",
+   "region": "Ontario"
+  },
+  "niagaraindependent.ca": {
+   "name": "The Niagara Independent",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://niagaraindependent.ca/feed/",
+   "region": "Ontario"
+  },
+  "lejournaldejoliette.ca": {
+   "name": "Le Journal de Joliette",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lejournaldejoliette.ca/feed/",
+   "region": "Québec"
+  },
+  "invernessoran.ca": {
+   "name": "The Inverness Oran",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://invernessoran.ca/feed/",
+   "region": "Centre-du-Québec"
+  },
+  "humberetc.ca": {
+   "name": "Humber Et Cetera",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://humberetc.ca/rss",
+   "region": ""
+  },
+  "wayves.ca": {
+   "name": "Wayves",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://wayves.ca/rss.xml",
+   "region": ""
+  },
+  "thelaker.ca": {
+   "name": "The Laker",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://thelaker.ca/feed/",
+   "region": "Nouvelle-Écosse"
+  },
+  "cultmontreal.com": {
+   "name": "Cult MTL",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://cultmontreal.com/feed/",
+   "region": ""
+  },
+  "edmontonsun.com": {
+   "name": "Edmonton Sun",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://edmontonsun.com/feed/",
+   "region": ""
+  },
+  "levoyageur.ca": {
+   "name": "Le Voyageur",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://levoyageur.ca/feed/",
+   "region": "Ontario"
+  },
+  "ottawacitizen.com": {
+   "name": "Ottawa Citizen",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://ottawacitizen.com/feed/",
+   "region": "Ontario"
+  },
+  "acadienouvelle.com": {
+   "name": "L'Acadie nouvelle",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.acadienouvelle.com/feed/",
+   "region": "Nouveau-Brunswick"
+  },
+  "delitfrancais.com": {
+   "name": "Le Délit français",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.delitfrancais.com/feed/",
+   "region": ""
+  },
+  "corriere.ca": {
+   "name": "Corriere Canadese",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.corriere.ca/feed/",
+   "region": "Ontario"
+  },
+  "theprovince.com": {
+   "name": "The Province",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://theprovince.com/feed/",
+   "region": "Colombie-Britannique"
+  },
+  "dalgazette.com": {
+   "name": "The Dalhousie Gazette",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://dalgazette.com/feed/",
+   "region": ""
+  },
+  "winnipegfreepress.com": {
+   "name": "Winnipeg Free Press",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.winnipegfreepress.com/feed",
+   "region": ""
+  },
+  "journaldequebec.com": {
+   "name": "Le Journal de Québec",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://journaldequebec.com/rss.xml",
+   "region": ""
+  },
+  "xtramagazine.com": {
+   "name": "Xtra!",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://xtramagazine.com/feed",
+   "region": "Ontario"
+  },
+  "edmontonjournal.com": {
+   "name": "Edmonton Journal",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://edmontonjournal.com/feed/",
+   "region": "Alberta"
+  },
+  "timescolonist.com": {
+   "name": "Victoria Times-Colonist",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://timescolonist.com/rss",
+   "region": "Colombie-Britannique"
+  },
+  "torontosun.com": {
+   "name": "Toronto Sun",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://torontosun.com/feed/",
+   "region": "Ontario"
+  },
+  "vancouversun.com": {
+   "name": "Vancouver Sun",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://vancouversun.com/feed/",
+   "region": "Colombie-Britannique"
+  },
+  "theglobeandmail.com": {
+   "name": "The Globe and Mail",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://theglobeandmail.com/arc/outboundfeeds/rss/?outputType=xml",
+   "region": "Ontario"
+  },
+  "montrealmirror.com": {
+   "name": "Montreal Mirror",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.montrealmirror.com/feed",
+   "region": ""
+  },
+  "calgarysun.com": {
+   "name": "Calgary Sun",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://calgarysun.com/feed/",
+   "region": "Alberta"
+  },
+  "l-express.ca": {
+   "name": "L'Express",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://l-express.ca/feed/",
+   "region": ""
+  },
+  "journaldemontreal.com": {
+   "name": "Le Journal de Montréal",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://journaldemontreal.com/rss.xml",
+   "region": "Montréal"
+  },
+  "thecjn.ca": {
+   "name": "Canadian Jewish News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://thecjn.ca/feed/",
+   "region": ""
+  },
+  "ngnews.ca": {
+   "name": "The News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://ngnews.ca/feed/",
+   "region": "Nouvelle-Écosse"
+  },
+  "mcgilldaily.com": {
+   "name": "The McGill Daily",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://mcgilldaily.com/feed/",
+   "region": ""
+  },
+  "paherald.sk.ca": {
+   "name": "Prince Albert Daily Herald",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://paherald.sk.ca/feed/",
+   "region": ""
+  },
+  "thelinknewspaper.ca": {
+   "name": "The Link",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://thelinknewspaper.ca/feed",
+   "region": ""
+  },
+  "catholicregister.org": {
+   "name": "The Catholic Register",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://catholicregister.org/rss",
+   "region": "Ontario"
+  },
+  "medicinehatnews.com": {
+   "name": "Medicine Hat News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://medicinehatnews.com/feed/",
+   "region": ""
+  },
+  "queensjournal.ca": {
+   "name": "The Queen's Journal",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.queensjournal.ca/feed/",
+   "region": ""
+  },
+  "theeyeopener.com": {
+   "name": "The Eyeopener",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://theeyeopener.com/feed/",
+   "region": ""
+  },
+  "princegeorgecitizen.com": {
+   "name": "The Prince George Citizen",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://princegeorgecitizen.com/rss",
+   "region": ""
+  },
+  "thecadreupei.com": {
+   "name": "The Cadre",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://thecadreupei.com/feed/",
+   "region": "Île-du-Prince-Édouard"
+  },
+  "northernminer.com": {
+   "name": "The Northern Miner",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.northernminer.com/feed/",
+   "region": ""
+  },
+  "thegatewayonline.ca": {
+   "name": "The Gateway",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://thegatewayonline.ca/feed/",
+   "region": ""
+  },
+  "nunatsiaq.com": {
+   "name": "Nunatsiaq News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://nunatsiaq.com/feed/",
+   "region": ""
+  },
+  "surreynowleader.com": {
+   "name": "Surrey Now-Leader",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://surreynowleader.com/feed/",
+   "region": "Colombie-Britannique"
+  },
+  "thecasket.ca": {
+   "name": "The Casket",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://thecasket.ca/feed/",
+   "region": "Nouvelle-Écosse"
+  },
+  "thecoast.ca": {
+   "name": "The Coast",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.thecoast.ca/feed/",
+   "region": "Nouvelle-Écosse"
+  },
+  "thevarsity.ca": {
+   "name": "The Varsity",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://thevarsity.ca/feed/",
+   "region": "Ontario"
+  },
+  "runnermag.ca": {
+   "name": "The Runner",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://runnermag.ca/feed/",
+   "region": ""
+  },
+  "lionsroar.com": {
+   "name": "Lion's Roar",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.lionsroar.com/feed/",
+   "region": ""
+  },
+  "ubyssey.ca": {
+   "name": "The Ubyssey",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://ubyssey.ca/rss",
+   "region": ""
+  },
+  "peacearchnews.com": {
+   "name": "Peace Arch News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://peacearchnews.com/feed/",
+   "region": "Colombie-Britannique"
+  },
+  "mindentimes.ca": {
+   "name": "Minden Times",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://mindentimes.ca/feed/",
+   "region": ""
+  },
+  "reddeeradvocate.com": {
+   "name": "Red Deer Advocate",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://reddeeradvocate.com/feed/",
+   "region": "Alberta"
+  },
+  "ontariofarmer.com": {
+   "name": "Ontario Farmer",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://ontariofarmer.com/feed/",
+   "region": ""
+  },
+  "martlet.ca": {
+   "name": "The Martlet",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://martlet.ca/feed/",
+   "region": ""
+  },
+  "themanitoban.com": {
+   "name": "The Manitoban",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://themanitoban.com/feed/",
+   "region": ""
+  },
+  "bancroftthisweek.com": {
+   "name": "Bancroft This Week",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.bancroftthisweek.com/feed/",
+   "region": ""
+  },
+  "ashcroftcachecreekjournal.com": {
+   "name": "Ashcroft-Cache Creek Journal",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://ashcroftcachecreekjournal.com/feed/",
+   "region": ""
+  },
+  "thefulcrum.ca": {
+   "name": "The Fulcrum",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://thefulcrum.ca/feed/",
+   "region": ""
+  },
+  "qctonline.com": {
+   "name": "Gazette de Québec",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.qctonline.com/feed/",
+   "region": ""
+  },
+  "abakanews.org": {
+   "name": "Abaka",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://abakanews.org/feed/",
+   "region": "Montréal"
+  },
+  "haliburtonecho.ca": {
+   "name": "Haliburton Echo",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://haliburtonecho.ca/feed/",
+   "region": ""
+  },
+  "campbellrivermirror.com": {
+   "name": "Campbell River Mirror",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://campbellrivermirror.com/feed/",
+   "region": ""
+  },
+  "horizonweekly.ca": {
+   "name": "Horizon Weekly",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://horizonweekly.ca/feed/",
+   "region": "Montréal"
+  },
+  "grandforksgazette.ca": {
+   "name": "Grand Forks Gazette",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://grandforksgazette.ca/feed/",
+   "region": ""
+  },
+  "excal.on.ca": {
+   "name": "Excalibur Publications",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://excal.on.ca/feed/",
+   "region": ""
+  },
+  "cornwallseawaynews.com": {
+   "name": "Cornwall Seaway News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://cornwallseawaynews.com/feed/",
+   "region": "Ontario"
+  },
+  "langleyadvancetimes.com": {
+   "name": "Langley Advance Times",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://langleyadvancetimes.com/feed/",
+   "region": "Colombie-Britannique"
+  },
+  "theconcordian.com": {
+   "name": "The Concordian",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://theconcordian.com/feed/",
+   "region": "Montréal"
+  },
+  "madonnahouse.org": {
+   "name": "Restoration",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://madonnahouse.org/feed/",
+   "region": ""
+  },
+  "dailyheraldtribune.com": {
+   "name": "Grande Prairie Daily Herald-Tribune",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://dailyheraldtribune.com/feed/",
+   "region": ""
+  },
+  "stalbertgazette.com": {
+   "name": "St. Albert Gazette",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://stalbertgazette.com/rss",
+   "region": ""
+  },
+  "piquenewsmagazine.com": {
+   "name": "Pique Newsmagazine",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://piquenewsmagazine.com/rss",
+   "region": "Colombie-Britannique"
+  },
+  "athabascaadvocate.com": {
+   "name": "The Athabasca Advocate",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://athabascaadvocate.com/rss",
+   "region": ""
+  },
+  "thereminder.ca": {
+   "name": "The Reminder",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.thereminder.ca/feed/",
+   "region": ""
+  },
+  "capilanocourier.com": {
+   "name": "The Capilano Courier",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.capilanocourier.com/feed/",
+   "region": ""
+  },
+  "thebeaverton.com": {
+   "name": "The Beaverton",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://thebeaverton.com/feed/",
+   "region": "Ontario"
+  },
+  "the-peak.ca": {
+   "name": "The Peak",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://the-peak.ca/feed/",
+   "region": ""
+  },
+  "thegauntlet.ca": {
+   "name": "Gauntlet",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://thegauntlet.ca/default-index/rss/",
+   "region": "Alberta"
+  },
+  "dailyhive.com": {
+   "name": "Daily Hive",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://dailyhive.com/feed/",
+   "region": ""
+  },
+  "brandonsun.com": {
+   "name": "The Brandon Sun",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.brandonsun.com/feed",
+   "region": ""
+  },
+  "canadian-courier.ca": {
+   "name": "Canadian Courier",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://canadian-courier.ca/feed",
+   "region": "Ontario"
+  },
+  "nnsl.com": {
+   "name": "News/North",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://nnsl.com/feed/",
+   "region": ""
+  },
+  "lifesitenews.com": {
+   "name": "LifeSiteNews.com",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.lifesitenews.com/feed/",
+   "region": ""
+  },
+  "richmond-news.com": {
+   "name": "Richmond News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://richmond-news.com/rss",
+   "region": "Colombie-Britannique"
+  },
+  "itineraire.ca": {
+   "name": "L'Itinéraire",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.itineraire.ca/feed/",
+   "region": ""
+  },
+  "pvonline.ca": {
+   "name": "People’s Voice",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://pvonline.ca/feed/",
+   "region": ""
+  },
+  "meridianbooster.com": {
+   "name": "Lloydminster Meridian Booster",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://meridiansource.ca/feed/",
+   "region": ""
+  },
+  "westlocknews.com": {
+   "name": "Westlock News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://westlocknews.com/rss",
+   "region": "Alberta"
+  },
+  "journalpioneer.com": {
+   "name": "Journal Pioneer",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://journalpioneer.com/feed/",
+   "region": ""
+  },
+  "thebruns.ca": {
+   "name": "The Brunswickan",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://thebruns.ca/feed/",
+   "region": "Nouveau-Brunswick"
+  },
+  "globalnews.ca": {
+   "name": "CKND-DT",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://globalnews.ca/feed/",
+   "region": "Manitoba"
+  },
+  "bnnbloomberg.ca": {
+   "name": "BNN Bloomberg",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://bnnbloomberg.ca/arc/outboundfeeds/rss/?outputType=xml",
+   "region": "Ontario"
+  },
+  "ctvnews.ca": {
+   "name": "CTV News Channel",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://ctvnews.ca/arc/outboundfeeds/rss/?outputType=xml",
+   "region": "Ontario"
+  },
+  "cheknews.ca": {
+   "name": "CHEK-DT",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://cheknews.ca/feed/",
+   "region": "Colombie-Britannique"
+  },
+  "sportsnet.ca": {
+   "name": "Sportsnet",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://sportsnet.ca/feed/",
+   "region": "Ontario"
+  },
+  "tvanouvelles.ca": {
+   "name": "CFTM-DT",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://tvanouvelles.ca/rss",
+   "region": "Montréal"
+  },
+  "toronto.citynews.ca": {
+   "name": "CITY-DT",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://toronto.citynews.ca/feed/",
+   "region": "Ontario"
+  },
+  "ottawa.ctvnews.ca": {
+   "name": "CJOH-DT",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://ottawa.ctvnews.ca/arc/outboundfeeds/rss/?outputType=xml",
+   "region": "Ontario"
+  },
+  "toronto.ctvnews.ca": {
+   "name": "CFTO-DT",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://toronto.ctvnews.ca/arc/outboundfeeds/rss/?outputType=xml",
+   "region": "Ontario"
+  },
+  "tsn.ca": {
+   "name": "The Sports Network",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://tsn.ca/arc/outboundfeeds/rss/?outputType=xml",
+   "region": "Ontario"
+  },
+  "cp24.com": {
+   "name": "CP24",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://cp24.com/arc/outboundfeeds/rss/?outputType=xml",
+   "region": "Ontario"
+  },
+  "barrie.ctvnews.ca": {
+   "name": "CKVR-DT",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://barrie.ctvnews.ca/arc/outboundfeeds/rss/?outputType=xml",
+   "region": "Ontario"
+  },
+  "chco.tv": {
+   "name": "CHCO-TV",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://chco.tv/feed/",
+   "region": "Nouveau-Brunswick"
+  },
+  "stingray.com": {
+   "name": "Stingray Juicebox",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.stingray.com/feed/",
+   "region": "Ontario"
+  },
+  "alltv.ca": {
+   "name": "All TV",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://alltv.ca/rss",
+   "region": ""
+  },
+  "winnipeg.citynews.ca": {
+   "name": "CHMI-DT",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://winnipeg.citynews.ca/feed/",
+   "region": "Manitoba"
+  },
+  "mychamplainvalley.com": {
+   "name": "WFFF-TV",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://mychamplainvalley.com/feed/",
+   "region": "Montréal"
+  },
+  "cftktv.com": {
+   "name": "CFTK-TV",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://cftktv.com/arc/outboundfeeds/rss/?outputType=xml",
+   "region": "Colombie-Britannique"
+  },
+  "edmonton.ctvnews.ca": {
+   "name": "CFRN-DT",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://edmonton.ctvnews.ca/arc/outboundfeeds/rss/?outputType=xml",
+   "region": "Alberta"
+  },
+  "univision.ca": {
+   "name": "Univision Canada",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://univision.ca/feed/",
+   "region": "Ontario"
+  },
+  "northernontario.ctvnews.ca": {
+   "name": "CHBX-TV",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://northernontario.ctvnews.ca/arc/outboundfeeds/rss/?outputType=xml",
+   "region": "Ontario"
+  },
+  "retro.stingray.com": {
+   "name": "Stingray Retro",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.stingray.com/feed/",
+   "region": "Ontario"
+  },
+  "loud.stingray.com": {
+   "name": "Stingray Loud",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.stingray.com/feed/",
+   "region": "Ontario"
+  },
+  "vibe.stingray.com": {
+   "name": "Stingray Vibe",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.stingray.com/feed/",
+   "region": "Ontario"
+  },
+  "tln.ca": {
+   "name": "TLN",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.tln.ca/feed/",
+   "region": "Ontario"
+  },
+  "rds.ca": {
+   "name": "Réseau des sports",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://rds.ca/arc/outboundfeeds/rss/?outputType=xml",
+   "region": "Montréal"
+  },
+  "palmaresadisq.stingray.com": {
+   "name": "PalmarèsADISQ par Stingray",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.stingray.com/feed/",
+   "region": "Montréal"
+  },
+  "atlantic.ctvnews.ca": {
+   "name": "CKLT-DT",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://atlantic.ctvnews.ca/arc/outboundfeeds/rss/?outputType=xml",
+   "region": "Nouveau-Brunswick"
+  },
+  "cjdctv.com": {
+   "name": "CJDC-TV",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://cjdctv.com/arc/outboundfeeds/rss/?outputType=xml",
+   "region": "Colombie-Britannique"
+  },
+  "winnipeg.ctvnews.ca": {
+   "name": "CKY-DT",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://winnipeg.ctvnews.ca/arc/outboundfeeds/rss/?outputType=xml",
+   "region": "Manitoba"
+  },
+  "hits.stingray.com": {
+   "name": "Stingray Hits!",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.stingray.com/feed/",
+   "region": ""
+  },
+  "vancouverisland.ctvnews.ca": {
+   "name": "CIVI-DT",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://vancouverisland.ctvnews.ca/arc/outboundfeeds/rss/?outputType=xml",
+   "region": "Colombie-Britannique"
+  },
+  "channelpunjabi.ca": {
+   "name": "Channel Punjabi",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://channelpunjabi.ca/feed/",
+   "region": ""
+  },
+  "mediasetitalia.ca": {
+   "name": "Mediaset Italia",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://mediasetitalia.ca/feed/",
+   "region": ""
+  },
+  "ntv.ca": {
+   "name": "CJON-DT",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://ntv.ca/feed/",
+   "region": "Terre-Neuve-et-Labrador"
+  },
+  "iconcerts.stingray.com": {
+   "name": "Stingray iConcerts",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.stingray.com/feed/",
+   "region": ""
+  },
+  "megatv.com": {
+   "name": "MEGA Cosmos",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://megatv.com/feed/",
+   "region": "Ontario"
+  },
+  "country.stingray.com": {
+   "name": "Stingray Country",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.stingray.com/feed/",
+   "region": ""
+  },
+  "briarpatchmagazine.com": {
+   "name": "Briarpatch",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://briarpatchmagazine.com/feed/",
+   "region": "Saskatchewan"
+  },
+  "thepostmillennial.com": {
+   "name": "The Post Millennial",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://thepostmillennial.com/feed/",
+   "region": "Montréal"
+  },
+  "blogto.com": {
+   "name": "blogTO",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.blogto.com/rss/articles.xml",
+   "region": "Ontario",
+   "cities": [
+    "Toronto",
+    "Mississauga",
+    "Markham",
+    "Vaughan",
+    "Whitby",
+    "Milton",
+    "Pickering",
+    "Halton Hills"
+   ]
+  },
+  "ottawa.citynews.ca": {
+   "name": "CityNews Ottawa",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://ottawa.citynews.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Ottawa",
+    "Kanata"
+   ]
+  },
+  "calgaryjournal.ca": {
+   "name": "Calgary Journal",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://calgaryjournal.ca/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Calgary",
+    "Airdrie",
+    "Cochrane",
+    "Chestermere",
+    "Canmore"
+   ]
+  },
+  "apt613.ca": {
+   "name": "Apartment613",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://apt613.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Ottawa",
+    "Kanata"
+   ]
+  },
+  "nowtoronto.com": {
+   "name": "NOW Toronto",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://nowtoronto.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Toronto",
+    "Markham",
+    "Vaughan",
+    "Whitby",
+    "Pickering",
+    "Halton Hills"
+   ]
+  },
+  "cfweradio.ca": {
+   "name": "CFWE",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://cfweradio.ca/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Edmonton",
+    "St. Albert",
+    "Spruce Grove",
+    "Leduc",
+    "Fort Saskatchewan",
+    "Stony Plain"
+   ]
+  },
+  "montrealsecret.co": {
+   "name": "Montréal Secret",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://montrealsecret.co/feed/",
+   "region": "Montréal",
+   "cities": [
+    "Montréal",
+    "Laval",
+    "Longueuil",
+    "Terrebonne",
+    "Saint-Jean-sur-Richelieu",
+    "Brossard",
+    "Mascouche",
+    "Saint-Eustache"
+   ]
+  },
+  "ravenradio.ca": {
+   "name": "Raven Radio Network",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://ravenradio.ca/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Edmonton",
+    "Leduc",
+    "Fort Saskatchewan",
+    "Stony Plain"
+   ]
+  },
+  "edmonton.citynews.ca": {
+   "name": "CityNews Edmonton",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://edmonton.citynews.ca/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Edmonton",
+    "St. Albert",
+    "Spruce Grove",
+    "Leduc",
+    "Fort Saskatchewan",
+    "Stony Plain"
+   ]
+  },
+  "capitalcurrent.ca": {
+   "name": "Capital Current",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://capitalcurrent.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Ottawa",
+    "Kanata"
+   ]
+  },
+  "obj.ca": {
+   "name": "Ottawa Business Journal",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://obj.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Ottawa",
+    "Kanata"
+   ]
+  },
+  "chrisd.ca": {
+   "name": "ChrisD.ca",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.chrisd.ca/feed/",
+   "region": "Manitoba",
+   "cities": [
+    "Winnipeg"
+   ]
+  },
+  "oakvillenews.org": {
+   "name": "Oakville News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://oakvillenews.org/rss",
+   "region": "Ontario",
+   "cities": [
+    "Mississauga",
+    "Hamilton",
+    "Oakville",
+    "Burlington",
+    "Milton",
+    "Halton Hills"
+   ]
+  },
+  "torontolife.com": {
+   "name": "Toronto Life",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://torontolife.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Toronto",
+    "Mississauga",
+    "Vaughan",
+    "Oakville",
+    "Pickering"
+   ]
+  },
+  "caledoncitizen.com": {
+   "name": "Caledon Citizen |",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://caledoncitizen.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Brampton"
+   ]
+  },
+  "silo57.ca": {
+   "name": "Silo 57",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://silo57.ca/rss.xml",
+   "region": "Montréal",
+   "cities": [
+    "Montréal",
+    "Longueuil",
+    "Terrebonne",
+    "Saint-Jean-sur-Richelieu",
+    "Brossard",
+    "Mascouche",
+    "Saint-Eustache",
+    "Vaudreuil-Dorion"
+   ]
+  },
+  "cityhallwatch.wordpress.com": {
+   "name": "CityHallWatch",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://cityhallwatch.wordpress.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Vancouver",
+    "Burnaby",
+    "Richmond",
+    "North Vancouver",
+    "Port Moody"
+   ]
+  },
+  "atuvu.ca": {
+   "name": "Atuvu.ca",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://atuvu.ca/rss.xml",
+   "region": "Capitale-Nationale",
+   "cities": [
+    "Québec",
+    "Lévis",
+    "Saint-Augustin-de-Desmaures",
+    "L'Ancienne-Lorette",
+    "Pont-Rouge",
+    "Saint-Apollinaire",
+    "Lac-Beauport",
+    "Donnacona"
+   ]
+  },
+  "vancouverisawesome.com": {
+   "name": "Vancouver Is Awesome",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://vancouverisawesome.com/rss",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Vancouver",
+    "Surrey",
+    "Burnaby",
+    "Richmond",
+    "Coquitlam",
+    "Delta",
+    "Maple Ridge",
+    "New Westminster"
+   ]
+  },
+  "nsnews.com": {
+   "name": "North Shore News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://nsnews.com/rss",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Vancouver",
+    "Surrey",
+    "Burnaby",
+    "Coquitlam",
+    "New Westminster",
+    "Port Coquitlam",
+    "North Vancouver",
+    "West Vancouver"
+   ]
+  },
+  "delta-optimist.com": {
+   "name": "Delta Optimist",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://delta-optimist.com/rss",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Vancouver",
+    "Surrey",
+    "Burnaby",
+    "Coquitlam",
+    "Delta",
+    "New Westminster",
+    "Port Coquitlam",
+    "North Vancouver"
+   ]
+  },
+  "vancouver.citynews.ca": {
+   "name": "CityNews Vancouver",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://vancouver.citynews.ca/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Vancouver",
+    "Surrey",
+    "Burnaby",
+    "Richmond",
+    "Abbotsford",
+    "Coquitlam",
+    "Delta",
+    "Maple Ridge"
+   ]
+  },
+  "cloverdalereporter.com": {
+   "name": "Cloverdale Reporter",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://cloverdalereporter.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Surrey",
+    "Burnaby",
+    "Coquitlam",
+    "Delta",
+    "Maple Ridge",
+    "New Westminster",
+    "Port Coquitlam",
+    "West Vancouver"
+   ]
+  },
+  "haldimandpress.com": {
+   "name": "The Haldimand Press",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://haldimandpress.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Hamilton",
+    "Norwich"
+   ]
+  },
+  "brantbeacon.ca": {
+   "name": "BrantBeacon",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.brantbeacon.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Hamilton",
+    "Brantford",
+    "Norwich"
+   ]
+  },
+  "mapleridgenews.com": {
+   "name": "Maple Ridge News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://mapleridgenews.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Surrey",
+    "Abbotsford",
+    "Coquitlam",
+    "Maple Ridge",
+    "Port Coquitlam",
+    "Mission",
+    "Port Moody",
+    "Pitt Meadows"
+   ]
+  },
+  "thepublicrecord.ca": {
+   "name": "TPR Hamilton",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://thepublicrecord.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Hamilton",
+    "Oakville",
+    "Burlington",
+    "Milton"
+   ]
+  },
+  "baronmag.com": {
+   "name": "Baron Mag",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://baronmag.com/feed/",
+   "region": "Capitale-Nationale",
+   "cities": [
+    "Québec",
+    "Lévis",
+    "Saint-Jean-sur-Richelieu",
+    "Granby",
+    "Côte-Saint-Luc",
+    "Saint-Augustin-de-Desmaures",
+    "L'Ancienne-Lorette",
+    "Cowansville"
+   ]
+  },
+  "aldergrovestar.com": {
+   "name": "Aldergrove Star",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://aldergrovestar.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Surrey",
+    "Abbotsford",
+    "Coquitlam",
+    "Maple Ridge",
+    "Mission",
+    "Langley",
+    "Pitt Meadows"
+   ]
+  },
+  "stthomastoday.ca": {
+   "name": "94.1 St.ThomasToday.ca",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://stthomastoday.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "London",
+    "St. Thomas",
+    "Strathroy-Caradoc",
+    "Norwich"
+   ]
+  },
+  "beachmetro.com": {
+   "name": "Beach Metro Community News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://beachmetro.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Markham",
+    "Whitby"
+   ]
+  },
+  "durhamradionews.com": {
+   "name": "Durham Radio News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.durhamradionews.com/feed",
+   "region": "Ontario",
+   "cities": [
+    "Markham",
+    "Oshawa",
+    "Whitby",
+    "Ajax",
+    "Pickering",
+    "Kawartha Lakes",
+    "Whitchurch-Stouffville",
+    "Uxbridge"
+   ]
+  },
+  "infodelaval.ca": {
+   "name": "Info de Laval",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://infodelaval.ca/feed/",
+   "region": "Laval",
+   "cities": [
+    "Laval",
+    "Terrebonne",
+    "Repentigny",
+    "Mirabel",
+    "Blainville",
+    "Mascouche",
+    "Dollard-des-Ormeaux",
+    "Saint-Eustache"
+   ]
+  },
+  "tvagatineau.ca": {
+   "name": "TVA Gatineau",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://tvagatineau.ca/feed/",
+   "region": "Outaouais",
+   "cities": [
+    "Gatineau",
+    "Cantley",
+    "L'Ange-Gardien"
+   ]
+  },
+  "newmarkettoday.ca": {
+   "name": "NewmarketToday.ca",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://newmarkettoday.ca/rss",
+   "region": "Ontario",
+   "cities": [
+    "Markham",
+    "Vaughan",
+    "Richmond Hill",
+    "Whitby",
+    "Newmarket",
+    "Aurora",
+    "Whitchurch-Stouffville",
+    "Georgina"
+   ]
+  },
+  "lareleve.qc.ca": {
+   "name": "La Relève de Boucherville",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lareleve.qc.ca/feed/",
+   "region": "Montérégie",
+   "cities": [
+    "Longueuil",
+    "Terrebonne",
+    "Repentigny",
+    "Saint-Hyacinthe",
+    "Mascouche",
+    "Boucherville",
+    "Sorel-Tracy",
+    "Saint-Constant"
+   ]
+  },
+  "versants.com": {
+   "name": "Les Versants",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://versants.com/feed/",
+   "region": "Montérégie",
+   "cities": [
+    "Longueuil",
+    "Saint-Jean-sur-Richelieu",
+    "Brossard",
+    "Repentigny",
+    "Saint-Hyacinthe",
+    "Boucherville",
+    "Saint-Constant",
+    "Chambly"
+   ]
+  },
+  "cjwwradio.com": {
+   "name": "Country 600 CJWW",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://cjwwradio.com/feed/",
+   "region": "Saskatchewan",
+   "cities": [
+    "Saskatoon"
+   ]
+  },
+  "cjme.com": {
+   "name": "980 CJME",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://cjme.com/feed/",
+   "region": "Saskatchewan",
+   "cities": [
+    "Saskatoon",
+    "Regina"
+   ]
+  },
+  "620ckrm.com": {
+   "name": "620 CKRM",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://620ckrm.com/feed/",
+   "region": "Saskatchewan",
+   "cities": [
+    "Saskatoon",
+    "Regina"
+   ]
+  },
+  "windsorite.ca": {
+   "name": "windsor news",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://windsorite.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Windsor",
+    "Tecumseh",
+    "Amherstburg"
+   ]
+  },
+  "chipfm.com": {
+   "name": "CHIP FM",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://chipfm.com/feed",
+   "region": "Outaouais",
+   "cities": [
+    "Gatineau",
+    "Cantley",
+    "L'Ange-Gardien"
+   ]
+  },
+  "dbusiness.com": {
+   "name": "DBusiness Magazine",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.dbusiness.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Windsor",
+    "Tecumseh",
+    "Amherstburg",
+    "Detroit"
+   ]
+  },
+  "gx94radio.com": {
+   "name": "GX94 Radio",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://gx94radio.com/feed/",
+   "region": "Saskatchewan",
+   "cities": [
+    "Regina",
+    "Yorkton"
+   ]
+  },
+  "metrotimes.com": {
+   "name": "Detroit Metro Times",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://metrotimes.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Windsor",
+    "Tecumseh",
+    "Amherstburg",
+    "Detroit"
+   ]
+  },
+  "abbynews.com": {
+   "name": "Abbotsford News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://abbynews.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Abbotsford",
+    "Maple Ridge",
+    "Chilliwack",
+    "Port Coquitlam",
+    "Mission"
+   ]
+  },
+  "theprogress.com": {
+   "name": "Chilliwack Progress",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://theprogress.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Abbotsford",
+    "Chilliwack",
+    "Mission"
+   ]
+  },
+  "missioncityrecord.com": {
+   "name": "Mission City Record",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://missioncityrecord.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Abbotsford",
+    "Chilliwack",
+    "Mission"
+   ]
+  },
+  "informeaffaires.com": {
+   "name": "Informe Affaires",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://informeaffaires.com/rss",
+   "region": "Saguenay--Lac-Saint-Jean",
+   "cities": [
+    "Saguenay",
+    "Roberval",
+    "Saint-Ambroise",
+    "Saint-David-de-Falardeau",
+    "Saint-Gédéon",
+    "L'Ascension-de-Notre-Seigneur",
+    "Mashteuiatsh"
+   ]
+  },
+  "elliotlaketoday.com": {
+   "name": "ElliotLakeToday.com",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://elliotlaketoday.com/rss",
+   "region": "Ontario",
+   "cities": [
+    "Grand Sudbury",
+    "Elliot Lake"
+   ]
+  },
+  "agassizharrisonobserver.com": {
+   "name": "Agassiz Harrison Observer",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://agassizharrisonobserver.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Abbotsford",
+    "Chilliwack",
+    "Mission"
+   ]
+  },
+  "lerefletdulac.com": {
+   "name": "Le Reflet du Lac",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lerefletdulac.com/feed/",
+   "region": "Estrie",
+   "cities": [
+    "Sherbrooke",
+    "Magog",
+    "Bromont",
+    "Coaticook",
+    "Lac-Brome",
+    "Cookshire-Eaton",
+    "Saint-Denis-de-Brompton",
+    "Ascot Corner"
+   ]
+  },
+  "lhebdodustmaurice.com": {
+   "name": "L’Hebdo du St-Maurice",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lhebdodustmaurice.com/feed/",
+   "region": "Mauricie",
+   "cities": [
+    "Trois-Rivières",
+    "Shawinigan",
+    "Bécancour",
+    "Nicolet",
+    "Notre-Dame-du-Mont-Carmel",
+    "Saint-Tite",
+    "Saint-Alexis-des-Monts",
+    "Yamachiche"
+   ]
+  },
+  "sudbury.com": {
+   "name": "Sudbury News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://sudbury.com/rss",
+   "region": "Ontario",
+   "cities": [
+    "Grand Sudbury"
+   ]
+  },
+  "lechodemaskinonge.com": {
+   "name": "L’Écho de Maskinongé",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lechodemaskinonge.com/feed/",
+   "region": "Mauricie",
+   "cities": [
+    "Trois-Rivières",
+    "Shawinigan",
+    "Bécancour",
+    "Nicolet",
+    "Louiseville",
+    "Notre-Dame-du-Mont-Carmel",
+    "Saint-Cyrille-de-Wendover",
+    "Saint-Alexis-des-Monts"
+   ]
+  },
+  "innisfiltoday.ca": {
+   "name": "InnisfilToday.ca",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://innisfiltoday.ca/rss",
+   "region": "Ontario",
+   "cities": [
+    "Barrie",
+    "Georgina",
+    "New Tecumseth",
+    "East Gwillimbury",
+    "Uxbridge"
+   ]
+  },
+  "kelownacapnews.com": {
+   "name": "Kelowna Capital News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://kelownacapnews.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Kelowna",
+    "Salmon Arm"
+   ]
+  },
+  "fm1033.ca": {
+   "name": "FM 103,3",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.fm1033.ca/feed/",
+   "region": "Montérégie",
+   "cities": [
+    "Longueuil",
+    "Repentigny",
+    "Saint-Hyacinthe",
+    "Boucherville",
+    "Chambly",
+    "Sainte-Julie",
+    "Saint-Bruno-de-Montarville",
+    "Beloeil"
+   ]
+  },
+  "saobserver.net": {
+   "name": "Salmon Arm Observer",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://saobserver.net/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Kelowna",
+    "Salmon Arm"
+   ]
+  },
+  "vernonmatters.ca": {
+   "name": "Vernon Matters",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://vernonmatters.ca/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Kelowna",
+    "Vernon",
+    "Salmon Arm"
+   ]
+  },
+  "bradfordtoday.ca": {
+   "name": "BradfordToday.ca",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://bradfordtoday.ca/rss",
+   "region": "Ontario",
+   "cities": [
+    "Barrie",
+    "Newmarket",
+    "Aurora",
+    "Georgina",
+    "New Tecumseth",
+    "Orillia",
+    "East Gwillimbury",
+    "Uxbridge"
+   ]
+  },
+  "barrietoday.com": {
+   "name": "Barrie News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://barrietoday.com/rss",
+   "region": "Ontario",
+   "cities": [
+    "Barrie",
+    "Newmarket",
+    "Aurora",
+    "Georgina",
+    "New Tecumseth",
+    "East Gwillimbury",
+    "Midland"
+   ]
+  },
+  "kelownanow.com": {
+   "name": "KelownaNow",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://kelownanow.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Kelowna",
+    "Vernon",
+    "Penticton",
+    "Salmon Arm",
+    "Summerland"
+   ]
+  },
+  "wellingtonadvertiser.com": {
+   "name": "Wellington Advertiser",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.wellingtonadvertiser.com/rss/",
+   "region": "Ontario",
+   "cities": [
+    "Guelph",
+    "Cambridge",
+    "Waterloo"
+   ]
+  },
+  "observerxtra.com": {
+   "name": "ObserverXtra",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.observerxtra.com/rss/",
+   "region": "Ontario",
+   "cities": [
+    "Guelph",
+    "Cambridge",
+    "Waterloo"
+   ]
+  },
+  "thegrand101.com": {
+   "name": "Grand 101.1 FM",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://thegrand101.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Guelph"
+   ]
+  },
+  "summerlandreview.com": {
+   "name": "Summerland Review",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://summerlandreview.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Kelowna",
+    "Penticton",
+    "Summerland"
+   ]
+  },
+  "barrie360.com": {
+   "name": "Barrie 360",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://barrie360.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Barrie",
+    "Georgina"
+   ]
+  },
+  "guelphtoday.com": {
+   "name": "Guelph News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://guelphtoday.com/rss",
+   "region": "Ontario",
+   "cities": [
+    "Guelph",
+    "Cambridge",
+    "Milton",
+    "Halton Hills"
+   ]
+  },
+  "napaneetoday.ca": {
+   "name": "Napanee Today",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://napaneetoday.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Kingston",
+    "Belleville",
+    "Quinte West",
+    "Greater Napanee"
+   ]
+  },
+  "thoroldtoday.ca": {
+   "name": "ThoroldToday.ca",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://thoroldtoday.ca/rss",
+   "region": "Ontario",
+   "cities": [
+    "Saint Catharines",
+    "Niagara Falls",
+    "Welland",
+    "Thorold"
+   ]
+  },
+  "cambridgetoday.ca": {
+   "name": "CambridgeToday.ca",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://cambridgetoday.ca/rss",
+   "region": "Ontario",
+   "cities": [
+    "Guelph",
+    "Cambridge",
+    "Milton",
+    "Waterloo",
+    "Halton Hills",
+    "Norwich"
+   ]
+  },
+  "vicnews.com": {
+   "name": "Victoria News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://vicnews.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Saanich",
+    "Victoria",
+    "Langford",
+    "Esquimalt",
+    "Sidney"
+   ]
+  },
+  "kitchener.citynews.ca": {
+   "name": "CityNews Kitchener",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://kitchener.citynews.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Guelph",
+    "Cambridge",
+    "Waterloo"
+   ]
+  },
+  "sookenewsmirror.com": {
+   "name": "Sooke News Mirror",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://sookenewsmirror.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Saanich",
+    "Esquimalt"
+   ]
+  },
+  "kingstonherald.com": {
+   "name": "Kingston Herald",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://kingstonherald.com/feed",
+   "region": "Ontario",
+   "cities": [
+    "Kingston",
+    "Greater Napanee"
+   ]
+  },
+  "rdnewsnow.com": {
+   "name": "rdnewsnow.com",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://rdnewsnow.com/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Red Deer",
+    "Sylvan Lake",
+    "Lacombe",
+    "Blackfalds"
+   ]
+  },
+  "sequimgazette.com": {
+   "name": "Sequim Gazette",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://sequimgazette.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Saanich",
+    "Esquimalt"
+   ]
+  },
+  "nanaimonewsnow.com": {
+   "name": "NanaimoNewsNOW",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://nanaimonewsnow.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Nanaimo",
+    "Parksville"
+   ]
+  },
+  "peninsuladailynews.com": {
+   "name": "Peninsula Daily News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://peninsuladailynews.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Saanich",
+    "Esquimalt"
+   ]
+  },
+  "nanaimobulletin.com": {
+   "name": "Nanaimo News Bulletin",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://nanaimobulletin.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Nanaimo",
+    "Parksville"
+   ]
+  },
+  "lethbridgenewsnow.com": {
+   "name": "Lethbridge News Now",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://lethbridgenewsnow.com/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Lethbridge"
+   ]
+  },
+  "cfjctoday.com": {
+   "name": "CFJC Today Kamloops",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://cfjctoday.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Kamloops",
+    "Williams Lake"
+   ]
+  },
+  "bridgecitynews.ca": {
+   "name": "Bridge City News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://bridgecitynews.ca/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Lethbridge"
+   ]
+  },
+  "sunpeaksnews.com": {
+   "name": "Sun Peaks Independent News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://sunpeaksnews.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Kamloops",
+    "Salmon Arm"
+   ]
+  },
+  "mycoastnow.com": {
+   "name": "My Coast Now",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.mycoastnow.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Nanaimo"
+   ]
+  },
+  "peninsulanewsreview.com": {
+   "name": "Peninsula News Review",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://peninsulanewsreview.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Victoria",
+    "Langford",
+    "Sidney"
+   ]
+  },
+  "goldstreamgazette.com": {
+   "name": "Goldstream News Gazette",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://goldstreamgazette.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Victoria",
+    "Langford"
+   ]
+  },
+  "tbnewswatch.com": {
+   "name": "Thunder Bay News - TBNewsWatch.com",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://tbnewswatch.com/rss",
+   "region": "Ontario",
+   "cities": [
+    "Thunder Bay"
+   ]
+  },
+  "lapensee.qc.ca": {
+   "name": "La Pensée de Bagot",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lapensee.qc.ca/feed/",
+   "region": "Centre-du-Québec",
+   "cities": [
+    "Drummondville",
+    "Granby",
+    "Saint-Hyacinthe",
+    "Bromont",
+    "Acton Vale",
+    "Lac-Brome",
+    "Saint-Pie",
+    "Saint-Cyrille-de-Wendover"
+   ]
+  },
+  "wgrz.com": {
+   "name": "WGRZ",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.wgrz.com/feeds/syndication/rss/news",
+   "region": "Ontario",
+   "cities": [
+    "Niagara Falls",
+    "Buffalo"
+   ]
+  },
+  "islandsocialtrends.ca": {
+   "name": "islandsocialtrends.ca",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://islandsocialtrends.ca/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Victoria",
+    "Langford"
+   ]
+  },
+  "lethbridgeherald.com": {
+   "name": "The Lethbridge Herald",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://lethbridgeherald.com/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Lethbridge"
+   ]
+  },
+  "kawarthanow.com": {
+   "name": "kawarthaNOW",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://kawarthanow.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Peterborough",
+    "Kawartha Lakes",
+    "Cobourg",
+    "Selwyn"
+   ]
+  },
+  "journalacces.ca": {
+   "name": "Journal Accès",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://journalacces.ca/feed/",
+   "region": "Laurentides",
+   "cities": [
+    "Saint-Jérôme",
+    "Mirabel",
+    "Saint-Lin--Laurentides",
+    "Sainte-Sophie",
+    "Sainte-Anne-des-Plaines",
+    "Lachute",
+    "Sainte-Adèle",
+    "Prévost"
+   ]
+  },
+  "cjso.ca": {
+   "name": "CJSO",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://cjso.ca/feed/",
+   "region": "Centre-du-Québec",
+   "cities": [
+    "Drummondville",
+    "Sorel-Tracy",
+    "L'Assomption",
+    "Joliette",
+    "Saint-Charles-Borromée",
+    "Lavaltrie",
+    "Rawdon",
+    "Contrecoeur"
+   ]
+  },
+  "todaysnorthumberland.ca": {
+   "name": "Today's Northumberland",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://todaysnorthumberland.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Peterborough",
+    "Kawartha Lakes",
+    "Quinte West",
+    "Cobourg",
+    "Selwyn"
+   ]
+  },
+  "ptbotoday.ca": {
+   "name": "PTBO Today",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://ptbotoday.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Peterborough",
+    "Kawartha Lakes",
+    "Cobourg",
+    "Selwyn"
+   ]
+  },
+  "ckpgtoday.ca": {
+   "name": "CKPG Today",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://ckpgtoday.ca/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Prince George"
+   ]
+  },
+  "myprincegeorgenow.com": {
+   "name": "My Prince George Now",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.myprincegeorgenow.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Prince George"
+   ]
+  },
+  "coupdoeil.info": {
+   "name": "Coup d'Oeil",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://coupdoeil.info/feed/",
+   "region": "Montérégie",
+   "cities": [
+    "Saint-Jean-sur-Richelieu",
+    "Saint-Constant",
+    "Candiac",
+    "Sainte-Catherine",
+    "Marieville",
+    "Saint-Rémi",
+    "Delson",
+    "Napierville"
+   ]
+  },
+  "radio-acton.com": {
+   "name": "Radio-Acton",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.radio-acton.com/feed/",
+   "region": "Centre-du-Québec",
+   "cities": [
+    "Drummondville",
+    "Granby",
+    "Saint-Hyacinthe",
+    "Beloeil",
+    "Mont-Saint-Hilaire",
+    "Bromont",
+    "Acton Vale",
+    "Lac-Brome"
+   ]
+  },
+  "hometownnews.ca": {
+   "name": "hometownnews.ca",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://hometownnews.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Kanata"
+   ]
+  },
+  "petrolialambtonindependent.ca": {
+   "name": "Petrolia Lambton Independent",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://petrolialambtonindependent.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Sarnia"
+   ]
+  },
+  "ckxsfm.com": {
+   "name": "CKXS FM",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://ckxsfm.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Sarnia"
+   ]
+  },
+  "wawa-news.com": {
+   "name": "Wawa-news.com",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://wawa-news.com/index.php/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Sault-Sainte-Marie"
+   ]
+  },
+  "pgdailynews.ca": {
+   "name": "Prince George Daily News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://pgdailynews.ca/index.php/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Prince George"
+   ]
+  },
+  "everythinggp.com": {
+   "name": "EverythingGP",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://everythinggp.com/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Grande Prairie"
+   ]
+  },
+  "sydenhamcurrent.ca": {
+   "name": "The Sydenham Current",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://sydenhamcurrent.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Sarnia",
+    "Strathroy-Caradoc"
+   ]
+  },
+  "wgrt.com": {
+   "name": "WGRT",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://wgrt.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Sarnia"
+   ]
+  },
+  "chatnewstoday.ca": {
+   "name": "CHAT News Today",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://chatnewstoday.ca/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Medicine Hat"
+   ]
+  },
+  "kingstonist.com": {
+   "name": "Kingstonist News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.kingstonist.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Kingston",
+    "Belleville",
+    "Greater Napanee"
+   ]
+  },
+  "cybersoleil.com": {
+   "name": "Le Soleil de Châteauguay",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://cybersoleil.com/feed/",
+   "region": "Montérégie",
+   "cities": [
+    "Châteauguay",
+    "Pincourt",
+    "L'Île-Perrot",
+    "Baie-D'Urfé"
+   ]
+  },
+  "journalsaint-francois.ca": {
+   "name": "Journal Saint-François",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://journalsaint-francois.ca/feed/",
+   "region": "Montérégie",
+   "cities": [
+    "Châteauguay",
+    "Salaberry-de-Valleyfield",
+    "Vaudreuil-Dorion",
+    "Pointe-Claire",
+    "Sainte-Marthe-sur-le-Lac",
+    "Lachute",
+    "Beauharnois",
+    "Pincourt"
+   ]
+  },
+  "mygrandeprairienow.com": {
+   "name": "My Grande Prairie Now",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.mygrandeprairienow.com/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Grande Prairie"
+   ]
+  },
+  "mynorthbaynow.com": {
+   "name": "My North Bay Now",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.mynorthbaynow.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "North Bay"
+   ]
+  },
+  "qcountryfm.ca": {
+   "name": "Q Country 91.5FM",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://qcountryfm.ca/feed/",
+   "region": "Manitoba",
+   "cities": [
+    "Brandon"
+   ]
+  },
+  "citizen.on.ca": {
+   "name": "Orangeville Citizen |",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://citizen.on.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Halton Hills",
+    "New Tecumseth",
+    "Orangeville"
+   ]
+  },
+  "bdnmb.ca": {
+   "name": "bdnmb.ca Brandon MB",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://bdnmb.ca/feed/",
+   "region": "Manitoba",
+   "cities": [
+    "Brandon"
+   ]
+  },
+  "cfnj.net": {
+   "name": "CFNJ",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://cfnj.net/feed/",
+   "region": "Lanaudière",
+   "cities": [
+    "Terrebonne",
+    "Repentigny",
+    "Saint-Hyacinthe",
+    "Mascouche",
+    "Boucherville",
+    "Sorel-Tracy",
+    "Sainte-Julie",
+    "Saint-Bruno-de-Montarville"
+   ]
+  },
+  "inquinte.ca": {
+   "name": "InQuinte.ca",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://inquinte.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Belleville",
+    "Quinte West",
+    "Cobourg",
+    "Selwyn",
+    "Greater Napanee"
+   ]
+  },
+  "quintenews.com": {
+   "name": "Quinte News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://quintenews.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Belleville",
+    "Quinte West",
+    "Cobourg",
+    "Greater Napanee"
+   ]
+  },
+  "napaneebeaver.ca": {
+   "name": "Napanee Beaver",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://napaneebeaver.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Belleville",
+    "Greater Napanee"
+   ]
+  },
+  "countylive.ca": {
+   "name": "Prince Edward County News countylive.ca",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.countylive.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Belleville",
+    "Quinte West",
+    "Greater Napanee"
+   ]
+  },
+  "brightontoday.ca": {
+   "name": "Brighton Today.ca",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://brightontoday.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Belleville",
+    "Quinte West",
+    "Cobourg",
+    "Selwyn"
+   ]
+  },
+  "cornwallnewswatch.com": {
+   "name": "Cornwall Newswatch",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.cornwallnewswatch.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Cornwall"
+   ]
+  },
+  "vernonmorningstar.com": {
+   "name": "Vernon Morning Star",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://vernonmorningstar.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Vernon",
+    "Salmon Arm"
+   ]
+  },
+  "similkameenspotlight.com": {
+   "name": "The Similkameen Spotlight",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://similkameenspotlight.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Vernon",
+    "Penticton",
+    "Summerland"
+   ]
+  },
+  "panow.com": {
+   "name": "paNOW",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://panow.com/feed/",
+   "region": "Saskatchewan",
+   "cities": [
+    "Prince Albert"
+   ]
+  },
+  "tastet.ca": {
+   "name": "Tastet",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://tastet.ca/feed/",
+   "region": "Montréal",
+   "cities": [
+    "Côte-Saint-Luc"
+   ]
+  },
+  "coastreporter.net": {
+   "name": "Coast Reporter",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://coastreporter.net/rss",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "West Vancouver",
+    "Squamish",
+    "Powell River"
+   ]
+  },
+  "pentictonwesternnews.com": {
+   "name": "Penticton Western News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://pentictonwesternnews.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Penticton",
+    "Summerland"
+   ]
+  },
+  "comoxvalleyrecord.com": {
+   "name": "Comox Valley Record",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://comoxvalleyrecord.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Campbell River",
+    "Courtenay",
+    "Powell River"
+   ]
+  },
+  "thesarniajournal.ca": {
+   "name": "The Sarnia Journal",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://thesarniajournal.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Sarnia",
+    "Strathroy-Caradoc"
+   ]
+  },
+  "saanichnews.com": {
+   "name": "Saanich News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://saanichnews.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Langford"
+   ]
+  },
+  "tvaabitibi.ca": {
+   "name": "TVA Abitibi-Temiscamingue",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://tvaabitibi.ca/feed/",
+   "region": "Abitibi-Témiscamingue",
+   "cities": [
+    "Val-d'Or",
+    "Malartic",
+    "Macamic"
+   ]
+  },
+  "timminstoday.com": {
+   "name": "TimminsToday.com",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://timminstoday.com/rss",
+   "region": "Ontario",
+   "cities": [
+    "Timmins"
+   ]
+  },
+  "lakelandtoday.ca": {
+   "name": "LakelandToday.ca",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://lakelandtoday.ca/rss",
+   "region": "Alberta",
+   "cities": [
+    "Leduc",
+    "Beaumont",
+    "Cold Lake"
+   ]
+  },
+  "courrierfrontenac.qc.ca": {
+   "name": "Courrier Frontenac",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://courrierfrontenac.qc.ca/feed/",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Georges",
+    "Thetford Mines",
+    "Montmagny",
+    "Plessisville",
+    "Beauceville",
+    "Saint-Joseph-de-Beauce",
+    "Lac-Etchemin",
+    "Saint-Prosper"
+   ]
+  },
+  "mystratfordnow.com": {
+   "name": "My Stratford Now",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.mystratfordnow.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Stratford"
+   ]
+  },
+  "sherwoodparknews.com": {
+   "name": "Sherwood Park News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://sherwoodparknews.com/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Fort Saskatchewan"
+   ]
+  },
+  "fox2detroit.com": {
+   "name": "FOX 2 Detroit",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.fox2detroit.com/rss.xml",
+   "region": "Ontario",
+   "cities": [
+    "Tecumseh",
+    "Detroit"
+   ]
+  },
+  "strathmoretimes.com": {
+   "name": "Strathmore Times",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://strathmoretimes.com/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Chestermere",
+    "Strathmore"
+   ]
+  },
+  "bayshorebroadcasting.ca": {
+   "name": "Bayshore Broadcasting News Centre",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://bayshorebroadcasting.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Owen Sound",
+    "Kincardine"
+   ]
+  },
+  "grossepointenews.com": {
+   "name": "Grosse Pointe News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://grossepointenews.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Tecumseh"
+   ]
+  },
+  "exetertoday.ca": {
+   "name": "90.5 Exeter Today",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://exetertoday.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Strathroy-Caradoc"
+   ]
+  },
+  "squamishchief.com": {
+   "name": "Squamish Chief",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://squamishchief.com/rss",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Squamish",
+    "Whistler"
+   ]
+  },
+  "collingwoodtoday.ca": {
+   "name": "CollingwoodToday.ca",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://collingwoodtoday.ca/rss",
+   "region": "Ontario",
+   "cities": [
+    "Owen Sound",
+    "Midland"
+   ]
+  },
+  "southmuskoka.doppleronline.ca": {
+   "name": "South Muskoka Doppler",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://southmuskoka.doppleronline.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Huntsville"
+   ]
+  },
+  "mymuskokanow.com": {
+   "name": "My Muskoka Now",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.mymuskokanow.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Huntsville"
+   ]
+  },
+  "lecharlevoisien.com": {
+   "name": "Le Charlevoisien",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lecharlevoisien.com/feed/",
+   "region": "Bas-Saint-Laurent",
+   "cities": [
+    "Rivière-du-Loup",
+    "Pont-Rouge",
+    "Montmagny",
+    "Stoneham-et-Tewkesbury",
+    "Boischatel",
+    "Sainte-Brigitte-de-Laval",
+    "La Malbaie",
+    "Donnacona"
+   ]
+  },
+  "albernivalleynews.com": {
+   "name": "Port Alberni Valley News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://albernivalleynews.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Port Alberni"
+   ]
+  },
+  "cabinradio.ca": {
+   "name": "Cabin Radio",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://cabinradio.ca/feed/",
+   "region": "Territoires du Nord-Ouest",
+   "cities": [
+    "Yellowknife"
+   ]
+  },
+  "nantes.maville.com": {
+   "name": "maville.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://nantes.maville.com/flux/rss/actu.php?c=loc",
+   "region": "Laurentides",
+   "cities": [
+    "Saint-Colomban",
+    "Saint-Nazaire"
+   ]
+  },
+  "sylvanlakenews.com": {
+   "name": "Sylvan Lake News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://sylvanlakenews.com/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Sylvan Lake",
+    "Lacombe"
+   ]
+  },
+  "mycomoxvalleynow.com": {
+   "name": "My Comox Valley Now",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.mycomoxvalleynow.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Courtenay",
+    "Powell River"
+   ]
+  },
+  "labaule.maville.com": {
+   "name": "maville.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://labaule.maville.com/flux/rss/actu.php?c=dep",
+   "region": "Laurentides",
+   "cities": [
+    "Saint-Colomban",
+    "Saint-Nazaire"
+   ]
+  },
+  "energeticcity.ca": {
+   "name": "Energeticcity",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://energeticcity.ca/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Fort St. John",
+    "Dawson Creek"
+   ]
+  },
+  "hashilthsa.com": {
+   "name": "Ha-Shilth-Sa Newspaper",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://hashilthsa.com/rss.xml",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Port Alberni"
+   ]
+  },
+  "midlandtoday.ca": {
+   "name": "MidlandToday.ca",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://midlandtoday.ca/rss",
+   "region": "Ontario",
+   "cities": [
+    "Midland"
+   ]
+  },
+  "meridiansource.ca": {
+   "name": "Meridian Source",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://meridiansource.ca/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Lloydminster"
+   ]
+  },
+  "magaspesie.ca": {
+   "name": "Ma Gaspésie",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://magaspesie.ca/feed/",
+   "region": "Bas-Saint-Laurent",
+   "cities": [
+    "Matane",
+    "Amqui",
+    "Causapscal"
+   ]
+  },
+  "kingsvilletimes.ca": {
+   "name": "Kingsville Times",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://kingsvilletimes.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Tecumseh",
+    "Amherstburg"
+   ]
+  },
+  "pqbnews.com": {
+   "name": "Parksville Qualicum News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://pqbnews.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Parksville"
+   ]
+  },
+  "pembroketoday.ca": {
+   "name": "104.9 Pembroke Today",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://pembroketoday.ca/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Pembroke"
+   ]
+  },
+  "lacombeexpress.com": {
+   "name": "Lacombe Express",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://lacombeexpress.com/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Lacombe",
+    "Blackfalds"
+   ]
+  },
+  "mylloydminsternow.com": {
+   "name": "My Lloydminster Now",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.mylloydminsternow.com/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Lloydminster"
+   ]
+  },
+  "ponokanews.com": {
+   "name": "Ponoka News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://ponokanews.com/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Lacombe"
+   ]
+  },
+  "thenorthernview.com": {
+   "name": "The Northern View",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://thenorthernview.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Prince Rupert"
+   ]
+  },
+  "carrefourdequebec.com": {
+   "name": "Journal Le Carrefour de Québec",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.carrefourdequebec.com/feed/",
+   "region": "Capitale-Nationale",
+   "cities": [
+    "L'Ancienne-Lorette",
+    "Stoneham-et-Tewkesbury",
+    "Boischatel",
+    "Sainte-Brigitte-de-Laval",
+    "Château-Richer",
+    "Beaupré",
+    "Sainte-Claire",
+    "Sainte-Anne-de-Beaupré"
+   ]
+  },
+  "interior-news.com": {
+   "name": "The Interior News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://interior-news.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Terrace"
+   ]
+  },
+  "prpeak.com": {
+   "name": "Powell River Peak",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://prpeak.com/rss",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Powell River"
+   ]
+  },
+  "wltribune.com": {
+   "name": "Williams Lake Tribune",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://wltribune.com/feed/",
+   "region": "Colombie-Britannique",
+   "cities": [
+    "Williams Lake"
+   ]
+  },
+  "cmatv.ca": {
+   "name": "CMATV",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://cmatv.ca/feed/",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Montmagny",
+    "Boischatel",
+    "Sainte-Brigitte-de-Laval",
+    "Baie-Saint-Paul",
+    "La Pocatière",
+    "Château-Richer",
+    "Beaupré",
+    "Sainte-Claire"
+   ]
+  },
+  "wetaskiwintimes.com": {
+   "name": "Wetaskiwin Times",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://wetaskiwintimes.com/feed/",
+   "region": "Alberta",
+   "cities": [
+    "Wetaskiwin"
+   ]
+  },
+  "sorstu.ca": {
+   "name": "Sors-tu?",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://sorstu.ca/feed/",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Henri",
+    "Ville-Marie"
+   ]
+  },
+  "saugeentimes.com": {
+   "name": "Saugeen Times",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://saugeentimes.com/feed/",
+   "region": "Ontario",
+   "cities": [
+    "Kincardine"
+   ]
+  },
+  "chga.fm": {
+   "name": "Radio CHGA",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.chga.fm/feed/podcast",
+   "region": "Laurentides",
+   "cities": [
+    "Mont-Laurier",
+    "Maniwaki",
+    "Gracefield",
+    "Déléage"
+   ]
+  },
+  "cathobel.be": {
+   "name": "CathoBel",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://cathobel.be/feed/",
+   "region": "Estrie",
+   "cities": [
+    "Waterloo"
+   ]
+  },
+  "mercisf.com": {
+   "name": "MerciSF",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://mercisf.com/feed/",
+   "region": "Laurentides",
+   "cities": [
+    "Piedmont"
+   ]
+  },
+  "nicematin.com": {
+   "name": "Nice-Matin",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://nicematin.com/rss",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Raphaël"
+   ]
+  },
+  "echodefrontenac.com": {
+   "name": "L'Écho de Frontenac",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://echodefrontenac.com/rss.xml",
+   "region": "Estrie",
+   "cities": [
+    "Lac-Mégantic",
+    "Weedon",
+    "Saint-Gédéon-de-Beauce"
+   ]
+  },
+  "petitesaffiches.fr": {
+   "name": "Petites Affiches",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://petitesaffiches.fr/feed/",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Raphaël"
+   ]
+  },
+  "paris-normandie.fr": {
+   "name": "Paris Normandie",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://paris-normandie.fr/rss.xml",
+   "region": "Montérégie",
+   "cities": [
+    "Léry"
+   ]
+  },
+  "info83.fr": {
+   "name": "Info 83",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.info83.fr/feed/",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Raphaël"
+   ]
+  },
+  "lemessager.fr": {
+   "name": "Le Messager",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lemessager.fr/rss.xml",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Gervais"
+   ]
+  },
+  "tv83.info": {
+   "name": "TV83",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.tv83.info/feed/",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Raphaël"
+   ]
+  },
+  "actumontagne.com": {
+   "name": "Actumontagne",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.actumontagne.com/feed/",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Gervais"
+   ]
+  },
+  "saint-nazaire.maville.com": {
+   "name": "maville.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://saint-nazaire.maville.com/flux/rss/actu.php?c=loc",
+   "region": "Saguenay--Lac-Saint-Jean",
+   "cities": [
+    "Saint-Nazaire"
+   ]
+  },
+  "presseagence.fr": {
+   "name": "Presse Agence",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://presseagence.fr/feed/",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Raphaël"
+   ]
+  },
+  "lessorsavoyard.lemessager.fr": {
+   "name": "L'Essor Savoyard",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lessorsavoyard.lemessager.fr/rss.xml",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Gervais"
+   ]
+  },
+  "tribuca.net": {
+   "name": "Tribuca.net",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://tribuca.net/feed/",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Raphaël"
+   ]
+  },
+  "fox5ny.com": {
+   "name": "FOX 5 New York",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.fox5ny.com/rss.xml",
+   "region": "NY",
+   "cities": [
+    "New York"
+   ]
+  },
+  "nyc.streetsblog.org": {
+   "name": "Streetsblog New York City",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://nyc.streetsblog.org/feed/",
+   "region": "NY",
+   "cities": [
+    "New York"
+   ]
+  },
+  "newsday.com": {
+   "name": "Newsday",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.newsday.com/api/rss/recent",
+   "region": "NY",
+   "cities": [
+    "New York"
+   ]
+  },
+  "nbcnewyork.com": {
+   "name": "NBC New York",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.nbcnewyork.com/?rss=y",
+   "region": "NY",
+   "cities": [
+    "New York"
+   ]
+  },
+  "pix11.com": {
+   "name": "PIX11",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://pix11.com/feed/",
+   "region": "NY",
+   "cities": [
+    "New York"
+   ]
+  },
+  "lessorsavoyard.fr": {
+   "name": "L'Essor Savoyard",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lessorsavoyard.fr/rss.xml",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Gervais"
+   ]
+  },
+  "le-mensuel.com": {
+   "name": "Le Mensuel",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.le-mensuel.com/feed/",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Raphaël"
+   ]
+  },
+  "gothamist.com": {
+   "name": "Gothamist",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://gothamist.com/feed/",
+   "region": "NY",
+   "cities": [
+    "New York"
+   ]
+  },
+  "commercialobserver.com": {
+   "name": "Commercial Observer",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://commercialobserver.com/feed/",
+   "region": "NY",
+   "cities": [
+    "New York"
+   ]
+  },
+  "amny.com": {
+   "name": "amNewYork",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://amny.com/feed/",
+   "region": "NY",
+   "cities": [
+    "New York"
+   ]
+  },
+  "laist.com": {
+   "name": "LAist",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://laist.com/index.atom",
+   "region": "CA",
+   "cities": [
+    "Los Angeles"
+   ]
+  },
+  "amsterdamnews.com": {
+   "name": "New York Amsterdam News",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://amsterdamnews.com/feed/",
+   "region": "NY",
+   "cities": [
+    "New York"
+   ]
+  },
+  "bxtimes.com": {
+   "name": "Bronx Times",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://bxtimes.com/feed/",
+   "region": "NY",
+   "cities": [
+    "New York"
+   ]
+  },
+  "thesource.metro.net": {
+   "name": "LA Metro",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://thesource.metro.net/feed/",
+   "region": "CA",
+   "cities": [
+    "Los Angeles"
+   ]
+  },
+  "la.streetsblog.org": {
+   "name": "Streetsblog Los Angeles",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://la.streetsblog.org/feed/",
+   "region": "CA",
+   "cities": [
+    "Los Angeles"
+   ]
+  },
+  "foxla.com": {
+   "name": "FOX 11 Los Angeles",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.foxla.com/rss.xml",
+   "region": "CA",
+   "cities": [
+    "Los Angeles"
+   ]
+  },
+  "mynewsla.com": {
+   "name": "MyNewsLA.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://mynewsla.com/feed/",
+   "region": "CA",
+   "cities": [
+    "Los Angeles"
+   ]
+  },
+  "chicago.suntimes.com": {
+   "name": "Chicago Sun-Times",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://chicago.suntimes.com/rss/index.xml",
+   "region": "IL",
+   "cities": [
+    "Chicago"
+   ]
+  },
+  "blockclubchicago.org": {
+   "name": "Block Club Chicago",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://blockclubchicago.org/feed/",
+   "region": "IL",
+   "cities": [
+    "Chicago"
+   ]
+  },
+  "unidivers.fr": {
+   "name": "Unidivers",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://unidivers.fr/feed/",
+   "region": "Montérégie",
+   "cities": [
+    "Léry"
+   ]
+  },
+  "la.urbanize.city": {
+   "name": "Urbanize LA",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://la.urbanize.city/rss.xml",
+   "region": "CA",
+   "cities": [
+    "Los Angeles"
+   ]
+  },
+  "therealdeal.com": {
+   "name": "The Real Deal",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://therealdeal.com/new-york/feed/",
+   "region": "IL",
+   "cities": [
+    "Chicago",
+    "Miami"
+   ]
+  },
+  "wbez.org": {
+   "name": "WBEZ Chicago",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wbez.org/rss/index.xml",
+   "region": "IL",
+   "cities": [
+    "Chicago"
+   ]
+  },
+  "wgntv.com": {
+   "name": "WGN-TV",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wgntv.com/feed/",
+   "region": "IL",
+   "cities": [
+    "Chicago"
+   ]
+  },
+  "khou.com": {
+   "name": "KHOU",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.khou.com/feeds/syndication/rss/news",
+   "region": "TX",
+   "cities": [
+    "Houston"
+   ]
+  },
+  "illinoispolicy.org": {
+   "name": "Illinois Policy",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://illinoispolicy.org/feed/",
+   "region": "IL",
+   "cities": [
+    "Chicago"
+   ]
+  },
+  "fox32chicago.com": {
+   "name": "FOX 32 Chicago",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.fox32chicago.com/rss.xml",
+   "region": "IL",
+   "cities": [
+    "Chicago"
+   ]
+  },
+  "houston.culturemap.com": {
+   "name": "CultureMap Houston",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://houston.culturemap.com/feeds/feed.rss",
+   "region": "TX",
+   "cities": [
+    "Houston"
+   ]
+  },
+  "communityimpact.com": {
+   "name": "Community Impact",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://communityimpact.com/rss/",
+   "region": "TX",
+   "cities": [
+    "Houston",
+    "Austin",
+    "Fort Worth"
+   ]
+  },
+  "houstonpublicmedia.org": {
+   "name": "Houston Public Media",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.houstonpublicmedia.org/rsslatest.xml",
+   "region": "TX",
+   "cities": [
+    "Houston"
+   ]
+  },
+  "fox26houston.com": {
+   "name": "FOX 26 Houston",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.fox26houston.com/rss.xml",
+   "region": "TX",
+   "cities": [
+    "Houston"
+   ]
+  },
+  "phoenixnewtimes.com": {
+   "name": "Phoenix New Times",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://phoenixnewtimes.com/feed/",
+   "region": "AZ",
+   "cities": [
+    "Phoenix"
+   ]
+  },
+  "cw39.com": {
+   "name": "CW39 Houston",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://cw39.com/feed/",
+   "region": "TX",
+   "cities": [
+    "Houston"
+   ]
+  },
+  "phoenixmag.com": {
+   "name": "phoenixmag.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://phoenixmag.com/feed/",
+   "region": "AZ",
+   "cities": [
+    "Phoenix"
+   ]
+  },
+  "12news.com": {
+   "name": "12News",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.12news.com/feeds/syndication/rss/news",
+   "region": "AZ",
+   "cities": [
+    "Phoenix"
+   ]
+  },
+  "nbcchicago.com": {
+   "name": "NBC 5 Chicago",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.nbcchicago.com/?rss=y",
+   "region": "IL",
+   "cities": [
+    "Chicago"
+   ]
+  },
+  "whyy.org": {
+   "name": "WHYY",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://whyy.org/feed/",
+   "region": "PA",
+   "cities": [
+    "Philadelphia"
+   ]
+  },
+  "billypenn.com": {
+   "name": "Billy Penn at WHYY",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://billypenn.com/feed/",
+   "region": "PA",
+   "cities": [
+    "Philadelphia"
+   ]
+  },
+  "broadwayworld.com": {
+   "name": "BroadwayWorld",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.broadwayworld.com/feed_all_bway.php",
+   "region": "PA",
+   "cities": [
+    "Philadelphia",
+    "Dallas",
+    "Las Vegas",
+    "Orlando",
+    "Saint Paul",
+    "Hartford",
+    "Portland",
+    "Bath"
+   ]
+  },
+  "sanantonioreport.org": {
+   "name": "San Antonio Report",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://sanantonioreport.org/feed/",
+   "region": "TX",
+   "cities": [
+    "San Antonio"
+   ]
+  },
+  "nbcphiladelphia.com": {
+   "name": "NBC10 Philadelphia",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.nbcphiladelphia.com/?rss=y",
+   "region": "PA",
+   "cities": [
+    "Philadelphia"
+   ]
+  },
+  "phl17.com": {
+   "name": "PHL17.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://phl17.com/feed/",
+   "region": "PA",
+   "cities": [
+    "Philadelphia"
+   ]
+  },
+  "kens5.com": {
+   "name": "kens5.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.kens5.com/feeds/syndication/rss/news",
+   "region": "TX",
+   "cities": [
+    "San Antonio"
+   ]
+  },
+  "10news.com": {
+   "name": "10News.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.10news.com/index.rss",
+   "region": "CA",
+   "cities": [
+    "San Diego"
+   ]
+  },
+  "sanantonio.culturemap.com": {
+   "name": "CultureMap San Antonio",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://sanantonio.culturemap.com/feeds/feed.rss",
+   "region": "TX",
+   "cities": [
+    "San Antonio"
+   ]
+  },
+  "fox5sandiego.com": {
+   "name": "FOX 5 San Diego & KUSI News",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://fox5sandiego.com/feed/",
+   "region": "CA",
+   "cities": [
+    "San Diego"
+   ]
+  },
+  "timesofsandiego.com": {
+   "name": "Times of San Diego",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://timesofsandiego.com/feed/",
+   "region": "CA",
+   "cities": [
+    "San Diego"
+   ]
+  },
+  "cbs8.com": {
+   "name": "cbs8.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.cbs8.com/feeds/syndication/rss/news",
+   "region": "CA",
+   "cities": [
+    "San Diego"
+   ]
+  },
+  "kpbs.org": {
+   "name": "KPBS",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.kpbs.org/index.rss",
+   "region": "CA",
+   "cities": [
+    "San Diego"
+   ]
+  },
+  "kesq.com": {
+   "name": "KESQ",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://kesq.com/feed/",
+   "region": "CA",
+   "cities": [
+    "San Diego"
+   ]
+  },
+  "sandiegomagazine.com": {
+   "name": "San Diego Magazine",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://sandiegomagazine.com/feed/",
+   "region": "CA",
+   "cities": [
+    "San Diego"
+   ]
+  },
+  "fox4news.com": {
+   "name": "FOX 4 News Dallas-Fort Worth",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.fox4news.com/rss.xml",
+   "region": "TX",
+   "cities": [
+    "Dallas",
+    "Fort Worth"
+   ]
+  },
+  "dallasobserver.com": {
+   "name": "Dallas Observer",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://dallasobserver.com/feed/",
+   "region": "TX",
+   "cities": [
+    "Dallas"
+   ]
+  },
+  "dallas.culturemap.com": {
+   "name": "CultureMap Dallas",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://dallas.culturemap.com/feeds/feed.rss",
+   "region": "TX",
+   "cities": [
+    "Dallas"
+   ]
+  },
+  "wfaa.com": {
+   "name": "WFAA",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wfaa.com/feeds/syndication/rss/news",
+   "region": "TX",
+   "cities": [
+    "Dallas",
+    "Fort Worth"
+   ]
+  },
+  "dallasinnovates.com": {
+   "name": "Dallas Innovates",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://dallasinnovates.com/feed/",
+   "region": "TX",
+   "cities": [
+    "Dallas"
+   ]
+  },
+  "dmagazine.com": {
+   "name": "D Magazine",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://dmagazine.com/feed/",
+   "region": "TX",
+   "cities": [
+    "Dallas"
+   ]
+  },
+  "cw33.com": {
+   "name": "CW33.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://cw33.com/feed/",
+   "region": "TX",
+   "cities": [
+    "Dallas",
+    "Fort Worth"
+   ]
+  },
+  "jaxdailyrecord.com": {
+   "name": "Jacksonville Daily Record",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://jaxdailyrecord.com/rss/headlines/all/",
+   "region": "FL",
+   "cities": [
+    "Jacksonville"
+   ]
+  },
+  "firstcoastnews.com": {
+   "name": "firstcoastnews.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.firstcoastnews.com/feeds/syndication/rss/news",
+   "region": "FL",
+   "cities": [
+    "Jacksonville"
+   ]
+  },
+  "nbcdfw.com": {
+   "name": "NBC 5 Dallas-Fort Worth",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.nbcdfw.com/?rss=y",
+   "region": "TX",
+   "cities": [
+    "Dallas"
+   ]
+  },
+  "villagenews.com": {
+   "name": "Village News Homepage",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://villagenews.com/rss",
+   "region": "CA",
+   "cities": [
+    "San Diego"
+   ]
+  },
+  "austin.culturemap.com": {
+   "name": "CultureMap Austin",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://austin.culturemap.com/feeds/feed.rss",
+   "region": "TX",
+   "cities": [
+    "Austin"
+   ]
+  },
+  "nbclosangeles.com": {
+   "name": "NBC Los Angeles",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.nbclosangeles.com/?rss=y",
+   "region": "CA",
+   "cities": [
+    "Los Angeles"
+   ]
+  },
+  "kvue.com": {
+   "name": "KVUE",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.kvue.com/feeds/syndication/rss/news",
+   "region": "TX",
+   "cities": [
+    "Austin"
+   ]
+  },
+  "kxan.com": {
+   "name": "KXAN Austin",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://kxan.com/feed/",
+   "region": "TX",
+   "cities": [
+    "Austin"
+   ]
+  },
+  "austinchronicle.com": {
+   "name": "The Austin Chronicle",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.austinchronicle.com/feed/",
+   "region": "TX",
+   "cities": [
+    "Austin"
+   ]
+  },
+  "fortworthreport.org": {
+   "name": "Fort Worth Report",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://fortworthreport.org/feed/",
+   "region": "TX",
+   "cities": [
+    "Fort Worth"
+   ]
+  },
+  "folioweekly.com": {
+   "name": "Folio Weekly",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://folioweekly.com/feed/",
+   "region": "FL",
+   "cities": [
+    "Jacksonville"
+   ]
+  },
+  "fortworth.culturemap.com": {
+   "name": "CultureMap Fort Worth",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://fortworth.culturemap.com/feeds/feed.rss",
+   "region": "TX",
+   "cities": [
+    "Fort Worth"
+   ]
+  },
+  "fortworthbusiness.com": {
+   "name": "The Business Press",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://fortworthbusiness.com/feed/",
+   "region": "TX",
+   "cities": [
+    "Fort Worth"
+   ]
+  },
+  "fox7austin.com": {
+   "name": "FOX 7 Austin",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.fox7austin.com/rss.xml",
+   "region": "TX",
+   "cities": [
+    "Austin"
+   ]
+  },
+  "sanjosespotlight.com": {
+   "name": "San José Spotlight",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://sanjosespotlight.com/feed/",
+   "region": "CA",
+   "cities": [
+    "San Jose"
+   ]
+  },
+  "kron4.com": {
+   "name": "KRON4",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://kron4.com/feed/",
+   "region": "CA",
+   "cities": [
+    "San Jose",
+    "San Francisco"
+   ]
+  },
+  "sanjoseinside.com": {
+   "name": "San Jose Inside",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://sanjoseinside.com/feed/",
+   "region": "CA",
+   "cities": [
+    "San Jose"
+   ]
+  },
+  "10tv.com": {
+   "name": "10TV",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.10tv.com/feeds/syndication/rss/news",
+   "region": "OH",
+   "cities": [
+    "Columbus"
+   ]
+  },
+  "svvoice.com": {
+   "name": "The Silicon Valley Voice",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.svvoice.com/feed/",
+   "region": "CA",
+   "cities": [
+    "San Jose"
+   ]
+  },
+  "614now.com": {
+   "name": "614NOW",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://614now.com/feed",
+   "region": "OH",
+   "cities": [
+    "Columbus"
+   ]
+  },
+  "nbc4i.com": {
+   "name": "NBC4 WCMH-TV",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://nbc4i.com/feed/",
+   "region": "OH",
+   "cities": [
+    "Columbus"
+   ]
+  },
+  "star-telegram.com": {
+   "name": "Fort Worth Star-Telegram",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/star-telegram/stories",
+   "region": "TX",
+   "cities": [
+    "Fort Worth"
+   ]
+  },
+  "wcnc.com": {
+   "name": "WCNC",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wcnc.com/feeds/syndication/rss/news",
+   "region": "NC",
+   "cities": [
+    "Charlotte"
+   ]
+  },
+  "wccbcharlotte.com": {
+   "name": "WCCB Charlotte",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wccbcharlotte.com/feed/",
+   "region": "NC",
+   "cities": [
+    "Charlotte"
+   ]
+  },
+  "wthr.com": {
+   "name": "WTHR",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wthr.com/feeds/syndication/rss/news",
+   "region": "IN",
+   "cities": [
+    "Indianapolis"
+   ]
+  },
+  "qcitymetro.com": {
+   "name": "QCity Metro",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://qcitymetro.com/rss.xml",
+   "region": "NC",
+   "cities": [
+    "Charlotte"
+   ]
+  },
+  "wrtv.com": {
+   "name": "WRTV",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wrtv.com/feed/",
+   "region": "IN",
+   "cities": [
+    "Indianapolis"
+   ]
+  },
+  "wishtv.com": {
+   "name": "WISH-TV",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wishtv.com/feed/",
+   "region": "IN",
+   "cities": [
+    "Indianapolis"
+   ]
+  },
+  "charlotteobserver.com": {
+   "name": "Charlotte Observer",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/charlotteobserver/stories",
+   "region": "NC",
+   "cities": [
+    "Charlotte"
+   ]
+  },
+  "dailyjournal.net": {
+   "name": "Daily Journal",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://dailyjournal.net/feed/",
+   "region": "IN",
+   "cities": [
+    "Indianapolis"
+   ]
+  },
+  "readthereporter.com": {
+   "name": "The Hamilton County Reporter",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://readthereporter.com/feed/",
+   "region": "IN",
+   "cities": [
+    "Indianapolis"
+   ]
+  },
+  "missionlocal.org": {
+   "name": "Mission Local",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://missionlocal.org/feed/",
+   "region": "CA",
+   "cities": [
+    "San Francisco"
+   ]
+  },
+  "sfist.com": {
+   "name": "SFist",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://sfist.com/rss/",
+   "region": "CA",
+   "cities": [
+    "San Francisco"
+   ]
+  },
+  "secretsanfrancisco.com": {
+   "name": "Secret San Francisco",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://secretsanfrancisco.com/feed/",
+   "region": "CA",
+   "cities": [
+    "San Francisco"
+   ]
+  },
+  "sfyimby.com": {
+   "name": "San Francisco YIMBY",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://sfyimby.com/feed",
+   "region": "CA",
+   "cities": [
+    "San Francisco",
+    "Oakland"
+   ]
+  },
+  "ktvu.com": {
+   "name": "KTVU",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.ktvu.com/rss.xml",
+   "region": "CA",
+   "cities": [
+    "San Francisco"
+   ]
+  },
+  "48hills.org": {
+   "name": "48 Hills",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://48hills.org/feed/",
+   "region": "CA",
+   "cities": [
+    "San Francisco"
+   ]
+  },
+  "sfstandard.com": {
+   "name": "The San Francisco Standard",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://sfstandard.com/feed/",
+   "region": "CA",
+   "cities": [
+    "San Francisco"
+   ]
+  },
+  "king5.com": {
+   "name": "king5.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.king5.com/feeds/syndication/rss/news",
+   "region": "WA",
+   "cities": [
+    "Seattle"
+   ]
+  },
+  "oaklandside.org": {
+   "name": "The Oaklandside",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://oaklandside.org/feed/",
+   "region": "CA",
+   "cities": [
+    "San Francisco",
+    "Oakland"
+   ]
+  },
+  "amp.charlotteobserver.com": {
+   "name": "Charlotte Observer",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/charlotteobserver/stories",
+   "region": "NC",
+   "cities": [
+    "Charlotte"
+   ]
+  },
+  "thestranger.com": {
+   "name": "TheStranger.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.thestranger.com/feed/",
+   "region": "WA",
+   "cities": [
+    "Seattle"
+   ]
+  },
+  "thefactsnewspaper.com": {
+   "name": "thefactsnewspaper.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.thefactsnewspaper.com/blog-feed.xml",
+   "region": "WA",
+   "cities": [
+    "Seattle"
+   ]
+  },
+  "westseattleblog.com": {
+   "name": "West Seattle Blog...",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://westseattleblog.com/feed/",
+   "region": "WA",
+   "cities": [
+    "Seattle"
+   ]
+  },
+  "mahoningmatters.com": {
+   "name": "Mahoning Matters",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/mahoningmatters/stories",
+   "region": "OH",
+   "cities": [
+    "Columbus"
+   ]
+  },
+  "seattlemag.com": {
+   "name": "Seattle magazine",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://seattlemag.com/feed/",
+   "region": "WA",
+   "cities": [
+    "Seattle"
+   ]
+  },
+  "capitolhillseattle.com": {
+   "name": "CHS Capitol Hill Seattle News",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://capitolhillseattle.com/feed/",
+   "region": "WA",
+   "cities": [
+    "Seattle"
+   ]
+  },
+  "denverite.com": {
+   "name": "Denverite",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://denverite.com/feed/",
+   "region": "CO",
+   "cities": [
+    "Denver"
+   ]
+  },
+  "westword.com": {
+   "name": "Westword",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://westword.com/feed/",
+   "region": "CO",
+   "cities": [
+    "Denver"
+   ]
+  },
+  "businessden.com": {
+   "name": "BusinessDen",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://businessden.com/feed/",
+   "region": "CO",
+   "cities": [
+    "Denver"
+   ]
+  },
+  "news9.com": {
+   "name": "News 9",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.news9.com/index.rss",
+   "region": "OK",
+   "cities": [
+    "Oklahoma City",
+    "Tulsa"
+   ]
+  },
+  "kgnu.org": {
+   "name": "KGNU",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://kgnu.org/feed/",
+   "region": "CO",
+   "cities": [
+    "Denver"
+   ]
+  },
+  "kdvr.com": {
+   "name": "KDVR",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://kdvr.com/feed/",
+   "region": "CO",
+   "cities": [
+    "Denver"
+   ]
+  },
+  "freepressokc.com": {
+   "name": "Oklahoma City Free Press",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://freepressokc.com/feed/",
+   "region": "OK",
+   "cities": [
+    "Oklahoma City"
+   ]
+  },
+  "denvergazette.com": {
+   "name": "Denver Gazette",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://denvergazette.com/feed/",
+   "region": "CO",
+   "cities": [
+    "Denver"
+   ]
+  },
+  "journalrecord.com": {
+   "name": "The Journal Record",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://journalrecord.com/feed/",
+   "region": "OK",
+   "cities": [
+    "Oklahoma City"
+   ]
+  },
+  "kfor.com": {
+   "name": "KFOR",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://kfor.com/feed/",
+   "region": "OK",
+   "cities": [
+    "Oklahoma City"
+   ]
+  },
+  "geekwire.com": {
+   "name": "GeekWire",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://geekwire.com/feed/",
+   "region": "WA",
+   "cities": [
+    "Seattle"
+   ]
+  },
+  "crashnews.abellawfirm.com": {
+   "name": "Abel Law Firm",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://crashnews.abellawfirm.com/feed/",
+   "region": "OK",
+   "cities": [
+    "Oklahoma City"
+   ]
+  },
+  "nashvillelifestyles.com": {
+   "name": "Nashville Lifestyles",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://nashvillelifestyles.com/api/rss/content.rss",
+   "region": "TN",
+   "cities": [
+    "Nashville"
+   ]
+  },
+  "newschannel5.com": {
+   "name": "News Channel 5 Nashville",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.newschannel5.com/index.rss",
+   "region": "TN",
+   "cities": [
+    "Nashville"
+   ]
+  },
+  "musicrow.com": {
+   "name": "MusicRow.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://musicrow.com/feed/",
+   "region": "TN",
+   "cities": [
+    "Nashville"
+   ]
+  },
+  "wkrn.com": {
+   "name": "WKRN News 2",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wkrn.com/feed/",
+   "region": "TN",
+   "cities": [
+    "Nashville"
+   ]
+  },
+  "nbcwashington.com": {
+   "name": "NBC4 Washington",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.nbcwashington.com/?rss=y",
+   "region": "DC",
+   "cities": [
+    "Washington"
+   ]
+  },
+  "fox5dc.com": {
+   "name": "FOX 5 DC",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.fox5dc.com/rss.xml",
+   "region": "DC",
+   "cities": [
+    "Washington"
+   ]
+  },
+  "washingtonian.com": {
+   "name": "Washingtonian",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://washingtonian.com/feed/",
+   "region": "DC",
+   "cities": [
+    "Washington"
+   ]
+  },
+  "bethesdamagazine.com": {
+   "name": "Bethesda Magazine",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://bethesdamagazine.com/feed/",
+   "region": "DC",
+   "cities": [
+    "Washington"
+   ]
+  },
+  "wusa9.com": {
+   "name": "WUSA9",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wusa9.com/feeds/syndication/rss/news",
+   "region": "DC",
+   "cities": [
+    "Washington"
+   ]
+  },
+  "wtop.com": {
+   "name": "WTOP News",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wtop.com/feed/",
+   "region": "DC",
+   "cities": [
+    "Washington"
+   ]
+  },
+  "alxnow.com": {
+   "name": "ALXnow",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://alxnow.com/feed/",
+   "region": "DC",
+   "cities": [
+    "Washington"
+   ]
+  },
+  "arlnow.com": {
+   "name": "ARLnow",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://arlnow.com/feed/",
+   "region": "DC",
+   "cities": [
+    "Washington"
+   ]
+  },
+  "vanderbilthustler.com": {
+   "name": "The Vanderbilt Hustler",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://vanderbilthustler.com/feed/",
+   "region": "TN",
+   "cities": [
+    "Nashville"
+   ]
+  },
+  "kvia.com": {
+   "name": "KVIA",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://kvia.com/feed/",
+   "region": "TX",
+   "cities": [
+    "El Paso"
+   ]
+  },
+  "dc.urbanturf.com": {
+   "name": "UrbanTurf",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.feedburner.com/UrbanTurf_DC",
+   "region": "DC",
+   "cities": [
+    "Washington"
+   ]
+  },
+  "ktnv.com": {
+   "name": "KTNV Las Vegas",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.ktnv.com/index.rss",
+   "region": "NV",
+   "cities": [
+    "Las Vegas"
+   ]
+  },
+  "neon.reviewjournal.com": {
+   "name": "Las Vegas Review-Journal",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://neon.reviewjournal.com/feed/",
+   "region": "NV",
+   "cities": [
+    "Las Vegas"
+   ]
+  },
+  "ktsm.com": {
+   "name": "KTSM 9 News",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://ktsm.com/feed/",
+   "region": "TX",
+   "cities": [
+    "El Paso"
+   ]
+  },
+  "lasvegassun.com": {
+   "name": "Las Vegas Sun",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://lasvegassun.com/feeds/headlines/all/",
+   "region": "NV",
+   "cities": [
+    "Las Vegas"
+   ]
+  },
+  "reviewjournal.com": {
+   "name": "Las Vegas Review-Journal",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://reviewjournal.com/feed/",
+   "region": "NV",
+   "cities": [
+    "Las Vegas"
+   ]
+  },
+  "8newsnow.com": {
+   "name": "KLAS 8 News Now",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://8newsnow.com/feed/",
+   "region": "NV",
+   "cities": [
+    "Las Vegas"
+   ]
+  },
+  "boston.com": {
+   "name": "Boston.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.boston.com/feed/",
+   "region": "MA",
+   "cities": [
+    "Boston"
+   ]
+  },
+  "wxyz.com": {
+   "name": "WXYZ Channel 7",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wxyz.com/index.rss",
+   "region": "MI",
+   "cities": [
+    "Detroit"
+   ]
+  },
+  "hourdetroit.com": {
+   "name": "Hour Detroit Magazine",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.hourdetroit.com/feed/",
+   "region": "MI",
+   "cities": [
+    "Detroit"
+   ]
+  },
+  "bridgedetroit.com": {
+   "name": "BridgeDetroit",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.bridgedetroit.com/feed/",
+   "region": "MI",
+   "cities": [
+    "Detroit"
+   ]
+  },
+  "dotnews.com": {
+   "name": "Dorchester Reporter",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.dotnews.com/feed/",
+   "region": "MA",
+   "cities": [
+    "Boston"
+   ]
+  },
+  "koin.com": {
+   "name": "KOIN.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://koin.com/feed/",
+   "region": "OR",
+   "cities": [
+    "Portland"
+   ]
+  },
+  "littleguidedetroit.com": {
+   "name": "LittleGuide Detroit",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://littleguidedetroit.com/feed/",
+   "region": "MI",
+   "cities": [
+    "Detroit"
+   ]
+  },
+  "portlandmercury.com": {
+   "name": "Portland Mercury",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.portlandmercury.com/feed/",
+   "region": "OR",
+   "cities": [
+    "Portland"
+   ]
+  },
+  "pdxmonthly.com": {
+   "name": "Portland Monthly",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.pdxmonthly.com/feed/",
+   "region": "OR",
+   "cities": [
+    "Portland"
+   ]
+  },
+  "portailconstructo.com": {
+   "name": "Portail Constructo",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://portailconstructo.com/rss.xml",
+   "region": "Centre-du-Québec",
+   "cities": [
+    "Bécancour"
+   ]
+  },
+  "universalhub.com": {
+   "name": "Universal Hub",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://universalhub.com/rss.xml",
+   "region": "MA",
+   "cities": [
+    "Boston"
+   ]
+  },
+  "whas11.com": {
+   "name": "WHAS11",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.whas11.com/feeds/syndication/rss/news",
+   "region": "KY",
+   "cities": [
+    "Louisville"
+   ]
+  },
+  "berkeleybeacon.com": {
+   "name": "The Berkeley Beacon",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://berkeleybeacon.com/feed/",
+   "region": "MA",
+   "cities": [
+    "Boston"
+   ]
+  },
+  "memphisflyer.com": {
+   "name": "Memphis Flyer",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.memphisflyer.com/feed/",
+   "region": "TN",
+   "cities": [
+    "Memphis"
+   ]
+  },
+  "localmemphis.com": {
+   "name": "localmemphis.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.localmemphis.com/feeds/syndication/rss/news",
+   "region": "TN",
+   "cities": [
+    "Memphis"
+   ]
+  },
+  "memphismagazine.com": {
+   "name": "Memphis magazine",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://memphismagazine.com/api/rss/content.rss",
+   "region": "TN",
+   "cities": [
+    "Memphis"
+   ]
+  },
+  "baltimorefishbowl.com": {
+   "name": "Baltimore Fishbowl",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://baltimorefishbowl.com/feed/",
+   "region": "MD",
+   "cities": [
+    "Baltimore"
+   ]
+  },
+  "wbal.com": {
+   "name": "WBAL News Radio",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wbal.com/feed",
+   "region": "MD",
+   "cities": [
+    "Baltimore"
+   ]
+  },
+  "psuvanguard.com": {
+   "name": "Vanguard",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://psuvanguard.com/feed/",
+   "region": "OR",
+   "cities": [
+    "Portland"
+   ]
+  },
+  "wmar2news.com": {
+   "name": "WMAR 2 News Baltimore",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wmar2news.com/index.rss",
+   "region": "MD",
+   "cities": [
+    "Baltimore"
+   ]
+  },
+  "kentucky.com": {
+   "name": "Lexington Herald Leader",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/kentucky/stories",
+   "region": "KY",
+   "cities": [
+    "Louisville",
+    "Lexington"
+   ]
+  },
+  "fox6now.com": {
+   "name": "FOX6 News Milwaukee",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.fox6now.com/rss.xml",
+   "region": "WI",
+   "cities": [
+    "Milwaukee"
+   ]
+  },
+  "tmj4.com": {
+   "name": "TMJ4 News",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.tmj4.com/index.rss",
+   "region": "WI",
+   "cities": [
+    "Milwaukee"
+   ]
+  },
+  "shepherdexpress.com": {
+   "name": "Shepherd Express",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://shepherdexpress.com/api/rss/content.rss",
+   "region": "WI",
+   "cities": [
+    "Milwaukee"
+   ]
+  },
+  "milwaukeenns.org": {
+   "name": "Milwaukee Neighborhood News Service",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://milwaukeenns.org/feed/",
+   "region": "WI",
+   "cities": [
+    "Milwaukee"
+   ]
+  },
+  "dailymemphian.com": {
+   "name": "Daily Memphian",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://dailymemphian.com/feed/",
+   "region": "TN",
+   "cities": [
+    "Memphis"
+   ]
+  },
+  "biztimes.com": {
+   "name": "BizTimes - Milwaukee Business News",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://biztimes.com/feed/",
+   "region": "WI",
+   "cities": [
+    "Milwaukee"
+   ]
+  },
+  "milwaukeerecord.com": {
+   "name": "Milwaukee Record",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://milwaukeerecord.com/feed/",
+   "region": "WI",
+   "cities": [
+    "Milwaukee"
+   ]
+  },
+  "milwaukeemag.com": {
+   "name": "Milwaukee Magazine",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.milwaukeemag.com/feed/",
+   "region": "WI",
+   "cities": [
+    "Milwaukee"
+   ]
+  },
+  "cbs58.com": {
+   "name": "CBS58",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://cbs58.com/rss",
+   "region": "WI",
+   "cities": [
+    "Milwaukee"
+   ]
+  },
+  "kob.com": {
+   "name": "KOB 4",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://kob.com/feed/",
+   "region": "NM",
+   "cities": [
+    "Albuquerque"
+   ]
+  },
+  "wisbusiness.com": {
+   "name": "WisBusiness",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wisbusiness.com/feed/",
+   "region": "WI",
+   "cities": [
+    "Milwaukee",
+    "Madison"
+   ]
+  },
+  "abq.news": {
+   "name": "The Paper. Albuquerque's independent news.",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://abq.news/feed/",
+   "region": "NM",
+   "cities": [
+    "Albuquerque"
+   ]
+  },
+  "krqe.com": {
+   "name": "KRQE",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://krqe.com/feed/",
+   "region": "NM",
+   "cities": [
+    "Albuquerque"
+   ]
+  },
+  "jewishchronicle.org": {
+   "name": "Wisconsin Jewish Chronicle",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.jewishchronicle.org/feed/",
+   "region": "WI",
+   "cities": [
+    "Milwaukee"
+   ]
+  },
+  "azjewishpost.com": {
+   "name": "Arizona Jewish Post",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://azjewishpost.com/feed/",
+   "region": "AZ",
+   "cities": [
+    "Tucson"
+   ]
+  },
+  "onmilwaukee.com": {
+   "name": "OnMilwaukee",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://onmilwaukee.com/rss",
+   "region": "WI",
+   "cities": [
+    "Milwaukee"
+   ]
+  },
+  "tucsonfoodie.com": {
+   "name": "Tucson Foodie",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://tucsonfoodie.com/feed",
+   "region": "AZ",
+   "cities": [
+    "Tucson"
+   ]
+  },
+  "kgun9.com": {
+   "name": "KGUN 9",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.kgun9.com/index.rss",
+   "region": "AZ",
+   "cities": [
+    "Tucson"
+   ]
+  },
+  "wildcat.arizona.edu": {
+   "name": "The Daily Wildcat",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wildcat.arizona.edu/feed/",
+   "region": "AZ",
+   "cities": [
+    "Tucson"
+   ]
+  },
+  "thebusinessjournal.com": {
+   "name": "The Business Journal",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://thebusinessjournal.com/feed/",
+   "region": "CA",
+   "cities": [
+    "Fresno"
+   ]
+  },
+  "thisistucson.com": {
+   "name": "Arizona Daily Star",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://thisistucson.com/search/?f=rss&t=article&c=thisistucson&l=50&s=start_time&sd=desc",
+   "region": "AZ",
+   "cities": [
+    "Tucson"
+   ]
+  },
+  "gvwire.com": {
+   "name": "GV Wire",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://gvwire.com/feed/",
+   "region": "CA",
+   "cities": [
+    "Fresno"
+   ]
+  },
+  "kmjnow.com": {
+   "name": "KMJ Now",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://kmjnow.com/feed/",
+   "region": "CA",
+   "cities": [
+    "Fresno"
+   ]
+  },
+  "hurtcallbert.com": {
+   "name": "Parnall Law Firm",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.hurtcallbert.com/feed/",
+   "region": "NM",
+   "cities": [
+    "Albuquerque"
+   ]
+  },
+  "yourcentralvalley.com": {
+   "name": "YourCentralValley.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://yourcentralvalley.com/feed/",
+   "region": "CA",
+   "cities": [
+    "Fresno"
+   ]
+  },
+  "whdh.com": {
+   "name": "WHDH",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://whdh.com/feed/",
+   "region": "MA",
+   "cities": [
+    "Boston"
+   ]
+  },
+  "sacramento.newsreview.com": {
+   "name": "Sacramento News & Review",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://sacramento.newsreview.com/rss.xml",
+   "region": "CA",
+   "cities": [
+    "Sacramento"
+   ]
+  },
+  "sacramentocityexpress.com": {
+   "name": "Sacramento City Express",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://sacramentocityexpress.com/feed/",
+   "region": "CA",
+   "cities": [
+    "Sacramento"
+   ]
+  },
+  "fresnobee.com": {
+   "name": "Fresno Bee",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/fresnobee/stories",
+   "region": "CA",
+   "cities": [
+    "Fresno"
+   ]
+  },
+  "fox40.com": {
+   "name": "FOX40",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://fox40.com/feed/",
+   "region": "CA",
+   "cities": [
+    "Sacramento"
+   ]
+  },
+  "amp.fresnobee.com": {
+   "name": "Fresno Bee",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/fresnobee/stories",
+   "region": "CA",
+   "cities": [
+    "Fresno"
+   ]
+  },
+  "fox5atlanta.com": {
+   "name": "FOX 5 Atlanta",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.fox5atlanta.com/rss.xml",
+   "region": "GA",
+   "cities": [
+    "Atlanta"
+   ]
+  },
+  "saportareport.com": {
+   "name": "SaportaReport",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://saportareport.com/feed/",
+   "region": "GA",
+   "cities": [
+    "Atlanta"
+   ]
+  },
+  "11alive.com": {
+   "name": "11Alive.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.11alive.com/feeds/syndication/rss/news",
+   "region": "GA",
+   "cities": [
+    "Atlanta"
+   ]
+  },
+  "metroatlantaceo.com": {
+   "name": "Metro Atlanta CEO",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://metroatlantaceo.com/feeds/latest/",
+   "region": "GA",
+   "cities": [
+    "Atlanta"
+   ]
+  },
+  "sacramentopress.com": {
+   "name": "Sacramento Press",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.sacramentopress.com/feed/",
+   "region": "CA",
+   "cities": [
+    "Sacramento"
+   ]
+  },
+  "amp.sacbee.com": {
+   "name": "Sacramento Bee",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/sacbee/stories",
+   "region": "CA",
+   "cities": [
+    "Sacramento"
+   ]
+  },
+  "statehornet.com": {
+   "name": "The State Hornet",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://statehornet.com/feed/",
+   "region": "CA",
+   "cities": [
+    "Sacramento"
+   ]
+  },
+  "atlanta.urbanize.city": {
+   "name": "Urbanize Atlanta",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://atlanta.urbanize.city/rss.xml",
+   "region": "GA",
+   "cities": [
+    "Atlanta"
+   ]
+  },
+  "startlandnews.com": {
+   "name": "Startland News",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://startlandnews.com/feed/",
+   "region": "MO",
+   "cities": [
+    "Kansas City"
+   ]
+  },
+  "sacramentoinjuryattorneysblog.com": {
+   "name": "sacramentoinjuryattorneysblog.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.sacramentoinjuryattorneysblog.com/feed/",
+   "region": "CA",
+   "cities": [
+    "Sacramento"
+   ]
+  },
+  "krdo.com": {
+   "name": "KRDO",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://krdo.com/feed/",
+   "region": "CO",
+   "cities": [
+    "Colorado Springs"
+   ]
+  },
+  "thepitchkc.com": {
+   "name": "Kansas City Pitch",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.thepitchkc.com/feed/",
+   "region": "MO",
+   "cities": [
+    "Kansas City"
+   ]
+  },
+  "koaa.com": {
+   "name": "KOAA News 5",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.koaa.com/index.rss",
+   "region": "CO",
+   "cities": [
+    "Colorado Springs"
+   ]
+  },
+  "fox21news.com": {
+   "name": "FOX21 News Colorado",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://fox21news.com/feed/",
+   "region": "CO",
+   "cities": [
+    "Colorado Springs"
+   ]
+  },
+  "gazette.com": {
+   "name": "Colorado Springs Gazette",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://gazette.com/feed/",
+   "region": "CO",
+   "cities": [
+    "Colorado Springs"
+   ]
+  },
+  "cpr.org": {
+   "name": "Colorado Public Radio",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://cpr.org/feed/",
+   "region": "CO",
+   "cities": [
+    "Colorado Springs"
+   ]
+  },
+  "3newsnow.com": {
+   "name": "KMTV 3 News Now Omaha",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.3newsnow.com/index.rss",
+   "region": "NE",
+   "cities": [
+    "Omaha"
+   ]
+  },
+  "sacbee.com": {
+   "name": "Sacramento Bee",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/sacbee/stories",
+   "region": "CA",
+   "cities": [
+    "Sacramento"
+   ]
+  },
+  "wsvn.com": {
+   "name": "WSVN",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wsvn.com/feed/",
+   "region": "FL",
+   "cities": [
+    "Miami"
+   ]
+  },
+  "miaminewtimes.com": {
+   "name": "Miami New Times",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://miaminewtimes.com/feed/",
+   "region": "FL",
+   "cities": [
+    "Miami"
+   ]
+  },
+  "amp.kansascity.com": {
+   "name": "Kansas City Star",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/kansascity/stories",
+   "region": "MO",
+   "cities": [
+    "Kansas City"
+   ]
+  },
+  "cbs17.com": {
+   "name": "CBS17.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://cbs17.com/feed/",
+   "region": "NC",
+   "cities": [
+    "Raleigh"
+   ]
+  },
+  "growomaha.com": {
+   "name": "Grow Omaha",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://growomaha.com/feed/",
+   "region": "NE",
+   "cities": [
+    "Omaha"
+   ]
+  },
+  "communitynewspapers.com": {
+   "name": "Miami’s Community News",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://communitynewspapers.com/feed/",
+   "region": "FL",
+   "cities": [
+    "Miami"
+   ]
+  },
+  "nbcmiami.com": {
+   "name": "NBC 6 South Florida",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.nbcmiami.com/?rss=y",
+   "region": "FL",
+   "cities": [
+    "Miami"
+   ]
+  },
+  "refreshmiami.com": {
+   "name": "Refresh Miami",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://refreshmiami.com/feed/",
+   "region": "FL",
+   "cities": [
+    "Miami"
+   ]
+  },
+  "wtkr.com": {
+   "name": "WTKR",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wtkr.com/index.rss",
+   "region": "VA",
+   "cities": [
+    "Virginia Beach"
+   ]
+  },
+  "wavy.com": {
+   "name": "WAVY.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wavy.com/feed/",
+   "region": "VA",
+   "cities": [
+    "Virginia Beach"
+   ]
+  },
+  "voyageraleigh.com": {
+   "name": "Voyage Raleigh",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://voyageraleigh.com/feed/",
+   "region": "NC",
+   "cities": [
+    "Raleigh"
+   ]
+  },
+  "newsobserver.com": {
+   "name": "Raleigh News & Observer",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/newsobserver/stories",
+   "region": "NC",
+   "cities": [
+    "Raleigh"
+   ]
+  },
+  "amp.newsobserver.com": {
+   "name": "News & Observer",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/newsobserver/stories",
+   "region": "NC",
+   "cities": [
+    "Raleigh"
+   ]
+  },
+  "miamitodaynews.com": {
+   "name": "Miami Today",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.miamitodaynews.com/feed/",
+   "region": "FL",
+   "cities": [
+    "Miami"
+   ]
+  },
+  "berkeleyside.org": {
+   "name": "Berkeleyside",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.berkeleyside.org/feed",
+   "region": "CA",
+   "cities": [
+    "Oakland"
+   ]
+  },
+  "startribune.com": {
+   "name": "Star Tribune",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://startribune.com/rss",
+   "region": "MN",
+   "cities": [
+    "Minneapolis",
+    "Saint Paul"
+   ]
+  },
+  "amp.miamiherald.com": {
+   "name": "Miami Herald",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/miamiherald/stories",
+   "region": "FL",
+   "cities": [
+    "Miami"
+   ]
+  },
+  "kansascity.com": {
+   "name": "Kansas City Star",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/kansascity/stories",
+   "region": "MO",
+   "cities": [
+    "Kansas City"
+   ]
+  },
+  "fox9.com": {
+   "name": "FOX 9 Minneapolis-St. Paul",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.fox9.com/rss.xml",
+   "region": "MN",
+   "cities": [
+    "Minneapolis",
+    "Saint Paul"
+   ]
+  },
+  "hauteliving.com": {
+   "name": "Haute Living",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://hauteliving.com/feed/",
+   "region": "FL",
+   "cities": [
+    "Miami"
+   ]
+  },
+  "kare11.com": {
+   "name": "kare11.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.kare11.com/feeds/syndication/rss/news",
+   "region": "MN",
+   "cities": [
+    "Minneapolis",
+    "Saint Paul"
+   ]
+  },
+  "krmg.com": {
+   "name": "KRMG",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://krmg.com/feed/",
+   "region": "OK",
+   "cities": [
+    "Tulsa"
+   ]
+  },
+  "fox13news.com": {
+   "name": "FOX 13 Tampa Bay",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.fox13news.com/rss.xml",
+   "region": "FL",
+   "cities": [
+    "Tampa"
+   ]
+  },
+  "cltampa.com": {
+   "name": "Creative Loafing Tampa",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.cltampa.com/feed/",
+   "region": "FL",
+   "cities": [
+    "Tampa"
+   ]
+  },
+  "thatssotampa.com": {
+   "name": "That's So Tampa",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://thatssotampa.com/feed/",
+   "region": "FL",
+   "cities": [
+    "Tampa"
+   ]
+  },
+  "kqed.org": {
+   "name": "KQED",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://ww2.kqed.org/news/feed/",
+   "region": "CA",
+   "cities": [
+    "Oakland"
+   ]
+  },
+  "wtsp.com": {
+   "name": "wtsp.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wtsp.com/feeds/syndication/rss/news",
+   "region": "FL",
+   "cities": [
+    "Tampa"
+   ]
+  },
+  "stpetecatalyst.com": {
+   "name": "St Pete Catalyst",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://stpetecatalyst.com/feed/",
+   "region": "FL",
+   "cities": [
+    "Tampa"
+   ]
+  },
+  "wfla.com": {
+   "name": "WFLA",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wfla.com/feed/",
+   "region": "FL",
+   "cities": [
+    "Tampa"
+   ]
+  },
+  "ksn.com": {
+   "name": "KSN.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://ksn.com/feed/",
+   "region": "KS",
+   "cities": [
+    "Wichita"
+   ]
+  },
+  "businessobserverfl.com": {
+   "name": "Business Observer",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://businessobserverfl.com/rss/headlines/all/",
+   "region": "FL",
+   "cities": [
+    "Tampa"
+   ]
+  },
+  "wwltv.com": {
+   "name": "WWLTV.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wwltv.com/feeds/syndication/rss/news",
+   "region": "LA",
+   "cities": [
+    "New Orleans"
+   ]
+  },
+  "wbrz.com": {
+   "name": "WBRZ",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.feedburner.com/wbrz/news",
+   "region": "LA",
+   "cities": [
+    "New Orleans"
+   ]
+  },
+  "wgno.com": {
+   "name": "WGNO",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wgno.com/feed/",
+   "region": "LA",
+   "cities": [
+    "New Orleans"
+   ]
+  },
+  "wmnf.org": {
+   "name": "WMNF",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.feedburner.com/wmnf/",
+   "region": "FL",
+   "cities": [
+    "Tampa"
+   ]
+  },
+  "neworleanscitybusiness.com": {
+   "name": "New Orleans CityBusiness",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://neworleanscitybusiness.com/feed/",
+   "region": "LA",
+   "cities": [
+    "New Orleans"
+   ]
+  },
+  "news5cleveland.com": {
+   "name": "News 5 Cleveland WEWS",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.news5cleveland.com/index.rss",
+   "region": "OH",
+   "cities": [
+    "Cleveland"
+   ]
+  },
+  "fox8.com": {
+   "name": "FOX 8 News",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://fox8.com/feed/",
+   "region": "OH",
+   "cities": [
+    "Cleveland"
+   ]
+  },
+  "wkyc.com": {
+   "name": "WKYC",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wkyc.com/feeds/syndication/rss/news",
+   "region": "OH",
+   "cities": [
+    "Cleveland"
+   ]
+  },
+  "tulanehullabaloo.com": {
+   "name": "The Tulane Hullabaloo",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://tulanehullabaloo.com/feed/",
+   "region": "LA",
+   "cities": [
+    "New Orleans"
+   ]
+  },
+  "kansas.com": {
+   "name": "Wichita Eagle",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/kansas/stories",
+   "region": "KS",
+   "cities": [
+    "Wichita"
+   ]
+  },
+  "civilbeat.org": {
+   "name": "Honolulu Civil Beat",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.civilbeat.org/feed/",
+   "region": "HI",
+   "cities": [
+    "Honolulu"
+   ]
+  },
+  "honolulumagazine.com": {
+   "name": "HONOLULU Magazine",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.honolulumagazine.com/feed/",
+   "region": "HI",
+   "cities": [
+    "Honolulu"
+   ]
+  },
+  "miamiherald.com": {
+   "name": "Miami Herald",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/miamiherald/stories",
+   "region": "FL",
+   "cities": [
+    "Miami"
+   ]
+  },
+  "bungalower.com": {
+   "name": "Bungalower",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://bungalower.com/feed/",
+   "region": "FL",
+   "cities": [
+    "Orlando"
+   ]
+  },
+  "khon2.com": {
+   "name": "KHON2",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://khon2.com/feed/",
+   "region": "HI",
+   "cities": [
+    "Honolulu"
+   ]
+  },
+  "orlandoweekly.com": {
+   "name": "Orlando Weekly",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.orlandoweekly.com/feed/",
+   "region": "FL",
+   "cities": [
+    "Orlando"
+   ]
+  },
+  "orangeobserver.com": {
+   "name": "West Orange Times Observer",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://orangeobserver.com/rss/headlines/all/",
+   "region": "FL",
+   "cities": [
+    "Orlando"
+   ]
+  },
+  "lex18.com": {
+   "name": "LEX 18 News",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.lex18.com/index.rss",
+   "region": "KY",
+   "cities": [
+    "Lexington"
+   ]
+  },
+  "winchestersun.com": {
+   "name": "Winchester Sun",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://winchestersun.com/feed/",
+   "region": "KY",
+   "cities": [
+    "Lexington"
+   ]
+  },
+  "state-journal.com": {
+   "name": "State-Journal",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://state-journal.com/feed/",
+   "region": "KY",
+   "cities": [
+    "Lexington"
+   ]
+  },
+  "uknow.uky.edu": {
+   "name": "UKNow",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://uknow.uky.edu/rss.xml",
+   "region": "KY",
+   "cities": [
+    "Lexington"
+   ]
+  },
+  "sahanjournal.com": {
+   "name": "Sahan Journal",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://sahanjournal.com/feed/",
+   "region": "MN",
+   "cities": [
+    "Saint Paul"
+   ]
+  },
+  "spokesman-recorder.com": {
+   "name": "Minnesota Spokesman-Recorder",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://spokesman-recorder.com/feed/",
+   "region": "MN",
+   "cities": [
+    "Saint Paul"
+   ]
+  },
+  "thecatholicspirit.com": {
+   "name": "TheCatholicSpirit.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.thecatholicspirit.com/feed/",
+   "region": "MN",
+   "cities": [
+    "Saint Paul"
+   ]
+  },
+  "wcpo.com": {
+   "name": "WCPO 9 News",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wcpo.com/index.rss",
+   "region": "OH",
+   "cities": [
+    "Cincinnati"
+   ]
+  },
+  "triblive.com": {
+   "name": "TribLIVE.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://triblive.com/feed/",
+   "region": "PA",
+   "cities": [
+    "Pittsburgh"
+   ]
+  },
+  "citybeat.com": {
+   "name": "Cincinnati CityBeat",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.citybeat.com/feed/",
+   "region": "OH",
+   "cities": [
+    "Cincinnati"
+   ]
+  },
+  "publicsource.org": {
+   "name": "Pittsburgh's Public Source",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.publicsource.org/feed/",
+   "region": "PA",
+   "cities": [
+    "Pittsburgh"
+   ]
+  },
+  "pittsburghmagazine.com": {
+   "name": "Pittsburgh Magazine",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.pittsburghmagazine.com/feed/",
+   "region": "PA",
+   "cities": [
+    "Pittsburgh"
+   ]
+  },
+  "akbizmag.com": {
+   "name": "Alaska Business Magazine",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.akbizmag.com/feed/",
+   "region": "AK",
+   "cities": [
+    "Anchorage"
+   ]
+  },
+  "amp.kentucky.com": {
+   "name": "Lexington Herald Leader",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/kentucky/stories",
+   "region": "KY",
+   "cities": [
+    "Lexington"
+   ]
+  },
+  "wivb.com": {
+   "name": "WIVB News 4",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wivb.com/feed/",
+   "region": "NY",
+   "cities": [
+    "Buffalo"
+   ]
+  },
+  "observer-reporter.com": {
+   "name": "Observer-Reporter",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://observer-reporter.com/feed/",
+   "region": "PA",
+   "cities": [
+    "Pittsburgh"
+   ]
+  },
+  "wkbw.com": {
+   "name": "WKBW",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wkbw.com/index.rss",
+   "region": "NY",
+   "cities": [
+    "Buffalo"
+   ]
+  },
+  "buffalorising.com": {
+   "name": "Buffalo Rising",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.buffalorising.com/feed/",
+   "region": "NY",
+   "cities": [
+    "Buffalo"
+   ]
+  },
+  "amp.kansas.com": {
+   "name": "Wichita Eagle",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/kansas/stories",
+   "region": "KS",
+   "cities": [
+    "Wichita"
+   ]
+  },
+  "ksdk.com": {
+   "name": "KSDK",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.ksdk.com/feeds/syndication/rss/news",
+   "region": "MO",
+   "cities": [
+    "St. Louis"
+   ]
+  },
+  "fox2now.com": {
+   "name": "FOX 2",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://fox2now.com/feed/",
+   "region": "MO",
+   "cities": [
+    "St. Louis"
+   ]
+  },
+  "ibmadison.com": {
+   "name": "In Business Madison",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://ibmadison.com/feed/",
+   "region": "WI",
+   "cities": [
+    "Madison"
+   ]
+  },
+  "stlamerican.com": {
+   "name": "St. Louis American",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.stlamerican.com/feed/",
+   "region": "MO",
+   "cities": [
+    "St. Louis"
+   ]
+  },
+  "saucemagazine.com": {
+   "name": "Sauce Magazine",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.saucemagazine.com/feed/",
+   "region": "MO",
+   "cities": [
+    "St. Louis"
+   ]
+  },
+  "wtvr.com": {
+   "name": "WTVR.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wtvr.com/index.rss",
+   "region": "VA",
+   "cities": [
+    "Richmond"
+   ]
+  },
+  "rvahub.com": {
+   "name": "RVAHub",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://rvahub.com/feed/",
+   "region": "VA",
+   "cities": [
+    "Richmond"
+   ]
+  },
+  "commonwealthtimes.org": {
+   "name": "The Commonwealth Times",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://commonwealthtimes.org/feed/",
+   "region": "VA",
+   "cities": [
+    "Richmond"
+   ]
+  },
+  "richmondmagazine.com": {
+   "name": "richmondmagazine.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://richmondmagazine.com/api/rss/content.rss",
+   "region": "VA",
+   "cities": [
+    "Richmond"
+   ]
+  },
+  "stljewishlight.org": {
+   "name": "St. Louis Jewish Light",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://stljewishlight.org/feed/",
+   "region": "MO",
+   "cities": [
+    "St. Louis"
+   ]
+  },
+  "stlmag.com": {
+   "name": "St. Louis Magazine",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.stlmag.com/feed/",
+   "region": "MO",
+   "cities": [
+    "St. Louis"
+   ]
+  },
+  "kivitv.com": {
+   "name": "Idaho News 6",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.kivitv.com/index.rss",
+   "region": "ID",
+   "cities": [
+    "Boise"
+   ]
+  },
+  "vpm.org": {
+   "name": "VPM",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://vpm.org/feed/",
+   "region": "VA",
+   "cities": [
+    "Richmond"
+   ]
+  },
+  "callnewspapers.com": {
+   "name": "St. Louis Call Newspapers",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://callnewspapers.com/feed/",
+   "region": "MO",
+   "cities": [
+    "St. Louis"
+   ]
+  },
+  "ktvb.com": {
+   "name": "KTVB",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.ktvb.com/feeds/syndication/rss/news",
+   "region": "ID",
+   "cities": [
+    "Boise"
+   ]
+  },
+  "wric.com": {
+   "name": "WRIC ABC 8News",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wric.com/feed/",
+   "region": "VA",
+   "cities": [
+    "Richmond"
+   ]
+  },
+  "styleweekly.com": {
+   "name": "Style Weekly",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://styleweekly.com/feed/",
+   "region": "VA",
+   "cities": [
+    "Richmond"
+   ]
+  },
+  "who13.com": {
+   "name": "WHO13.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://who13.com/feed/",
+   "region": "IA",
+   "cities": [
+    "Des Moines"
+   ]
+  },
+  "weareiowa.com": {
+   "name": "weareiowa.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.weareiowa.com/feeds/syndication/rss/news",
+   "region": "IA",
+   "cities": [
+    "Des Moines"
+   ]
+  },
+  "businessrecord.com": {
+   "name": "Business Record",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://businessrecord.com/feed/",
+   "region": "IA",
+   "cities": [
+    "Des Moines"
+   ]
+  },
+  "saltlakemagazine.com": {
+   "name": "Salt Lake Magazine",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.saltlakemagazine.com/feed/",
+   "region": "UT",
+   "cities": [
+    "Salt Lake City"
+   ]
+  },
+  "sltrib.com": {
+   "name": "The Salt Lake Tribune",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.sltrib.com/arc/outboundfeeds/rss/?outputType=xml",
+   "region": "UT",
+   "cities": [
+    "Salt Lake City"
+   ]
+  },
+  "utahbusiness.com": {
+   "name": "Utah Business",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.utahbusiness.com/rss/latest.rss",
+   "region": "UT",
+   "cities": [
+    "Salt Lake City"
+   ]
+  },
+  "fox13now.com": {
+   "name": "FOX 13 News Utah",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.fox13now.com/index.rss",
+   "region": "UT",
+   "cities": [
+    "Salt Lake City"
+   ]
+  },
+  "buildingsaltlake.com": {
+   "name": "Building Salt Lake",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://buildingsaltlake.com/feed/",
+   "region": "UT",
+   "cities": [
+    "Salt Lake City"
+   ]
+  },
+  "raccoonvalleyradio.com": {
+   "name": "Raccoon Valley Radio",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://raccoonvalleyradio.com/feed/",
+   "region": "IA",
+   "cities": [
+    "Des Moines"
+   ]
+  },
+  "abc4.com": {
+   "name": "ABC4 Utah",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://abc4.com/feed/",
+   "region": "UT",
+   "cities": [
+    "Salt Lake City"
+   ]
+  },
+  "idahostatesman.com": {
+   "name": "Idaho Statesman",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://feeds.mcclatchy.com/idahostatesman/stories",
+   "region": "ID",
+   "cities": [
+    "Boise"
+   ]
+  },
+  "soul-grown.com": {
+   "name": "SoulGrown",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://soul-grown.com/feed/",
+   "region": "AL",
+   "cities": [
+    "Birmingham"
+   ]
+  },
+  "gephardtdaily.com": {
+   "name": "Gephardt Daily",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://gephardtdaily.com/feed/",
+   "region": "UT",
+   "cities": [
+    "Salt Lake City"
+   ]
+  },
+  "thehomewoodstar.com": {
+   "name": "thehomewoodstar.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://thehomewoodstar.com/api/rss/content.rss",
+   "region": "AL",
+   "cities": [
+    "Birmingham"
+   ]
+  },
+  "dailyutahchronicle.com": {
+   "name": "The Daily Utah Chronicle",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://dailyutahchronicle.com/feed/",
+   "region": "UT",
+   "cities": [
+    "Salt Lake City"
+   ]
+  },
+  "birminghamtimes.com": {
+   "name": "The Birmingham Times",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.birminghamtimes.com/feed/",
+   "region": "AL",
+   "cities": [
+    "Birmingham"
+   ]
+  },
+  "rbj.net": {
+   "name": "Rochester Business Journal",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://rbj.net/feed/",
+   "region": "NY",
+   "cities": [
+    "Rochester"
+   ]
+  },
+  "rochesterfirst.com": {
+   "name": "RochesterFirst",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://rochesterfirst.com/feed/",
+   "region": "NY",
+   "cities": [
+    "Rochester"
+   ]
+  },
+  "fingerlakesdailynews.com": {
+   "name": "Finger Lakes Daily News",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://fingerlakesdailynews.com/feed/",
+   "region": "NY",
+   "cities": [
+    "Rochester"
+   ]
+  },
+  "bhamnow.com": {
+   "name": "Bham Now",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://bhamnow.com/feed/",
+   "region": "AL",
+   "cities": [
+    "Birmingham"
+   ]
+  },
+  "birminghamwatch.org": {
+   "name": "BirminghamWatch",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://birminghamwatch.org/feed/",
+   "region": "AL",
+   "cities": [
+    "Birmingham"
+   ]
+  },
+  "ctmirror.org": {
+   "name": "CT Mirror",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://ctmirror.org/feed/",
+   "region": "CT",
+   "cities": [
+    "Hartford",
+    "New Haven"
+   ]
+  },
+  "ctnewsjunkie.com": {
+   "name": "CT News Junkie",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://ctnewsjunkie.com/feed/",
+   "region": "CT",
+   "cities": [
+    "Hartford"
+   ]
+  },
+  "rochesterbeacon.com": {
+   "name": "Rochester Beacon",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://rochesterbeacon.com/feed/",
+   "region": "NY",
+   "cities": [
+    "Rochester"
+   ]
+  },
+  "hartfordbusiness.com": {
+   "name": "Hartford Business Journal",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://hartfordbusiness.com/feed/",
+   "region": "CT",
+   "cities": [
+    "Hartford"
+   ]
+  },
+  "greaterrochesterchamber.com": {
+   "name": "Greater Rochester Chamber of Commerce",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.greaterrochesterchamber.com/feed/",
+   "region": "NY",
+   "cities": [
+    "Rochester"
+   ]
+  },
+  "upriseri.com": {
+   "name": "Uprise RI",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://upriseri.com/rss.xml",
+   "region": "RI",
+   "cities": [
+    "Providence"
+   ]
+  },
+  "wtnh.com": {
+   "name": "WTNH.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wtnh.com/feed/",
+   "region": "CT",
+   "cities": [
+    "Hartford",
+    "New Haven"
+   ]
+  },
+  "pbn.com": {
+   "name": "Providence Business News",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://pbn.com/feed/",
+   "region": "RI",
+   "cities": [
+    "Providence"
+   ]
+  },
+  "wpri.com": {
+   "name": "WPRI.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wpri.com/feed/",
+   "region": "RI",
+   "cities": [
+    "Providence"
+   ]
+  },
+  "wnyt.com": {
+   "name": "WNYT.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wnyt.com/feed/",
+   "region": "NY",
+   "cities": [
+    "Albany"
+   ]
+  },
+  "sevendaysvt.com": {
+   "name": "Seven Days Vermont",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.sevendaysvt.com/feed/",
+   "region": "VT",
+   "cities": [
+    "Burlington"
+   ]
+  },
+  "wamc.org": {
+   "name": "WAMC",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wamc.org/rss.xml",
+   "region": "NY",
+   "cities": [
+    "Albany"
+   ]
+  },
+  "vtdigger.org": {
+   "name": "VTDigger",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://vtdigger.org/feed/",
+   "region": "VT",
+   "cities": [
+    "Burlington"
+   ]
+  },
+  "whec.com": {
+   "name": "WHEC.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://whec.com/feed/",
+   "region": "NY",
+   "cities": [
+    "Rochester"
+   ]
+  },
+  "pressherald.com": {
+   "name": "The Portland Press Herald",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.pressherald.com/feed/",
+   "region": "ME",
+   "cities": [
+    "Portland"
+   ]
+  },
+  "bangordailynews.com": {
+   "name": "Bangor Daily News",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.bangordailynews.com/feed/",
+   "region": "ME",
+   "cities": [
+    "Portland"
+   ]
+  },
+  "vermontbiz.com": {
+   "name": "Vermont Business Magazine",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://vermontbiz.com/rss.xml",
+   "region": "VT",
+   "cities": [
+    "Burlington"
+   ]
+  },
+  "vtcynic.com": {
+   "name": "The Vermont Cynic",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://vtcynic.com/feed/",
+   "region": "VT",
+   "cities": [
+    "Burlington"
+   ]
+  },
+  "mainebiz.biz": {
+   "name": "Mainebiz",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://mainebiz.biz/feed/",
+   "region": "ME",
+   "cities": [
+    "Portland"
+   ]
+  },
+  "charlestoncitypaper.com": {
+   "name": "Charleston City Paper",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://charlestoncitypaper.com/feed/",
+   "region": "SC",
+   "cities": [
+    "Charleston"
+   ]
+  },
+  "jacksonadvocateonline.com": {
+   "name": "Jackson Advocate",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://jacksonadvocateonline.com/feed/",
+   "region": "MS",
+   "cities": [
+    "Jackson"
+   ]
+  },
+  "unionleader.com": {
+   "name": "New Hampshire Union Leader",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://unionleader.com/rss.xml",
+   "region": "NH",
+   "cities": [
+    "Manchester"
+   ]
+  },
+  "counton2.com": {
+   "name": "WCBD News 2",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://counton2.com/feed/",
+   "region": "SC",
+   "cities": [
+    "Charleston"
+   ]
+  },
+  "redhillsmsnews.com": {
+   "name": "RedHillsMSNews.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.redhillsmsnews.com/rss.xml",
+   "region": "MS",
+   "cities": [
+    "Jackson"
+   ]
+  },
+  "wjtv.com": {
+   "name": "WJTV",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wjtv.com/feed/",
+   "region": "MS",
+   "cities": [
+    "Jackson"
+   ]
+  },
+  "thv11.com": {
+   "name": "thv11.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.thv11.com/feeds/syndication/rss/news",
+   "region": "AR",
+   "cities": [
+    "Little Rock"
+   ]
+  },
+  "arktimes.com": {
+   "name": "Arkansas Times",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://arktimes.com/feed",
+   "region": "AR",
+   "cities": [
+    "Little Rock"
+   ]
+  },
+  "armoneyandpolitics.com": {
+   "name": "Arkansas Money & Politics",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://armoneyandpolitics.com/feed/",
+   "region": "AR",
+   "cities": [
+    "Little Rock"
+   ]
+  },
+  "fox16.com": {
+   "name": "FOX16.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://fox16.com/feed/",
+   "region": "AR",
+   "cities": [
+    "Little Rock"
+   ]
+  },
+  "inforum.com": {
+   "name": "InForum",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.inforum.com/index.rss",
+   "region": "ND",
+   "cities": [
+    "Fargo"
+   ]
+  },
+  "wdayradionow.com": {
+   "name": "WDAY Radio",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wdayradionow.com/feed/",
+   "region": "ND",
+   "cities": [
+    "Fargo"
+   ]
+  },
+  "kark.com": {
+   "name": "KARK",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://kark.com/feed/",
+   "region": "AR",
+   "cities": [
+    "Little Rock"
+   ]
+  },
+  "we-ha.com": {
+   "name": "We-Ha",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://we-ha.com/feed/",
+   "region": "CT",
+   "cities": [
+    "Hartford"
+   ]
+  },
+  "am1100theflag.com": {
+   "name": "The Flag - AM 1100 and FM 92.3 WZFG",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.am1100theflag.com/feed/",
+   "region": "ND",
+   "cities": [
+    "Fargo"
+   ]
+  },
+  "darkhorsepressnow.com": {
+   "name": "Darkhorse Press",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://darkhorsepressnow.com/feed/",
+   "region": "MS",
+   "cities": [
+    "Jackson"
+   ]
+  },
+  "kwsn.com": {
+   "name": "KWSN",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://kwsn.com/feed/",
+   "region": "SD",
+   "cities": [
+    "Sioux Falls"
+   ]
+  },
+  "keloland.com": {
+   "name": "KELOLAND.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://keloland.com/feed/",
+   "region": "SD",
+   "cities": [
+    "Sioux Falls"
+   ]
+  },
+  "sfsimplified.com": {
+   "name": "Sioux Falls Simplified",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.sfsimplified.com/rss/",
+   "region": "SD",
+   "cities": [
+    "Sioux Falls"
+   ]
+  },
+  "ktvq.com": {
+   "name": "KTVQ",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.ktvq.com/index.rss",
+   "region": "MT",
+   "cities": [
+    "Billings"
+   ]
+  },
+  "pigeon605.com": {
+   "name": "Pigeon605",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://pigeon605.com/feed/",
+   "region": "SD",
+   "cities": [
+    "Sioux Falls"
+   ]
+  },
+  "connectsavannah.com": {
+   "name": "Connect Savannah",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.connectsavannah.com/feed/",
+   "region": "GA",
+   "cities": [
+    "Savannah"
+   ]
+  },
+  "wsav.com": {
+   "name": "WSAV-TV",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wsav.com/feed/",
+   "region": "GA",
+   "cities": [
+    "Savannah"
+   ]
+  },
+  "wate.com": {
+   "name": "WATE 6 On Your Side",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wate.com/feed/",
+   "region": "TN",
+   "cities": [
+    "Knoxville"
+   ]
+  },
+  "fox17online.com": {
+   "name": "FOX 17 West Michigan News",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.fox17online.com/index.rss",
+   "region": "MI",
+   "cities": [
+    "Grand Rapids"
+   ]
+  },
+  "wbir.com": {
+   "name": "WBIR",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wbir.com/feeds/syndication/rss/news",
+   "region": "TN",
+   "cities": [
+    "Knoxville"
+   ]
+  },
+  "knoxtntoday.com": {
+   "name": "Knox TN Today",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.knoxtntoday.com/feed/",
+   "region": "TN",
+   "cities": [
+    "Knoxville"
+   ]
+  },
+  "savannahtribune.com": {
+   "name": "The Savannah Tribune",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.savannahtribune.com/feed/",
+   "region": "GA",
+   "cities": [
+    "Savannah"
+   ]
+  },
+  "grmag.com": {
+   "name": "Grand Rapids Magazine",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.grmag.com/feed/",
+   "region": "MI",
+   "cities": [
+    "Grand Rapids"
+   ]
+  },
+  "wzzm13.com": {
+   "name": "WZZM13.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wzzm13.com/feeds/syndication/rss/news",
+   "region": "MI",
+   "cities": [
+    "Grand Rapids"
+   ]
+  },
+  "woodtv.com": {
+   "name": "WOODTV.com",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://woodtv.com/feed/",
+   "region": "MI",
+   "cities": [
+    "Grand Rapids"
+   ]
+  },
+  "wtol.com": {
+   "name": "WTOL",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.wtol.com/feeds/syndication/rss/news",
+   "region": "OH",
+   "cities": [
+    "Toledo"
+   ]
+  },
+  "toledoblade.com": {
+   "name": "Toledo Blade",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://toledoblade.com/rss/",
+   "region": "OH",
+   "cities": [
+    "Toledo"
+   ]
+  },
+  "thecollegiatelive.com": {
+   "name": "The Collegiate Live",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://thecollegiatelive.com/feed/",
+   "region": "MI",
+   "cities": [
+    "Grand Rapids"
+   ]
+  },
+  "localsyr.com": {
+   "name": "WSYR",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://localsyr.com/feed/",
+   "region": "NY",
+   "cities": [
+    "Syracuse"
+   ]
+  },
+  "news.syr.edu": {
+   "name": "Syracuse University Today",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://news.syr.edu/feed/",
+   "region": "NY",
+   "cities": [
+    "Syracuse"
+   ]
+  },
+  "thisweekinworcester.com": {
+   "name": "This Week in Worcester",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://thisweekinworcester.com/feed/",
+   "region": "MA",
+   "cities": [
+    "Worcester"
+   ]
+  },
+  "wbjournal.com": {
+   "name": "Worcester Business Journal",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://wbjournal.com/feed/",
+   "region": "MA",
+   "cities": [
+    "Worcester"
+   ]
+  },
+  "ctexaminer.com": {
+   "name": "CT Examiner",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://ctexaminer.com/feed/",
+   "region": "CT",
+   "cities": [
+    "New Haven"
+   ]
+  },
+  "newhavenindependent.org": {
+   "name": "New Haven Independent",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.newhavenindependent.org/feed/",
+   "region": "CT",
+   "cities": [
+    "New Haven"
+   ]
+  },
+  "fadmagazine.com": {
+   "name": "FAD Magazine",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://fadmagazine.com/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "London"
+   ]
+  },
+  "ianvisits.co.uk": {
+   "name": "ianVisits",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.ianvisits.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "London"
+   ]
+  },
+  "placenorthwest.co.uk": {
+   "name": "Place North West",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://placenorthwest.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Manchester"
+   ]
+  },
+  "manchesterwire.co.uk": {
+   "name": "Manchester Wire",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://manchesterwire.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Manchester"
+   ]
+  },
+  "luxurylondon.co.uk": {
+   "name": "Luxury London",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://luxurylondon.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "London"
+   ]
+  },
+  "ilovemanchester.com": {
+   "name": "I Love Manchester",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://ilovemanchester.com/feed",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Manchester"
+   ]
+  },
+  "oldham-chronicle.co.uk": {
+   "name": "Oldham Evening Chronicle",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.oldham-chronicle.co.uk/rss",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Manchester"
+   ]
+  },
+  "theatreweekly.com": {
+   "name": "Theatre Weekly",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://theatreweekly.com/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "London"
+   ]
+  },
+  "salfordnow.co.uk": {
+   "name": "Salford Now",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.salfordnow.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Manchester"
+   ]
+  },
+  "louderthanwar.com": {
+   "name": "Louder Than War",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://louderthanwar.com/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Manchester"
+   ]
+  },
+  "scotsman.com": {
+   "name": "The Scotsman",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://scotsman.com/rss",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Glasgow",
+    "Edinburgh"
+   ]
+  },
+  "projectscot.com": {
+   "name": "Project Scotland",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://projectscot.com/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Glasgow",
+    "Edinburgh"
+   ]
+  },
+  "mancunion.com": {
+   "name": "The Mancunion",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://mancunion.com/feed",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Manchester"
+   ]
+  },
+  "dramscotland.co.uk": {
+   "name": "DRAM Scotland",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://dramscotland.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Glasgow",
+    "Edinburgh"
+   ]
+  },
+  "merseynewslive.co.uk": {
+   "name": "MerseyNewsLive",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://merseynewslive.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Liverpool"
+   ]
+  },
+  "ymliverpool.com": {
+   "name": "YM Liverpool",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://ymliverpool.com/feed",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Liverpool"
+   ]
+  },
+  "liverpoolexpress.co.uk": {
+   "name": "Liverpool Express",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://liverpoolexpress.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Liverpool"
+   ]
+  },
+  "chorley-guardian.co.uk": {
+   "name": "Lancashire Evening Post",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://chorley-guardian.co.uk/rss",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Liverpool",
+    "Preston"
+   ]
+  },
+  "sheffieldtribune.co.uk": {
+   "name": "Sheffield Tribune",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.sheffieldtribune.co.uk/rss/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Sheffield"
+   ]
+  },
+  "knowsleynews.co.uk": {
+   "name": "Knowsley News",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.knowsleynews.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Liverpool"
+   ]
+  },
+  "exposedmagazine.co.uk": {
+   "name": "www.exposedmagazine.co.uk",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.exposedmagazine.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Sheffield"
+   ]
+  },
+  "sltn.co.uk": {
+   "name": "Scottish Licensed Trade News",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://sltn.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Edinburgh"
+   ]
+  },
+  "sheffieldtelegraph.co.uk": {
+   "name": "sheffieldtelegraph.co.uk",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://sheffieldtelegraph.co.uk/rss",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Sheffield"
+   ]
+  },
+  "thereviewshub.com": {
+   "name": "The Reviews Hub",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.thereviewshub.com/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Sheffield"
+   ]
+  },
+  "epigram.org.uk": {
+   "name": "Epigram",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://epigram.org.uk/latest/rss/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Bristol"
+   ]
+  },
+  "futurescot.com": {
+   "name": "FutureScot",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://futurescot.com/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Edinburgh"
+   ]
+  },
+  "nowthenmagazine.com": {
+   "name": "Now Then Sheffield",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://feeds.nowthenmagazine.com/sheffield",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Sheffield"
+   ]
+  },
+  "northernsoul.me.uk": {
+   "name": "https://www.northernsoul.me.uk/",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://northernsoul.me.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Liverpool"
+   ]
+  },
+  "goodnewsliverpool.co.uk": {
+   "name": "Good News Liverpool",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.goodnewsliverpool.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Liverpool"
+   ]
+  },
+  "businessnewswales.com": {
+   "name": "Business News Wales",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://businessnewswales.com/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Cardiff",
+    "Swansea"
+   ]
+  },
+  "bristol247.com": {
+   "name": "Bristol24/7",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://bristol247.com/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Bristol"
+   ]
+  },
+  "edinburghchamber.co.uk": {
+   "name": "Edinburgh Chamber of Commerce",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.edinburghchamber.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Edinburgh"
+   ]
+  },
+  "newtownabbeytoday.co.uk": {
+   "name": "NorthernIrelandWorld",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.northernirelandworld.com/rss",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Belfast"
+   ]
+  },
+  "midulstermail.co.uk": {
+   "name": "NorthernIrelandWorld",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://midulstermail.co.uk/rss",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Belfast"
+   ]
+  },
+  "xsnoize.com": {
+   "name": "XS Noize",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.xsnoize.com/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Belfast"
+   ]
+  },
+  "buzzmag.co.uk": {
+   "name": "Buzz Magazine",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.buzzmag.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Cardiff"
+   ]
+  },
+  "yorkshirebylines.co.uk": {
+   "name": "Yorkshire Bylines",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.bylinesnetwork.org/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Bradford"
+   ]
+  },
+  "culturednortheast.co.uk": {
+   "name": "Cultured. North East",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://culturednortheast.co.uk/feed",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Newcastle upon Tyne"
+   ]
+  },
+  "ilkestonlife.com": {
+   "name": "Ilkeston Life",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://ilkestonlife.com/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Nottingham",
+    "Derby"
+   ]
+  },
+  "ukpropertyforums.com": {
+   "name": "UK Property Forums",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://ukpropertyforums.com/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Bristol"
+   ]
+  },
+  "northeastbylines.co.uk": {
+   "name": "North East Bylines",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.bylinesnetwork.org/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Newcastle upon Tyne",
+    "Sunderland"
+   ]
+  },
+  "businessfirstonline.co.uk": {
+   "name": "Business First Online",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.businessfirstonline.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Belfast"
+   ]
+  },
+  "jesmondlocal.com": {
+   "name": "JESMONDLOCAL",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://jesmondlocal.com/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Newcastle upon Tyne"
+   ]
+  },
+  "mynottinghamnews.co.uk": {
+   "name": "My Nottingham News",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.mynottinghamnews.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Nottingham"
+   ]
+  },
+  "marketingderby.co.uk": {
+   "name": "Marketing Derby",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://marketingderby.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Derby"
+   ]
+  },
+  "businessupnorth.co.uk": {
+   "name": "Business Up North",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.businessupnorth.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Newcastle upon Tyne"
+   ]
+  },
+  "brightonsource.co.uk": {
+   "name": "Brighton Source",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://brightonsource.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Brighton"
+   ]
+  },
+  "in-common.co.uk": {
+   "name": "In-Common - Southampton",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.in-common.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Southampton"
+   ]
+  },
+  "brightonandhoveindependent.co.uk": {
+   "name": "SussexWorld",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.sussexexpress.co.uk/your-sussex/east-sussex/brighton-and-hove/rss",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Brighton"
+   ]
+  },
+  "chichester.co.uk": {
+   "name": "SussexWorld",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.sussexexpress.co.uk/your-sussex/west-sussex/chichester/rss",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Brighton"
+   ]
+  },
+  "eastbourneherald.co.uk": {
+   "name": "SussexWorld",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://eastbourneherald.co.uk/rss",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Brighton"
+   ]
+  },
+  "wscountytimes.co.uk": {
+   "name": "SussexWorld",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.sussexexpress.co.uk/your-sussex/west-sussex/horsham/rss",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Brighton"
+   ]
+  },
+  "worthingherald.co.uk": {
+   "name": "SussexWorld",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.sussexexpress.co.uk/your-sussex/west-sussex/worthing/rss",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Brighton"
+   ]
+  },
+  "thelatest.co.uk": {
+   "name": "Latest TV Brighton",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://thelatest.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Brighton"
+   ]
+  },
+  "southleedslife.com": {
+   "name": "South Leeds Life",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://southleedslife.com/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Leeds"
+   ]
+  },
+  "oneplymouth.co.uk": {
+   "name": "One Plymouth",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://oneplymouth.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Plymouth"
+   ]
+  },
+  "oxfordstudent.com": {
+   "name": "The Oxford Student",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.oxfordstudent.com/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Oxford",
+    "Milton Keynes"
+   ]
+  },
+  "alittlebitofstone.com": {
+   "name": "A Little Bit of Stone",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://alittlebitofstone.com/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Stoke-on-Trent"
+   ]
+  },
+  "news.oxfordshire.gov.uk": {
+   "name": "Oxfordshire County Council",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://news.oxfordshire.gov.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Oxford",
+    "Milton Keynes"
+   ]
+  },
+  "cherwell.org": {
+   "name": "Cherwell",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://cherwell.org/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Oxford",
+    "Milton Keynes"
+   ]
+  },
+  "networknorwich.co.uk": {
+   "name": "Network Norfolk and Norwich",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://networknorwich.co.uk/publisher/RSS.xml",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Norwich"
+   ]
+  },
+  "charleshutchpress.co.uk": {
+   "name": "charleshutchpress.co.uk",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://charleshutchpress.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "York"
+   ]
+  },
+  "bathnewseum.com": {
+   "name": "bath newseum",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://bathnewseum.com/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Bath"
+   ]
+  },
+  "oxfordshireguardian.co.uk": {
+   "name": "Oxfordshire Guardian",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://oxfordshireguardian.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Oxford"
+   ]
+  },
+  "allthingsbusiness.co.uk": {
+   "name": "allthingsbusiness.co.uk",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://allthingsbusiness.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Milton Keynes"
+   ]
+  },
+  "garstangcourier.co.uk": {
+   "name": "Lancashire Evening Post",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://garstangcourier.co.uk/rss",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Preston"
+   ]
+  },
+  "lythamstannesexpress.co.uk": {
+   "name": "Blackpool Gazette",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://lythamstannesexpress.co.uk/rss",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Preston"
+   ]
+  },
+  "northantslife.co.uk": {
+   "name": "Northants Life",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://www.northantslife.co.uk/feed/",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Milton Keynes"
+   ]
+  },
+  "dunstabletoday.co.uk": {
+   "name": "Luton Today",
+   "cc": "GB",
+   "lang": "en",
+   "feed": "https://dunstabletoday.co.uk/rss",
+   "region": "Royaume-Uni",
+   "cities": [
+    "Luton"
+   ]
+  },
+  "action-nationale.qc.ca": {
+   "name": "L'Action nationale",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://action-nationale.qc.ca/feed/",
+   "region": "Montréal"
+  },
+  "laterre.ca": {
+   "name": "La Terre de chez nous",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://laterre.ca/feed/",
+   "region": ""
+  },
+  "quartierlibre.ca": {
+   "name": "Quartier libre",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://quartierlibre.ca/feed/",
+   "region": ""
+  },
+  "fugues.com": {
+   "name": "Fugues",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://fugues.com/feed/",
+   "region": ""
+  },
+  "route17.ca": {
+   "name": "CFJU-FM",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.route17.ca/feed/",
+   "region": ""
+  },
+  "puq.ca": {
+   "name": "Presses de l'Université du Québec",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://puq.ca/rss/nouvelles.xml",
+   "region": "Capitale-Nationale"
+  },
+  "nightlife.ca": {
+   "name": "Nightlife.ca",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://nightlife.ca/feed/",
+   "region": ""
+  },
+  "ficsum.com": {
+   "name": "Dire",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.ficsum.com/feed/",
+   "region": ""
+  },
+  "infobref.com": {
+   "name": "InfoBref",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://infobref.com/feed/",
+   "region": "Montréal"
+  },
+  "ccap.tv": {
+   "name": "CCAP.Tv",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.ccap.tv/feed/",
+   "region": ""
+  },
+  "cifafm.com": {
+   "name": "CIFA-FM",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.cifafm.com/blog-feed.xml",
+   "region": ""
+  },
+  "lecourrier.com": {
+   "name": "Le Courrier de la Nouvelle-Écosse",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lecourrier.com/feed/",
+   "region": ""
+  },
+  "frontiere.fm": {
+   "name": "CJEM-FM",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.frontiere.fm/blog-feed.xml",
+   "region": ""
+  },
+  "todaysfarmer.ca": {
+   "name": "Ontario Farmer",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://todaysfarmer.ca/feed/",
+   "region": ""
+  },
+  "macleans.ca": {
+   "name": "Maclean's",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://macleans.ca/feed/",
+   "region": ""
+  },
+  "cantechletter.com": {
+   "name": "Dollarton Cantech Letter",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://cantechletter.com/feed/",
+   "region": ""
+  },
+  "erudit.org": {
+   "name": "Rabaska",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://erudit.org/rss.xml",
+   "region": ""
+  },
+  "barrheadleader.com": {
+   "name": "The Barrhead Leader",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://barrheadleader.com/rss",
+   "region": ""
+  },
+  "therealnews.com": {
+   "name": "The Real News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://therealnews.com/feed",
+   "region": ""
+  },
+  "pressprogress.ca": {
+   "name": "PressProgress",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://pressprogress.ca/feed/",
+   "region": ""
+  },
+  "thegate.ca": {
+   "name": "TheGATE.ca",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.thegate.ca/feed/",
+   "region": ""
+  },
+  "lannion-perros.maville.com": {
+   "name": "maville.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lannion-perros.maville.com/flux/rss/actu.php?c=loc",
+   "region": "Montérégie",
+   "cities": [
+    "Saint-Clet"
+   ]
+  },
+  "guingamp.maville.com": {
+   "name": "maville.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://guingamp.maville.com/flux/rss/actu.php?c=loc",
+   "region": "Montérégie",
+   "cities": [
+    "Saint-Clet"
+   ]
+  },
+  "dinan.maville.com": {
+   "name": "maville.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://dinan.maville.com/flux/rss/actu.php?c=loc",
+   "region": "Montérégie",
+   "cities": [
+    "Saint-Clet"
+   ]
+  },
+  "saint-brieuc.maville.com": {
+   "name": "maville.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://saint-brieuc.maville.com/flux/rss/actu.php?c=loc",
+   "region": "Montérégie",
+   "cities": [
+    "Saint-Clet"
+   ]
+  },
+  "marsactu.fr": {
+   "name": "Marsactu",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://marsactu.fr/feed/",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Zacharie",
+    "Saint-Barnabé"
+   ]
+  },
+  "nordlittoral.fr": {
+   "name": "Nord Littoral",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.nordlittoral.fr/rss.xml",
+   "region": "Outaouais",
+   "cities": [
+    "Messines"
+   ]
+  },
+  "claap.fr": {
+   "name": "Claap",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://claap.fr/feed/",
+   "region": "Outaouais",
+   "cities": [
+    "Montpellier"
+   ]
+  },
+  "marseillesecrete.com": {
+   "name": "Marseille Secrète",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://marseillesecrete.com/feed/",
+   "region": "Mauricie",
+   "cities": [
+    "Saint-Barnabé"
+   ]
+  },
+  "algerie-eco.com": {
+   "name": "Algerie Eco",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://algerie-eco.com/feed/",
+   "region": "Centre-du-Québec",
+   "cities": [
+    "Saint-Eugène"
+   ]
+  },
+  "destimed.fr": {
+   "name": "Destimed",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.destimed.fr/feed/",
+   "region": "Mauricie",
+   "cities": [
+    "Saint-Barnabé"
+   ]
+  },
+  "lepoing.net": {
+   "name": "Le Poing",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lepoing.net/feed/",
+   "region": "Outaouais",
+   "cities": [
+    "Montpellier"
+   ]
+  },
+  "toulon.maville.com": {
+   "name": "maville.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://toulon.maville.com/flux/rss/dma.php",
+   "region": "Mauricie",
+   "cities": [
+    "Saint-Barnabé"
+   ]
+  },
+  "frequence-sud.fr": {
+   "name": "frequence-sud.fr",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.frequence-sud.fr/rss/fluxactu.xml",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Zacharie",
+    "Saint-Barnabé"
+   ]
+  },
+  "lavoixdelain.fr": {
+   "name": "La Voix de l'Ain",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.lavoixdelain.fr/feed/",
+   "region": "Estrie",
+   "cities": [
+    "Saint-Claude"
+   ]
+  },
+  "lasemaineduroussillon.com": {
+   "name": "La Semaine du Roussillon",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lasemaineduroussillon.com/feed/",
+   "region": "Bas-Saint-Laurent",
+   "cities": [
+    "Saint-Cyprien"
+   ]
+  },
+  "ouillade.eu": {
+   "name": "Ouillade",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://ouillade.eu/feed",
+   "region": "Bas-Saint-Laurent",
+   "cities": [
+    "Saint-Cyprien"
+   ]
+  },
+  "lejournaltoulousain.fr": {
+   "name": "Le Journal Toulousain",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lejournaltoulousain.fr/feed/",
+   "region": "Outaouais",
+   "cities": [
+    "Montpellier"
+   ]
+  },
+  "lepaysgessien.lemessager.fr": {
+   "name": "Le Pays Gessien",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lepaysgessien.lemessager.fr/rss.xml",
+   "region": "Estrie",
+   "cities": [
+    "Saint-Claude"
+   ]
+  },
+  "madeinmarseille.net": {
+   "name": "Made in Marseille",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://madeinmarseille.net/feed/",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Zacharie",
+    "Saint-Barnabé"
+   ]
+  },
+  "leresistant.fr": {
+   "name": "LeResistant",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.leresistant.fr/rss.xml",
+   "region": "Centre-du-Québec",
+   "cities": [
+    "Sainte-Eulalie"
+   ]
+  },
+  "lebonbon.fr": {
+   "name": "Le Bonbon",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://rss.lebonbon.fr/feeds/paris",
+   "region": "Centre-du-Québec",
+   "cities": [
+    "Sainte-Eulalie",
+    "Sainte-Paule",
+    "Saint-Médard"
+   ]
+  },
+  "limpartial.fr": {
+   "name": "L'Impartial de la Drôme",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://limpartial.fr/feed/",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Vallier"
+   ]
+  },
+  "bordeaux-metropole.fr": {
+   "name": "Bordeaux Métropole",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://bordeaux-metropole.fr/rss.xml",
+   "region": "Centre-du-Québec",
+   "cities": [
+    "Sainte-Eulalie",
+    "Saint-Médard"
+   ]
+  },
+  "hebdo39.net": {
+   "name": "Hebdo39",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://hebdo39.net/feed/",
+   "region": "Estrie",
+   "cities": [
+    "Saint-Claude"
+   ]
+  },
+  "placeco.fr": {
+   "name": "Placéco",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://placeco.fr/rss.xml",
+   "region": "Centre-du-Québec",
+   "cities": [
+    "Sainte-Eulalie",
+    "Saint-Médard"
+   ]
+  },
+  "caen.maville.com": {
+   "name": "maville.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://caen.maville.com/flux/rss/actu.php?c=loc",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Honfleur"
+   ]
+  },
+  "laval.maville.com": {
+   "name": "maville.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://laval.maville.com/flux/rss/actu.php?c=loc",
+   "region": "Laurentides",
+   "cities": [
+    "Notre-Dame-de-Pontmain"
+   ]
+  },
+  "bordeaux.fr": {
+   "name": "Site officiel de la ville de Bordeaux",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://bordeaux.fr/rss.xml",
+   "region": "Centre-du-Québec",
+   "cities": [
+    "Sainte-Eulalie",
+    "Saint-Médard"
+   ]
+  },
+  "aquitaineonline.com": {
+   "name": "AquitaineOnLine",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://aquitaineonline.com/rss",
+   "region": "Centre-du-Québec",
+   "cities": [
+    "Sainte-Eulalie",
+    "Saint-Médard"
+   ]
+  },
+  "honfleur-infos.com": {
+   "name": "Honfleur-Infos",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.honfleur-infos.com/feed/",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Honfleur"
+   ]
+  },
+  "trouville-deauville.maville.com": {
+   "name": "maville.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://trouville-deauville.maville.com/flux/rss/actu.php?c=loc",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Honfleur"
+   ]
+  },
+  "mediabask.eus": {
+   "name": "Mediabask",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.mediabask.eus/eu/rss/sections/mediabask.rss",
+   "region": "Estrie",
+   "cities": [
+    "Saint-Sébastien"
+   ]
+  },
+  "granville.maville.com": {
+   "name": "maville.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://granville.maville.com/flux/rss/actu.php?c=loc",
+   "region": "Laurentides",
+   "cities": [
+    "Mont-Saint-Michel"
+   ]
+  },
+  "saint-lo.maville.com": {
+   "name": "maville.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://saint-lo.maville.com/flux/rss/actu.php?c=loc",
+   "region": "Laurentides",
+   "cities": [
+    "Mont-Saint-Michel"
+   ]
+  },
+  "cherbourg.maville.com": {
+   "name": "maville.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://cherbourg.maville.com/flux/rss/actu.php?c=loc",
+   "region": "Laurentides",
+   "cities": [
+    "Mont-Saint-Michel"
+   ]
+  },
+  "charolais-news.com": {
+   "name": "Charolais News",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://charolais-news.com/feed/",
+   "region": "Bas-Saint-Laurent",
+   "cities": [
+    "Saint-Eusèbe"
+   ]
+  },
+  "saint-malo.maville.com": {
+   "name": "maville.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://saint-malo.maville.com/flux/rss/actu.php?c=loc",
+   "region": "Estrie",
+   "cities": [
+    "Saint-Malo"
+   ]
+  },
+  "radioscoop.com": {
+   "name": "Radio SCOOP",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://radioscoop.com/rss",
+   "region": "Outaouais",
+   "cities": [
+    "Saint-Sixte",
+    "Sainte-Paule"
+   ]
+  },
+  "lyoncapitale.fr": {
+   "name": "Lyon Capitale",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.lyoncapitale.fr/feed",
+   "region": "Outaouais",
+   "cities": [
+    "Saint-Sixte",
+    "Sainte-Paule"
+   ]
+  },
+  "lejsl.com": {
+   "name": "Le JSL",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lejsl.com/rss",
+   "region": "Bas-Saint-Laurent",
+   "cities": [
+    "Saint-Eusèbe",
+    "Sainte-Paule"
+   ]
+  },
+  "echodumardi.com": {
+   "name": "L'Echo du Mardi",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.echodumardi.com/feed/",
+   "region": "Abitibi-Témiscamingue",
+   "cities": [
+    "Roquemaure"
+   ]
+  },
+  "infonormandie.com": {
+   "name": "InfoNormandie",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://infonormandie.com/xml/syndication.rss",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Marcel"
+   ]
+  },
+  "tvsudmagazine.fr": {
+   "name": "TV Sud Magazine, le magazine N°1 dans le Gard Rhodanien",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://tvsudmagazine.fr/feed/",
+   "region": "Abitibi-Témiscamingue",
+   "cities": [
+    "Roquemaure"
+   ]
+  },
+  "independantdelyonne.com": {
+   "name": "L'independant de L'yonne -",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://independantdelyonne.com/feed/",
+   "region": "Bas-Saint-Laurent",
+   "cities": [
+    "Saint-Clément"
+   ]
+  },
+  "lereveildumidi.fr": {
+   "name": "Le réveil de midi",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lereveildumidi.fr/?format=feed&type=rss",
+   "region": "Abitibi-Témiscamingue",
+   "cities": [
+    "Roquemaure"
+   ]
+  },
+  "hebdo25.net": {
+   "name": "Hebdo25",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://hebdo25.net/feed/",
+   "region": "Abitibi-Témiscamingue",
+   "cities": [
+    "Clerval"
+   ]
+  },
+  "macommune.info": {
+   "name": "maCommune.info",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://macommune.info/feed/",
+   "region": "Abitibi-Témiscamingue",
+   "cities": [
+    "Clerval"
+   ]
+  },
+  "lorient.maville.com": {
+   "name": "maville.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lorient.maville.com/flux/rss/actu.php?c=loc",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Philibert"
+   ]
+  },
+  "vannes.maville.com": {
+   "name": "maville.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://vannes.maville.com/flux/rss/actu.php?c=loc",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Philibert"
+   ]
+  },
+  "pontivy.maville.com": {
+   "name": "maville.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://pontivy.maville.com/flux/rss/actu.php?c=loc",
+   "region": "Chaudière-Appalaches",
+   "cities": [
+    "Saint-Philibert"
+   ]
+  },
+  "estrepublicain.fr": {
+   "name": "L'Est Républicain",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://estrepublicain.fr/rss",
+   "region": "Abitibi-Témiscamingue",
+   "cities": [
+    "Clerval"
+   ]
+  },
+  "liberation-champagne.fr": {
+   "name": "Libération Champagne",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://liberation-champagne.fr/rss.xml",
+   "region": "Bas-Saint-Laurent",
+   "cities": [
+    "Saint-Clément"
+   ]
+  },
+  "lyonmag.com": {
+   "name": "Lyon Mag",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lyonmag.com/rss",
+   "region": "Bas-Saint-Laurent",
+   "cities": [
+    "Sainte-Paule"
+   ]
+  },
+  "tribunedelyon.fr": {
+   "name": "Tribune de Lyon",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://tribunedelyon.fr/feed/",
+   "region": "Bas-Saint-Laurent",
+   "cities": [
+    "Sainte-Paule"
+   ]
+  },
+  "lest-eclair.fr": {
+   "name": "L'Est éclair",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://lest-eclair.fr/rss.xml",
+   "region": "Bas-Saint-Laurent",
+   "cities": [
+    "Saint-Clément"
+   ]
+  },
+  "la-vie-nouvelle.fr": {
+   "name": "La Vie Nouvelle",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.la-vie-nouvelle.fr/feed/",
+   "region": "Bas-Saint-Laurent",
+   "cities": [
+    "Albertville"
+   ]
+  },
+  "lyonpeople.com": {
+   "name": "Lyon people",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.lyonpeople.com/feed",
+   "region": "Bas-Saint-Laurent",
+   "cities": [
+    "Sainte-Paule"
+   ]
+  },
+  "echos-judiciaires.com": {
+   "name": "Échos Judiciaires Girondins",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://echos-judiciaires.com/feed/",
+   "region": "Bas-Saint-Laurent",
+   "cities": [
+    "Saint-Médard"
+   ]
+  },
+  "toutmontbeliard.com": {
+   "name": "ToutMontbeliard.com",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://www.toutmontbeliard.com/feed/",
+   "region": "Abitibi-Témiscamingue",
+   "cities": [
+    "Clerval"
+   ]
+  }
+ }
+}
