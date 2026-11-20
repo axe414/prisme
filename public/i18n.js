@@ -231,6 +231,13 @@ const EXACT = {
   "Le nombre d'histoires non lues sur tes sujets suivis, sur l'icône de Prisme. L'iPhone le met à jour quand Prisme s'ouvre ou vient de servir.": "The number of unread stories on the topics you follow, on Prisme's icon. The iPhone updates it when Prisme opens or was just used.",
   "Autorise les notifications de Prisme dans les réglages de l'iPhone.": "Allow Prisme's notifications in the iPhone settings.", "Suis un sujet pour voir la pastille bouger.": "Follow a topic to see the badge move.",
   "★ Enregistrer": "★ Save", "Retirer ★": "Remove ★", "✓ Lu": "✓ Read", "↺ Non lu": "↺ Unread", "Dernière mise à jour": "Last updated", "À jour": "Updated", "Moins de": "Less from",
+  "La une": "Top story", "La une de ce matin": "This morning's top story", "La une de ce soir": "Tonight's top story", "L'histoire la plus couverte": "The most-covered story", "La gauche, le centre et la droite": "Left, center and right",
+  "Angle mort à droite": "Right blind spot", "Angle mort à gauche": "Left blind spot", "◐ Angle mort": "◐ Blind spot", "Angle mort": "Blind spot", "Tous les angles morts →": "All blind spots →",
+  "Trier :": "Sort:", "Trier le fil": "Sort the feed", "Essentiel": "Essentials", "Angles morts": "Blind spots", "Gauche": "Left", "Droite": "Right", "Hors radar": "Under the radar", "En continu": "Latest", "Pour toi": "For you",
+  "Face à face": "Face to face", "la même nouvelle, deux titres": "same story, two headlines", "À gauche": "On the left", "À droite": "On the right",
+  "Le fil de l'histoire": "How the story unfolded", "Aujourd'hui": "Today", "Hier": "Yesterday", "Tout voir →": "See all →",
+  "Ensoleillé": "Sunny", "Partiellement nuageux": "Partly cloudy", "Nuageux": "Cloudy", "Brouillard": "Fog", "Bruine": "Drizzle", "Pluie": "Rain", "Neige": "Snow", "Averses": "Showers", "Averses de neige": "Snow showers", "Orages": "Thunderstorms",
+  "Sous chaque nouvelle, cette barre :": "Under every story, this bar:", "Gauche 4": "Left 4", "Centre 5": "Center 5", "Droite 3": "Right 3", "Quand un côté n'en parle presque pas, c'est un": "When one side barely covers it, it's a",
 };
 
 // Textes avec un nombre ou un nom à l'intérieur.
@@ -299,6 +306,13 @@ const PATTERNS = [
   [/^Aucune histoire de Prisme ne correspond à « (.+) »\. Voici ce qu'on trouve dans tous les articles lus par Prisme\.$/, (m, x) => `No Prisme story matches “${x}”. Here's what turns up in every article Prisme reads.`],
   [/^Chercher « (.+) » dans tous les articles \(48 h\)$/, (m, x) => `Search “${x}” in all articles (48 h)`],
   [/^Média · (.+)$/, (m, x) => `Outlet · ${tr(x)}`],
+  [/^(\d+) médias? en parlent$/, (m, n) => `${n} outlet${s(n)} cover it`],
+  [/^(\d+) médias? en parlent, mais presque aucun média de (droite|gauche)\.$/, (m, n, x) => `${n} outlet${s(n)} cover it, but almost none on the ${x === "droite" ? "right" : "left"}.`],
+  [/^Jour (\d+)$/, (m, n) => `Day ${n}`],
+  [/^en premier, à (.+?)(?: · (\d+) médias ce jour-là)?$/, (m, t, n) => `first, at ${t}${n ? ` · ${n} outlets that day` : ""}`],
+  [/^(\d+) jours?$/, (m, n) => `${n} day${s(n)}`],
+  [/^(\d+) min$/, (m, n) => `${n} min`],
+  [/^(\d+) j$/, (m, n) => `${n} d`],
 ];
 
 export function tr(text) {

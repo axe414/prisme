@@ -122,6 +122,17 @@ try {
 } catch (e) { log(`médias locaux : ${e.message}`); writeFileSync(join(DATA, "local-media.json"), "{}"); }
 log(`${videos.length} vidéos sur 7 jours (${(await import("../lib/videos.mjs")).channelCount()} chaînes)`);
 
+// 4 b) Les logos des médias (gardés d'une fois à l'autre ; seuls les nouveaux sont téléchargés).
+try {
+  const { buildLogos } = await import("../lib/logos.mjs");
+  const doms = new Set();
+  for (const file of Object.values(editions)) for (const s of file.stories) for (const a of s.articles || []) doms.add(a.domain);
+  try { for (const d of Object.keys(JSON.parse(readFileSync(join(DATA, "local-media.json"), "utf8")))) doms.add(d); } catch { /* pas de médias locaux */ }
+  const r = await buildLogos(doms, join(STATE, "logos"), join(DATA, "logos"));
+  writeFileSync(join(DATA, "logos.json"), JSON.stringify(r.have));
+  log(`logos : ${r.have.length} publiés (${r.fetched} nouveaux sur ${r.tried} essayés)`);
+} catch (e) { log(`logos : ${e.message}`); writeFileSync(join(DATA, "logos.json"), "[]"); }
+
 // 5) Résumés neutres des grandes histoires (gardés d'une fois à l'autre ; seuls les nouveaux sont écrits).
 mkdirSync(STATE, { recursive: true });
 const SUMS = join(STATE, "summaries.json");
