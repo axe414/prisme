@@ -43,10 +43,19 @@
   <meta name="apple-mobile-web-app-title" content="Prisme">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script>
-    try { const t = localStorage.getItem("prisme.theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+    try {
+      // Le sombre devient le thème de tout le monde, une seule fois (même si « Clair » avait été choisi avant).
+      // Ensuite, ce que chacun choisit dans les réglages reste.
+      if (localStorage.getItem("prisme.themeV") !== "2") { localStorage.setItem("prisme.theme", "dark"); localStorage.setItem("prisme.themeV", "2"); }
+      const t = localStorage.getItem("prisme.theme");
+      if (t === "auto") document.documentElement.removeAttribute("data-theme"); else if (t) document.documentElement.dataset.theme = t;
+      // Lecture du soir : de 21 h à 6 h, des couleurs plus chaudes (sauf si on l'a désactivée).
+      const h = new Date().getHours();
+      if (localStorage.getItem("prisme.soir") !== "0" && (h >= 21 || h < 6)) document.documentElement.classList.add("soir");
+    } catch (e) {}
     if (location.hostname === "localhost") {
       // Journal de diagnostic en local seulement : renvoie les erreurs du navigateur au terminal du serveur.
       var report = function (msg) { try { navigator.sendBeacon("/__log", String(msg)); } catch (e) {} };

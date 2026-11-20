@@ -21,7 +21,7 @@
   --b-unk: #D9D5CA;
 
   --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
-  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
 
   --w: 1240px;
@@ -1892,3 +1892,73 @@ body.edge-back { overflow-x: hidden; }
 .ob-demo-l i { width: 9px; height: 9px; border-radius: 2px; }
 .ob-demo-l i.l { background: var(--b-l2); } .ob-demo-l i.c { background: var(--b-c); } .ob-demo-l i.r { background: var(--b-r2); }
 .ob-demo .ck-blind { font-size: 10px; vertical-align: 1px; }
+
+/* ================= Encore plus beau : grandes cartes, halo, en direct, aperçu, soir ================= */
+/* Les rubriques avec leur icône */
+.cats a .ce { font-size: 14px; line-height: 1; margin-right: 5px; }
+@media (max-width: 760px) {
+  .cats a[class*="cc-"]:not(.cc-une)::before { display: none; }
+  .cats a .ce { margin-right: 0; }
+}
+
+/* Les chiffres qui comptent gardent leur largeur */
+[data-count] { font-variant-numeric: tabular-nums; }
+
+/* En direct : un point rouge qui pulse */
+.ck-live, .hero-live { display: inline-flex; align-items: center; gap: 6px; font: 700 10.5px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: #E5484D; }
+.ck-live::before, .hero-live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #E5484D; box-shadow: 0 0 0 0 rgba(229, 72, 77, .6); animation: live 1.6s ease-out infinite; }
+.hero-live { margin-left: 8px; padding: 5px 8px; border-radius: 4px; background: #E5484D; color: #fff; vertical-align: top; }
+.hero-live::before { background: #fff; box-shadow: 0 0 0 0 rgba(255, 255, 255, .7); }
+@keyframes live { 0% { box-shadow: 0 0 0 0 rgba(229, 72, 77, .55); } 70% { box-shadow: 0 0 0 7px rgba(229, 72, 77, 0); } 100% { box-shadow: 0 0 0 0 rgba(229, 72, 77, 0); } }
+@media (prefers-reduced-motion: reduce) { .ck-live::before, .hero-live::before { animation: none; } }
+
+/* Le halo : la couleur de la photo déborde doucement autour (comme Apple Music) */
+.lead.hero { position: relative; isolation: isolate; }
+.lead.hero > .glow { position: absolute; z-index: -1; left: -8%; right: -8%; top: -30px; width: 116%; height: calc(100% + 60px); object-fit: cover; filter: blur(60px) saturate(1.6); opacity: .5; pointer-events: none; -webkit-mask-image: radial-gradient(ellipse at 50% 35%, #000 30%, transparent 72%); mask-image: radial-gradient(ellipse at 50% 35%, #000 30%, transparent 72%); }
+.main-col { position: relative; isolation: isolate; }
+.glow-wrap { position: absolute; z-index: -1; left: -12%; right: -12%; top: -60px; height: 560px; overflow: hidden; pointer-events: none; -webkit-mask-image: linear-gradient(to bottom, #000 25%, transparent 95%); mask-image: linear-gradient(to bottom, #000 25%, transparent 95%); }
+.glow-wrap .glow { width: 100%; height: 100%; object-fit: cover; filter: blur(70px) saturate(1.6); opacity: .45; transform: scale(1.15); }
+:root[data-theme="light"] .lead.hero > .glow, :root[data-theme="light"] .glow-wrap .glow { opacity: .28; }
+
+/* Les grandes cartes (places 2 à 5) : la photo en large, le titre en blanc par-dessus */
+.story.big { display: block; padding: 14px 0 16px; border-bottom: 1px solid var(--hair); }
+.big-box { position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 16 / 10; background: #222; isolation: isolate; }
+@media (min-width: 761px) { .big-box { aspect-ratio: 16 / 7; } }
+.big-media { position: absolute; inset: 0; z-index: -1; display: block; }
+.big-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s cubic-bezier(.2, .8, .2, 1); }
+.big-box:hover .big-media img { transform: scale(1.03); }
+.big-box::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, .55) 62%, rgba(0, 0, 0, .9) 100%); }
+.big-in { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 16px 14px; pointer-events: none; }
+.big-in a { pointer-events: auto; }
+.big-in .c2-k { margin-bottom: 6px; }
+.big-in .ck { color: #fff; }
+.big-in .ck::before { box-shadow: 0 0 0 2px rgba(255, 255, 255, .85); }
+.big-in .ck-live { color: #fff; }
+.big-in h3 { margin: 0; font: 700 clamp(19px, 5.2vw, 27px)/1.15 var(--serif); letter-spacing: -.01em; text-wrap: balance; text-shadow: 0 1px 10px rgba(0, 0, 0, .4); }
+.big-in h3 a { color: #fff; text-decoration: none; }
+.story.big > .c2-bar { max-width: none; height: 5px; margin-top: 10px; }
+.story.big.is-seen .big-box { filter: saturate(.45) brightness(.85); }
+
+/* L'aperçu sur place */
+.c2-meta { position: relative; }
+.c2-peek { display: inline-grid; place-items: center; width: 26px; height: 26px; margin-left: 8px; vertical-align: middle; border-radius: 50%; border: 1px solid var(--hair); background: var(--card); color: var(--ink-2); cursor: pointer; padding: 0; }
+.c2-peek svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; transition: transform .2s ease; }
+.c2-peek[aria-expanded="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.c2-peek[aria-expanded="true"] svg { transform: rotate(180deg); }
+.peek { grid-column: 1 / -1; margin-top: 12px; padding: 14px; border-radius: 12px; background: var(--card); border: 1px solid var(--hair); display: grid; gap: 10px; animation: rise .25s ease both; }
+.pk-dek { margin: 0; font: 15.5px/1.5 var(--serif); color: var(--ink-2); }
+.pk-sides { display: grid; gap: 8px; }
+.pk-side { display: grid; gap: 3px; padding: 9px 11px; border-radius: 10px; text-decoration: none; color: var(--ink); background: var(--paper); border-left: 4px solid var(--b-c); }
+.pk-l { border-left-color: var(--b-l2); } .pk-r { border-left-color: var(--b-r2); }
+.pk-h { font: 700 10.5px var(--sans); letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); }
+.pk-l .pk-h { color: var(--b-l2); } .pk-r .pk-h { color: var(--b-r2); }
+.pk-t { font: 600 15px/1.3 var(--serif); }
+.pk-open { font: 600 14px var(--sans); color: var(--ink); }
+
+/* Lecture du soir : un voile chaud, et un peu moins de lumière */
+html.soir body::after { content: ""; position: fixed; inset: 0; z-index: 2147483000; pointer-events: none; background: rgba(255, 138, 30, .09); mix-blend-mode: multiply; }
+html.soir[data-theme="dark"] body::after, html.soir[data-theme="oled"] body::after { background: rgba(255, 150, 50, .07); mix-blend-mode: normal; }
+html.soir img { filter: brightness(.92); }
+.story.big > .big-box { display: block; }
+.story.big > .peek { margin-top: 12px; }
+.story > .peek { display: grid !important; }

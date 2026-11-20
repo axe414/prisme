@@ -6,6 +6,7 @@ const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const REGIONS = [["qc", "Québec"], ["ca", "Canada"], ["us", "États-Unis"], ["fr", "France"], ["uk", "Royaume-Uni"], ["europe", "Europe"], ["latam", "Amérique latine"], ["afrique", "Afrique"], ["moyenorient", "Moyen-Orient"], ["asie", "Asie"], ["oceanie", "Océanie"], ["monde", "Monde entier"]];
 const CATS = [["une", "À la une"], ["politique", "Politique"], ["international", "International"], ["economie", "Économie"], ["environnement", "Environnement"], ["techno", "Techno"], ["science", "Science"], ["sante", "Santé"], ["culture", "Culture"], ["sports", "Sports"]];
 const CAT_LABEL = Object.fromEntries(CATS);
+const CAT_EMOJI = { une: "📰", politique: "⚖️", international: "🌍", economie: "💰", environnement: "🌱", techno: "💻", science: "🔬", sante: "🩺", culture: "🎭", sports: "🏒" };
 const LENSES = {
   essentiel: { label: "L'essentiel", desc: "Les histoires couvertes par le plus de médias, avec un bonus quand la gauche, le centre et la droite en parlent tous. Les plus récentes passent devant." },
   angles: { label: "Angles morts", desc: "Des histoires qu'un côté du spectre couvre beaucoup et que l'autre ignore presque." },
@@ -107,6 +108,12 @@ document.addEventListener("error", (e) => {
     span.textContent = img.dataset.letter || "?";
     if (img.dataset.hue) span.style.setProperty("--fh", img.dataset.hue);
     img.replaceWith(span);
+  } else if (img.classList.contains("glow")) {
+    img.remove();
+  } else if (img.closest(".big-media")) {
+    // Grande carte sans photo valide : on la remplace par une carte normale.
+    const card = img.closest(".story.big"), s = card && state.stories.get(cardId(card));
+    if (s) { s.image = null; card.outerHTML = storyRow(s); } else img.remove();
   } else if (img.closest(".c2-img, .hero-media, .mini-img")) {
     // Photo cassée : la carte garde sa place, avec la couleur de sa rubrique et le logo du média.
     img.closest(".c2-img, .hero-media, .mini-img").classList.add("ph");
@@ -754,7 +761,7 @@ function renderChrome(route) {
   $("#mastLinks").innerHTML = PAGES.map(([v, l]) => `<a href="${href({ v })}" data-nav ${page === v ? 'aria-current="page"' : ""}>${l}</a>`).join("");
   $("#editionSel").innerHTML = REGIONS.map(([v, l]) => `<option value="${v}" ${v === state.region ? "selected" : ""}>${l}</option>`).join("");
   // « Ma ville » juste après « À la une » : visible tout de suite, sans glisser la barre.
-  const catLink = ([v, l]) => `<a class="cc-${v}" href="${href({ cat: v, lens: route.view === "feed" ? route.lens : undefined })}" data-nav ${route.view === "feed" && route.cat === v ? 'aria-current="page"' : ""}>${l}</a>`;
+  const catLink = ([v, l]) => `<a class="cc-${v}" href="${href({ cat: v, lens: route.view === "feed" ? route.lens : undefined })}" data-nav ${route.view === "feed" && route.cat === v ? 'aria-current="page"' : ""}>${CAT_EMOJI[v] ? `<span class="ce" aria-hidden="true">${CAT_EMOJI[v]}</span>` : ""}${l}</a>`;
   $("#cats").innerHTML = catLink(CATS[0])
     + `<a class="cat-ville" href="${prefs.city ? href({ ville: prefs.city }) : href({ v: "villes" })}" data-nav ${["ville", "villes"].includes(route.view) ? 'aria-current="page"' : ""}>📍 ${esc(prefs.cityLabel || "Ma ville")}</a><span class="sep"></span>`
     + CATS.slice(1).map(catLink).join("");
@@ -1073,13 +1080,17 @@ function logoStack(s, max = 3) {
 }
 // « 12 min », « 3 h », « 2 j » : l'heure courte des cartes (tient sur une ligne).
 const agoShort = (iso) => { const m = (Date.now() - Date.parse(iso || 0)) / 60e3; return !iso || !Number.isFinite(m) ? "" : m < 60 ? `${Math.max(1, Math.round(m))} min` : m < 1440 ? `${Math.round(m / 60)} h` : `${Math.round(m / 1440)} j`; };
-const metaLine = (s, st) => `<p class="c2-meta">${newTag(s)}${logoStack(s)}${sourcesLine(s, 1)} · <time title="${esc(ago(s.lastSeen || s.firstSeen))}">${agoShort(s.lastSeen || s.firstSeen)}</time>${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}</p>`;
+const peekBtn = `<button class="c2-peek" type="button" data-peek aria-expanded="false" aria-label="Aperçu ici" title="Aperçu ici"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>`;
+const metaLine = (s, st) => `<p class="c2-meta">${newTag(s)}${logoStack(s)}${sourcesLine(s, 1)} · <time title="${esc(ago(s.lastSeen || s.firstSeen))}">${agoShort(s.lastSeen || s.firstSeen)}</time>${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}${peekBtn}</p>`;
 
 // La rubrique d'une histoire, en couleur, et l'angle mort : en haut de chaque carte. La rubrique mène à son fil.
 const catOf = (s, cat) => s.categories?.find((x) => x !== cat && x !== "une" && CAT_LABEL[x]) || null;
+// « En direct » : au moins 2 médias ont publié sur l'histoire dans la dernière heure.
+const isLive = (s) => { const t = Date.now() - 60 * 60e3; return new Set((s.articles || []).filter((a) => Date.parse(a.published || 0) > t).map((a) => a.domain)).size >= 2; };
+const liveTag = (s) => (isLive(s) ? `<span class="ck-live" title="Des médias publient encore sur cette histoire dans la dernière heure">En direct</span>` : "");
 function kickerLine(s, cat) {
   const c = catOf(s, cat);
-  const k = (c ? `<a class="ck cc-${c}" href="${href({ cat: c })}" data-nav>${esc(CAT_LABEL[c])}</a>` : "")
+  const k = liveTag(s) + (c ?`<a class="ck cc-${c}" href="${href({ cat: c })}" data-nav>${esc(CAT_LABEL[c])}</a>` : "")
     + (s.blindspot ? `<span class="ck-blind ${s.blindspot === "right" ? "r" : "l"}" title="Les médias de ${s.blindspot === "right" ? "droite" : "gauche"} en parlent très peu">Angle mort ${s.blindspot === "right" ? "à droite" : "à gauche"}</span>` : "");
   return k ? `<div class="c2-k">${k}</div>` : "";
 }
@@ -1113,19 +1124,57 @@ function heroStory(s, cat) {
   const all3 = sd.left && sd.center && sd.right;
   const dek = s.ai?.summary || s.summary || "";
   return `<article class="lead hero${st?.seen ? " is-seen" : ""}">
+    ${s.image ? `<img class="glow" src="${esc(safeUrl(s.image))}" alt="" aria-hidden="true" referrerpolicy="no-referrer">` : ""}
     <a class="hero-media${s.image ? "" : ` ph cc-${catOf(s, cat) || "une"}`}" href="${link}" data-nav>
       ${s.image ? `<img src="${esc(safeUrl(s.image))}" alt="" referrerpolicy="no-referrer" fetchpriority="high">` : ""}
       <span class="hero-in">
-        <span class="hero-k">${when}</span>
+        <span class="hero-k">${when}</span>${isLive(s) ? `<span class="hero-live">En direct</span>` : ""}
         <h2 data-no-tr>${titleOf(s)}</h2>
       </span>
     </a>
-    <div class="hero-why"><b>${plural(s.sources, "média")} en parlent</b><span>${all3 ? "La gauche, le centre et la droite" : "L'histoire la plus couverte"} · ${esc(ago(s.lastSeen || s.firstSeen))}</span></div>
+    <div class="hero-why"><b><span data-count="${s.sources}">${s.sources}</span> ${s.sources > 1 ? "médias en parlent" : "média en parle"}</b><span>${all3 ? "La gauche, le centre et la droite" : "L'histoire la plus couverte"} · ${esc(ago(s.lastSeen || s.firstSeen))}</span></div>
     ${sideStrip(s)}
     ${dek ? `<p class="dek" data-no-tr>${esc(dek)}</p>` : ""}
-    <p class="c2-meta">${newTag(s)}${logoStack(s, 5)}${sourcesLine(s, 2)}${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}</p>
+    <p class="c2-meta">${newTag(s)}${logoStack(s, 5)}${sourcesLine(s, 2)}${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}${peekBtn}</p>
   </article>`;
 }
+// Les grandes cartes du haut du fil (places 2 à 5) : la photo en large, le titre en blanc par-dessus.
+function bigCard(s, cat) {
+  const link = href({ h: s.id });
+  const st = seenState(s);
+  return `<article class="story big${st?.seen ? " is-seen" : ""}">
+    <div class="big-box">
+      <a class="big-media" href="${link}" data-nav tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(s.image))}" alt="" loading="lazy" referrerpolicy="no-referrer"></a>
+      <div class="big-in">${kickerLine(s, cat)}<h3 data-no-tr><a href="${link}" data-nav>${titleOf(s)}</a></h3></div>
+    </div>
+    ${sideStrip(s)}
+    ${metaLine(s, st)}
+  </article>`;
+}
+// L'aperçu sur place : le résumé et les titres de gauche et de droite, sans changer de page.
+function peekHtml(s) {
+  const dek = s.ai?.summary || s.summary || "";
+  const by = pickBySide(s);
+  const row = (a, side, label) => (a ? `<a class="pk-side pk-${side}" href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener noreferrer" data-read="${readAttr(a)}">
+      <span class="pk-h">${label} · <span data-no-tr>${esc(a.sourceName)}</span></span><span class="pk-t" data-no-tr>${esc(a.title)}</span></a>` : "");
+  const sides3 = [row(by.left, "l", "Gauche"), row(by.center, "c", "Centre"), row(by.right, "r", "Droite")].filter(Boolean);
+  return `<div class="peek">${dek ? `<p class="pk-dek" data-no-tr>${esc(dek.length > 320 ? `${dek.slice(0, 317)}…` : dek)}</p>` : ""}
+    ${sides3.length ? `<div class="pk-sides">${sides3.join("")}</div>` : ""}
+    <a class="pk-open" href="${href({ h: s.id })}" data-nav>Toute l'histoire, tous les médias →</a></div>`;
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-peek]");
+  if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  const card = b.closest("article");
+  const s = card && state.stories.get(cardId(card));
+  if (!s) return;
+  const open = $(".peek", card);
+  if (open) { open.remove(); b.setAttribute("aria-expanded", "false"); return; }
+  card.insertAdjacentHTML("beforeend", peekHtml(s));
+  b.setAttribute("aria-expanded", "true");
+  buzz(8);
+}, true);
 // Une carte « Angle mort » glissée dans le fil.
 function blindCard(s) {
   const r = s.blindspot === "right";
@@ -2623,7 +2672,7 @@ function feedRows(f, from) {
     const home = cat === "une" && !f.params.q && f.params.lens !== "local";
     if (i === 3 && home && prefs.city) html += `<section class="vcard" id="rowVille" hidden></section>`;
     if (i === 8 && home && f.blind) html += blindCard(f.blind);
-    html += i === 0 ? (f.hero ? heroStory(s, cat) : leadStory(s, cat)) : storyRow(s, cat);
+    html += i === 0 ? (f.hero ? heroStory(s, cat) : leadStory(s, cat)) : home && i <= 4 && s.image ? bigCard(s, cat) : storyRow(s, cat);
   }
   return html;
 }
@@ -2680,7 +2729,9 @@ function settingsExtra() {
   const L = less.get();
   const items = [...L.c.map((c) => `<button class="chip on" type="button" data-unless-cat="${esc(c)}">${esc(CAT_LABEL[c] || c)} <span aria-hidden="true">✕</span></button>`),
     ...L.m.map((x) => `<button class="chip on" type="button" data-unless-med="${esc(x.d)}"><span data-no-tr>${esc(x.n)}</span> <span aria-hidden="true">✕</span></button>`)];
-  return `<section><h3>Lecture simple <small>sans barres de couleur ni étiquettes</small></h3>
+  return `<section><h3>Lecture du soir <small>de 21 h à 6 h, des couleurs plus chaudes pour les yeux</small></h3>
+      <div class="seg seg-big" role="group"><button type="button" data-soir-set="0" aria-pressed="${store.get("soir") === "0"}">Non</button><button type="button" data-soir-set="1" aria-pressed="${store.get("soir") !== "0"}">Oui</button></div></section>
+    <section><h3>Lecture simple <small>sans barres de couleur ni étiquettes</small></h3>
       <div class="seg seg-big" role="group"><button type="button" data-simple-set="0" aria-pressed="${store.get("simple") !== "1"}">Non</button><button type="button" data-simple-set="1" aria-pressed="${store.get("simple") === "1"}">Oui</button></div></section>
     <section id="setLess"><h3>Moins de ça <small>baissé dans ton fil, jamais caché</small></h3>
       ${items.length ? `<div class="chips">${items.join("")}</div><p class="note" style="margin:6px 0 0">Touche un élément pour le remettre comme avant.</p>`
@@ -2698,6 +2749,8 @@ document.addEventListener("click", async (e) => {
     if (sec) sec.outerHTML = settingsExtra().split("</section>")[0] + "</section>";
     return;
   }
+  const so = e.target.closest("[data-soir-set]");
+  if (so) { store.set("soir", so.dataset.soirSet); applySoir(); $$("[data-soir-set]").forEach((x) => x.setAttribute("aria-pressed", x === so)); return; }
   const sm = e.target.closest("[data-simple-set]");
   if (sm) { store.set("simple", sm.dataset.simpleSet); applySimple(); $$("[data-simple-set]").forEach((x) => x.setAttribute("aria-pressed", x === sm)); return; }
   const b = e.target.closest("[data-badge-set]");
@@ -3036,7 +3089,7 @@ document.addEventListener("click", (e) => {
   const a = e.target.closest("a[data-nav]");
   if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button || reduceMotion() || !/[?&]h=/.test(a.getAttribute("href") || "")) return;
   const card = a.closest("article, aside");
-  const img = card && card.querySelector(".c2-img img, .hero-media img, .lead-media img, .mini-img img");
+  const img = card && card.querySelector(".c2-img img, .hero-media img, .big-media img, .lead-media img, .mini-img img");
   if (!img || !img.complete || !img.naturalWidth) return;
   const r = img.getBoundingClientRect();
   if (r.bottom < 0 || r.top > innerHeight || !r.width) return;
@@ -3066,6 +3119,31 @@ function runFlip(v) {
     anim.onfinish = () => { hero.style.opacity = ""; g.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, fill: "forwards" }).onfinish = () => g.remove(); };
   }));
 }
+
+// Les chiffres qui comptent : « 13 médias » monte de 0 à 13 quand il apparaît.
+function countUp(root) {
+  if (reduceMotion()) return;
+  for (const el of $$("[data-count]:not([data-counted])", root)) {
+    el.dataset.counted = "1";
+    const n = Number(el.dataset.count);
+    if (!(n > 1)) continue;
+    const t0 = performance.now(), dur = Math.min(900, 380 + n * 25);
+    el.textContent = "0";
+    const step = (t) => {
+      const k = Math.min(1, (t - t0) / dur);
+      el.textContent = String(Math.round(n * (1 - (1 - k) ** 3)));
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+}
+
+// Lecture du soir : de 21 h à 6 h, des couleurs plus chaudes (réglage « Lecture du soir »).
+function applySoir() {
+  const h = new Date().getHours();
+  document.documentElement.classList.toggle("soir", store.get("soir") !== "0" && (h >= 21 || h < 6));
+}
+setInterval(applySoir, 60e3);
 
 // Face à face : le titre d'un média de gauche et celui d'un média de droite, côte à côte (même sur téléphone).
 function faceToFace(s) {
@@ -3311,6 +3389,7 @@ function drawFeed(f) {
   } else {
     el.dataset.count = String(f.stories.length);
     el.innerHTML = feedRows(f, 0);
+    countUp(el);
     if ($("#rowVille", el)) setTimeout(fillCityRow, 300);
   }
   drawNewPill(f);
@@ -3451,6 +3530,7 @@ async function viewStory(v, route) {
   v.innerHTML = `${stickyBar(s)}${back}
     <div class="layout" style="padding-top:0">
       <div class="main-col">
+        ${s.image ? `<div class="glow-wrap" aria-hidden="true"><img class="glow" src="${esc(safeUrl(s.image))}" alt="" referrerpolicy="no-referrer"></div>` : ""}
         ${s.image ? `<figure class="s-hero s-hero-top"><img src="${esc(safeUrl(s.image))}" alt="" referrerpolicy="no-referrer"><span class="credit">${esc(s.imageSource || "")}</span></figure>` : ""}
         <header class="s-head">
           <div class="kicker">${(s.categories || []).map((c) => esc(CAT_LABEL[c] || c)).join(" · ") || "Histoire"} · ${reason(s)}${s.firstBy ? ` · révélée par <b>${esc(s.firstBy)}</b>` : ""}</div>
@@ -3467,7 +3547,7 @@ async function viewStory(v, route) {
         <section class="sec">
           <h2 class="block-h">Qui couvre cette histoire <small>${plural(s.sources, "média")} · une voix par média</small></h2>
           ${bigBar(s.counts)}
-          <div class="s-cov">${SIDES.map((side) => `<div><b>${pct(sd[side.key])} %</b><small><i style="background:${side.color}"></i>${side.label} · ${plural(sd[side.key], "média")}</small></div>`).join("")}</div>
+          <div class="s-cov">${SIDES.map((side) => `<div><b><span data-count="${pct(sd[side.key])}">${pct(sd[side.key])}</span> %</b><small><i style="background:${side.color}"></i>${side.label} · ${plural(sd[side.key], "média")}</small></div>`).join("")}</div>
           ${s.blindspot ? `<div class="callout ${s.blindspot === "right" ? "r" : "l"}"><b>ANGLE MORT.</b> Les médias de ${s.blindspot === "right" ? "droite" : "gauche"} en parlent très peu : ${pct(s.blindspot === "right" ? sd.right : sd.left)} % des médias évalués.</div>` : ""}
           ${s.counts.state ? `<div class="callout"><b>MÉDIAS D'ÉTAT.</b> ${plural(s.counts.state, "média contrôlé", "médias contrôlés")} par un gouvernement couvre${s.counts.state > 1 ? "nt" : ""} aussi cette histoire.</div>` : ""}
         </section>
@@ -3531,6 +3611,7 @@ async function viewStory(v, route) {
   storySticky(v, s);
   setSeen(s, true);
   runFlip(v);
+  countUp(v);
   storyExtras(s, hlItem);
 }
 
