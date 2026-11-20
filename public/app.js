@@ -763,7 +763,8 @@ function renderChrome(route) {
   // « Ma ville » juste après « À la une » : visible tout de suite, sans glisser la barre.
   const catLink = ([v, l]) => `<a class="cc-${v}" href="${href({ cat: v, lens: route.view === "feed" ? route.lens : undefined })}" data-nav ${route.view === "feed" && route.cat === v ? 'aria-current="page"' : ""}>${CAT_EMOJI[v] ? `<span class="ce" aria-hidden="true">${CAT_EMOJI[v]}</span>` : ""}${l}</a>`;
   $("#cats").innerHTML = catLink(CATS[0])
-    + `<a class="cat-ville" href="${prefs.city ? href({ ville: prefs.city }) : href({ v: "villes" })}" data-nav ${["ville", "villes"].includes(route.view) ? 'aria-current="page"' : ""}>📍 ${esc(prefs.cityLabel || "Ma ville")}</a><span class="sep"></span>`
+    + `<a class="cat-ville" href="${prefs.city ? href({ ville: prefs.city }) : href({ v: "villes" })}" data-nav ${["ville", "villes"].includes(route.view) ? 'aria-current="page"' : ""}>📍 ${esc(prefs.cityLabel || "Ma ville")}</a>`
+    + `${prefs.city ? `<button class="cat-wx" id="catWx" type="button" aria-label="Météo" hidden></button>` : ""}<span class="sep"></span>`
     + CATS.slice(1).map(catLink).join("");
   const onUne = ["feed", "story", "search", "outlet", "ville", "villes"].includes(route.view);
   const alerts = alertCount();
@@ -775,6 +776,7 @@ function renderChrome(route) {
     <a href="${href({ v: "moi" })}" data-nav ${page === "moi" ? 'aria-current="page"' : ""}>${svg("moi")}Mon prisme</a>
     <button type="button" id="moreBtnTab" ${["proprietaires", "quiz", "favoris"].includes(page) ? 'aria-current="page"' : ""}>${svg("plus")}Plus</button>`;
   $("#moreBtnTab").onclick = openMoreSheet;
+  drawCatWx();
   $("#enBrefTab").onclick = openEnBref;
   // Garde visible la rubrique choisie dans la barre défilante (téléphone).
   const el = $("#cats [aria-current]");
@@ -3189,7 +3191,7 @@ function storyThread(s) {
 const WMO = (c) => (c === 0 ? ["☀️", "Ensoleillé"] : c <= 2 ? ["🌤️", "Partiellement nuageux"] : c === 3 ? ["☁️", "Nuageux"] : c <= 48 ? ["🌫️", "Brouillard"] : c <= 57 ? ["🌦️", "Bruine"]
   : c <= 67 ? ["🌧️", "Pluie"] : c <= 77 ? ["🌨️", "Neige"] : c <= 82 ? ["🌧️", "Averses"] : c <= 86 ? ["🌨️", "Averses de neige"] : ["⛈️", "Orages"]);
 async function weather(city) {
-  try { const c = JSON.parse(store.get(`wx.${city.s}`, "null")); if (c && Date.now() - c.at < 30 * 60e3) return c; } catch { /* rien en mémoire */ }
+  try { const c = JSON.parse(store.get(`wx.${city.s}`, "null")); if (c?.hours && Date.now() - c.at < 30 * 60e3) return c; } catch { /* rien en mémoire */ }
   let geo = null;
   try { geo = JSON.parse(store.get(`geo.${city.s}`, "null")); } catch { /* rien en mémoire */ }
   if (!geo) {
@@ -3200,12 +3202,29 @@ async function weather(city) {
     geo = { lat: hit.latitude, lon: hit.longitude };
     store.set(`geo.${city.s}`, JSON.stringify(geo));
   }
-  const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${geo.lat}&longitude=${geo.lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1`).then((x) => x.json());
+  const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${geo.lat}&longitude=${geo.lon}`
+    + "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day"
+    + "&hourly=temperature_2m,weather_code,precipitation_probability"
+    + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset"
+    + "&timezone=auto&forecast_days=6").then((x) => x.json());
   if (!w.current) return null;
-  const out = { at: Date.now(), t: Math.round(w.current.temperature_2m), code: w.current.weather_code, max: Math.round(w.daily?.temperature_2m_max?.[0]), min: Math.round(w.daily?.temperature_2m_min?.[0]) };
+  const r = Math.round, d = w.daily || {}, h = w.hourly || {};
+  // Les 24 prochaines heures, à partir de l'heure en cours (heure locale de la ville).
+  const now = String(w.current.time || "").slice(0, 13);
+  const k0 = Math.max(0, (h.time || []).findIndex((t) => t.slice(0, 13) >= now));
+  const out = {
+    at: Date.now(), t: r(w.current.temperature_2m), feel: r(w.current.apparent_temperature), code: w.current.weather_code,
+    day: w.current.is_day !== 0, wind: r(w.current.wind_speed_10m), max: r(d.temperature_2m_max?.[0]), min: r(d.temperature_2m_min?.[0]),
+    rain: d.precipitation_probability_max?.[0] ?? null, rise: d.sunrise?.[0] || "", set: d.sunset?.[0] || "",
+    hours: (h.time || []).slice(k0, k0 + 24).map((t, i) => ({ t, temp: r(h.temperature_2m[k0 + i]), code: h.weather_code[k0 + i], p: h.precipitation_probability?.[k0 + i] ?? null })),
+    days: (d.time || []).map((t, i) => ({ t, code: d.weather_code[i], max: r(d.temperature_2m_max[i]), min: r(d.temperature_2m_min[i]), p: d.precipitation_probability_max?.[i] ?? null, rise: d.sunrise?.[i] || "", set: d.sunset?.[i] || "" })),
+  };
   store.set(`wx.${city.s}`, JSON.stringify(out));
   return out;
 }
+// L'icône de nuit pour un ciel dégagé.
+const wxIco = (code, day = true) => (!day && code <= 1 ? "🌙" : !day && code === 2 ? "☁️" : WMO(code)[0]);
+const isDayAt = (iso, days) => { const dd = days?.find((x) => x.t === iso.slice(0, 10)); return !dd || !dd.rise ? true : iso >= dd.rise && iso < dd.set; };
 async function fillWeather(el, city) {
   if (!el || !navigator.onLine) return;
   const w = await weather(city).catch(() => null);
@@ -3214,7 +3233,65 @@ async function fillWeather(el, city) {
   el.innerHTML = `<span aria-hidden="true">${ico}</span><b>${w.t}°</b><small>${esc(lbl)}${Number.isFinite(w.max) ? ` · ${w.max}° / ${w.min}°` : ""}</small>`;
   el.title = `${lbl}, ${w.t}° (max ${w.max}°, min ${w.min}°)`;
   el.classList.add("on");
+  // Toucher la météo ouvre la feuille météo.
+  if (el.tagName !== "BUTTON") { el.setAttribute("role", "button"); el.tabIndex = 0; }
+  el.dataset.wxCity = city.s;
 }
+
+// La pastille météo en haut, à côté de ta ville : toujours visible, même en descendant.
+async function drawCatWx() {
+  const b = $("#catWx");
+  if (!b || !prefs.city || !navigator.onLine) return;
+  const city = await myVille();
+  if (!city || !b.isConnected) return;
+  // D'abord ce qu'on a en mémoire (instantané), puis à jour si c'est vieux.
+  let w = null;
+  try { w = JSON.parse(store.get(`wx.${city.s}`, "null")); } catch { /* rien */ }
+  const paint = (x) => { if (!x?.hours || !b.isConnected) return; b.innerHTML = `<span aria-hidden="true">${wxIco(x.code, x.day)}</span>${x.t}°`; b.title = `Météo à ${city.n} : ${WMO(x.code)[1]}, ${x.t}°`; b.hidden = false; };
+  paint(w);
+  if (!w?.hours || Date.now() - w.at > 30 * 60e3) paint(await weather(city).catch(() => null));
+}
+setInterval(drawCatWx, 15 * 60e3);
+
+// La feuille météo : maintenant, les prochaines heures, les 5 prochains jours.
+async function openWeather(slug) {
+  const V = await villesData().catch(() => null);
+  const city = V?.bySlug.get(slug || prefs.city);
+  if (!city) return;
+  openModal(`<div class="modal-pad wx-sheet"><div class="loader">Météo de ${esc(city.n)}…</div></div>`, true);
+  const w = await weather(city).catch(() => null);
+  const body = $("#modalBody");
+  if (!body) return;
+  if (!w?.hours) { body.innerHTML = `<div class="modal-pad"><h2>Météo</h2><p class="note">La météo n'a pas pu se charger. Vérifie ta connexion et réessaie.</p></div>`; return; }
+  const [, lbl] = WMO(w.code);
+  const hm = (iso) => iso.slice(11, 16).replace(":", " h ").replace(/ h 00$/, " h");
+  const dayName = (iso, i) => (i === 0 ? "Aujourd'hui" : i === 1 ? "Demain" : new Date(`${iso}T12:00`).toLocaleDateString(LOCALE, { weekday: "long" }));
+  const lo = Math.min(...w.days.map((d) => d.min)), hi = Math.max(...w.days.map((d) => d.max)), span = Math.max(1, hi - lo);
+  const hours = w.hours.filter((_, i) => i % 3 === 0).slice(0, 8);
+  body.innerHTML = `<div class="modal-pad wx-sheet">
+    <div class="kicker">${pin} ${esc(city.n)}</div>
+    <div class="wx-now">
+      <span class="wx-big" aria-hidden="true">${wxIco(w.code, w.day)}</span>
+      <div><b class="wx-t">${w.t}°</b><span class="wx-l">${esc(lbl)}</span>
+        <span class="wx-s">Ressenti ${w.feel}° · Vent ${w.wind} km/h${w.rain >= 10 ? ` · Pluie ${w.rain} %` : ""}</span>
+        <span class="wx-s">Max ${w.max}° · Min ${w.min}°${w.rise ? ` · ☀︎ ${hm(w.rise)} – ${hm(w.set)}` : ""}</span></div>
+    </div>
+    <h3 class="wx-h">Les prochaines heures</h3>
+    <ol class="wx-hours">${hours.map((x, i) => `<li><span>${i === 0 ? "Maint." : hm(x.t)}</span><b aria-hidden="true">${wxIco(x.code, isDayAt(x.t, w.days))}</b><span class="wx-ht">${x.temp}°</span>${x.p >= 10 ? `<small>${x.p} %</small>` : "<small></small>"}</li>`).join("")}</ol>
+    <h3 class="wx-h">Les prochains jours</h3>
+    <ol class="wx-days">${w.days.slice(0, 6).map((d, i) => `<li><span class="wx-dn">${esc(dayName(d.t, i))}</span><b aria-hidden="true">${WMO(d.code)[0]}</b>
+      <small class="wx-dp">${d.p >= 10 ? `${d.p} %` : ""}</small><span class="wx-dmin">${d.min}°</span>
+      <span class="wx-range"><i style="left:${((d.min - lo) / span) * 100}%;right:${100 - ((d.max - lo) / span) * 100}%"></i></span><span class="wx-dmax">${d.max}°</span></li>`).join("")}</ol>
+    <p class="note wx-src">Données Open-Meteo, mises à jour aux 30 minutes. <a class="link" href="${href({ ville: city.s })}" data-nav data-close-modal>Les nouvelles de ${esc(city.n)} →</a></p>
+  </div>`;
+}
+document.addEventListener("click", (e) => {
+  const x = e.target.closest("#catWx, [data-wx-city]");
+  if (!x) return;
+  e.preventDefault(); e.stopPropagation();
+  openWeather(x.dataset.wxCity || prefs.city);
+}, true);
+document.addEventListener("keydown", (e) => { if ((e.key === "Enter" || e.key === " ") && e.target.matches?.("[data-wx-city]")) { e.preventDefault(); openWeather(e.target.dataset.wxCity); } });
 
 // Trier le fil (téléphone) : un seul bouton « Trier : L'essentiel ▾ » au lieu de deux rangées de boutons.
 function openSortSheet(route) {

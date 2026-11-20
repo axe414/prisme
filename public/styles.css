@@ -1962,3 +1962,38 @@ html.soir img { filter: brightness(.92); }
 .story.big > .big-box { display: block; }
 .story.big > .peek { margin-top: 12px; }
 .story > .peek { display: grid !important; }
+
+/* ================= La météo : la pastille en haut, et la feuille ================= */
+.cat-wx { flex: none; display: inline-flex; align-items: center; gap: 5px; align-self: center; height: 30px; padding: 0 11px 0 9px; margin-left: 2px; border-radius: 999px; border: 1px solid var(--hair); background: var(--card); color: var(--ink); font: 600 13.5px var(--sans); font-variant-numeric: tabular-nums; cursor: pointer; white-space: nowrap; }
+.cat-wx[hidden] { display: none; }
+.cat-wx span { font-size: 15px; line-height: 1; }
+@media (max-width: 760px) { .cat-wx { height: auto; padding: 6px 11px 6px 9px; } }
+.wx[data-wx-city] { cursor: pointer; border-radius: 999px; }
+.vc-h .wx.on { padding: 4px 10px 4px 8px; border: 1px solid var(--hair); border-radius: 999px; }
+
+.wx-sheet .kicker { display: flex; align-items: center; gap: 5px; }
+.wx-sheet .kicker .sg-ico { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; }
+.wx-now { display: flex; align-items: center; gap: 16px; margin: 10px 0 6px; }
+.wx-big { font-size: 64px; line-height: 1; }
+.wx-now > div { display: grid; gap: 2px; }
+.wx-t { font: 700 52px/1 var(--sans); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.wx-l { font: 600 17px var(--sans); }
+.wx-s { font: 13px/1.45 var(--sans); color: var(--ink-3); }
+.wx-h { margin: 22px 0 10px; font: 700 12px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.wx-hours { list-style: none; margin: 0; padding: 12px 6px; display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; border-radius: 14px; background: var(--card); border: 1px solid var(--hair); }
+.wx-hours li { display: grid; justify-items: center; gap: 5px; font: 12px var(--sans); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.wx-hours b { font-size: 20px; line-height: 1; font-weight: 400; }
+.wx-ht { font: 700 15px var(--sans); color: var(--ink); }
+.wx-hours small { color: var(--b-l1); font-size: 11px; min-height: 13px; }
+.wx-days { list-style: none; margin: 0; padding: 4px 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--hair); }
+.wx-days li { display: grid; grid-template-columns: minmax(0, 1fr) 26px 40px 34px minmax(56px, 1.1fr) 34px; align-items: center; gap: 8px; padding: 10px 0; border-top: 1px solid var(--hair-2); font: 15px var(--sans); font-variant-numeric: tabular-nums; }
+.wx-days li:first-child { border-top: 0; }
+.wx-dn { font-weight: 600; text-transform: capitalize; }
+.wx-days b { font-size: 20px; font-weight: 400; text-align: center; }
+.wx-dp { color: var(--b-l1); font-size: 12px; text-align: right; white-space: nowrap; }
+.wx-dmin { color: var(--ink-3); text-align: right; }
+.wx-dmax { font-weight: 700; }
+.wx-range { position: relative; height: 5px; border-radius: 3px; background: var(--hair); }
+.wx-range i { position: absolute; top: 0; bottom: 0; border-radius: 3px; background: linear-gradient(90deg, #5EA9E6, #F2C14E, #EE7B3A); }
+.wx-src { margin-top: 14px; }
+@media (max-width: 380px) { .wx-hours { grid-template-columns: repeat(6, 1fr); } .wx-hours li:nth-child(n+7) { display: none; } .wx-days li { grid-template-columns: minmax(0, 1fr) 24px 30px 30px minmax(40px, 1fr) 30px; gap: 6px; } }
