@@ -200,10 +200,28 @@ const EXACT = {
   "Langue": "Language", "Signaler une erreur ↗": "Report an error ↗", "Code source (libre, MIT)": "Source code (free, MIT)",
   "Prisme lit directement les flux publics de ses médias et choisit ses histoires avec des règles visibles. Orientations indicatives, propriété selon la base Prisme et Wikidata.": "Prisme reads its outlets' public feeds directly and picks stories with visible rules. Indicative leanings, ownership from Prisme's database and Wikidata.",
   "L'orientation est une estimation indicative inspirée des évaluations publiques (AllSides, Media Bias/Fact Check, Ad Fontes). La propriété vient de la base Prisme et de Wikidata, une source collaborative qui peut être incomplète ou en retard.": "The leaning is an indicative estimate inspired by public ratings (AllSides, Media Bias/Fact Check, Ad Fontes). Ownership comes from Prisme's database and Wikidata, a collaborative source that may be incomplete or out of date.",
+  // Petites touches
+  "Nouveau": "New", "Tu t'étais arrêté ici": "You stopped here", "Annuler": "Undo", "Marquer comme lu": "Mark as read", "Marquer comme non lu": "Mark as unread",
+  "Comparer les côtés": "Compare the sides", "Retirer des favoris": "Remove from saved", "Actions": "Actions", "Revenir en haut": "Back to top",
+  "Marquée comme lue": "Marked as read", "Marquée comme non lue": "Marked as unread", "Fil mis à jour": "Feed updated", "De retour en ligne": "Back online",
+  "Hors ligne · tes histoires enregistrées restent lisibles": "Offline · your saved stories are still readable", "Hors ligne · tes favoris restent lisibles": "Offline · your saved items are still readable",
+  "1 nouvelle depuis ta dernière visite": "1 new story since your last visit", "Moins de ça": "Less of this", "baissé dans ton fil, jamais caché": "lowered in your feed, never hidden",
+  "Touche un élément pour le remettre comme avant.": "Tap an item to put it back as it was.",
+  "Rien pour l'instant. Appuie longtemps sur une histoire, puis choisis « Moins de… ».": "Nothing yet. Long-press a story, then choose “Less…”.",
+  "Pastille sur l'icône": "Badge on the app icon", "Non": "No", "Oui": "Yes",
+  "Le nombre d'histoires non lues sur tes sujets suivis, sur l'icône de Prisme. L'iPhone le met à jour quand Prisme s'ouvre ou vient de servir.": "The number of unread stories on the topics you follow, on Prisme's icon. The iPhone updates it when Prisme opens or was just used.",
+  "Autorise les notifications de Prisme dans les réglages de l'iPhone.": "Allow Prisme's notifications in the iPhone settings.", "Suis un sujet pour voir la pastille bouger.": "Follow a topic to see the badge move.",
+  "★ Enregistrer": "★ Save", "Retirer ★": "Remove ★", "✓ Lu": "✓ Read", "↺ Non lu": "↺ Unread", "Dernière mise à jour": "Last updated", "À jour": "Updated", "Moins de": "Less from",
 };
 
 // Textes avec un nombre ou un nom à l'intérieur.
 const PATTERNS = [
+  [/^(\d+) nouvelles depuis ta dernière visite$/, (m, n) => `${n} new stories since your last visit`],
+  [/^\+(\d+) depuis ta lecture$/, (m, n) => `+${n} since you read it`],
+  [/^Moins de « (.+) » dans ton fil$/, (m, x) => `Less “${tr(x)}” in your feed`],
+  [/^Moins de « (.+) »$/, (m, x) => `Less “${tr(x)}”`],
+  [/^Moins de (.+) dans ton fil$/, (m, x) => `Less from ${x} in your feed`],
+  [/^(À jour|Dernière mise à jour) (.+)$/, (m, a, x) => `${a === "À jour" ? "Updated" : "Last updated"} ${x}`],
   [/^(\d+) médias?$/, (m, n) => `${n} outlet${s(n)}`],
   [/^(\d+) articles?$/, (m, n) => `${n} article${s(n)}`],
   [/^(\d+) histoires?$/, (m, n) => `${n} stor${n > 1 ? "ies" : "y"}`],

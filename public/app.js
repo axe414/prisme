@@ -1,4 +1,4 @@
-import { LANG, LOCALE, setLang, startTranslation } from "./i18n.js";
+import { LANG, LOCALE, setLang, startTranslation, tr } from "./i18n.js";
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 
@@ -141,6 +141,7 @@ async function checkAlerts({ notify = true } = {}) {
   }));
   if (state.route) renderChrome(state.route);
   if (state.route?.view === "feed") drawTopics(state.feeds.get(feedKey(state.route)) || {});
+  updateBadge();
   if (notify && fresh && document.hidden && "Notification" in window && Notification.permission === "granted") {
     const reg = await navigator.serviceWorker?.getRegistration?.();
     const opts = { body: lines.join("\n"), icon: "icons/icon-192.png", badge: "icons/icon-192.png", tag: "prisme-sujets" };
@@ -231,6 +232,7 @@ function toast(msg) {
   let el = $("#toast");
   if (!el) { el = document.createElement("div"); el.id = "toast"; el.className = "toast"; el.setAttribute("role", "status"); document.body.appendChild(el); }
   el.textContent = msg;
+  el.classList.remove("has-undo");
   el.classList.add("on");
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove("on"), 2400);
@@ -433,7 +435,8 @@ async function feedLocal(p) {
   if (key === "pourtoi") { const sc = forYouScorer(villeCtx); for (const s of list) s.scores.pourtoi = sc(s); }
   if (key === "local") for (const s of list) s.scores.local = localScore(s, villeCtx) * (s.scores.essentiel + 0.2);
   if (key !== "recent") list = list.filter((s) => s.scores[key] > 0);
-  list = [...list].sort((a, b) => b.scores[key] - a.scores[key]);
+  const lf = !q && key !== "recent" ? lessScorer(cat) : null;
+  list = lf ? [...list].sort((a, b) => b.scores[key] * lf(b) - a.scores[key] * lf(a)) : [...list].sort((a, b) => b.scores[key] - a.scores[key]);
 
   const out = { region, page, fetchedAt: ed.fetchedAt, total: list.length, hasMore: (page + 1) * PAGE < list.length, stories: await withTitlesFr(list.slice(page * PAGE, (page + 1) * PAGE)) };
   if (page === 0) {
@@ -451,6 +454,7 @@ async function feedLocal(p) {
       owners: [...owners.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6).map(([owner, n]) => ({ owner, n })),
     };
     out.trending = ed.trending;
+    out.fresh = !q && visit.prev ? list.slice(0, 45).filter(isNew).length : 0; // parmi les 3 premières pages : ce qu'on voit vraiment
   }
   return out;
 }
@@ -984,14 +988,15 @@ const catKicker = (s, cat) => {
 
 function storyRow(s, cat) {
   const link = href({ h: s.id });
-  return `<article class="story${s.image ? "" : " noimg"}">
+  const st = seenState(s);
+  return `<article class="story${s.image ? "" : " noimg"}${st?.seen ? " is-seen" : ""}">
     <div>
-      <div class="kicker">${catKicker(s, cat)}${reason(s)} ${langTag(s.lang)}${s.ai ? ` ${aiTag}` : ""}</div>
+      <div class="kicker">${newTag(s)}${catKicker(s, cat)}${reason(s)} ${langTag(s.lang)}${s.ai ? ` ${aiTag}` : ""}</div>
       <h3 data-no-tr><a href="${link}" data-nav>${titleOf(s)}</a>${trTag(s)}</h3>
       ${dekOf(s)}
       ${coveredBy(s)}
       ${sidesSwipe(s)}
-      <div class="story-foot">${bar(s.counts)}${splitHtml(s.counts)}${flags(s)}${s.articles.some((a) => reads.has(a.url)) ? `<span class="flag read">Lu</span>` : ""}<span class="acts">${favBtn(storyFav(s))}${shareBtn(storyShare(s))}</span></div>
+      <div class="story-foot">${bar(s.counts)}${splitHtml(s.counts)}${flags(s)}${seenFlag(st)}<span class="acts">${favBtn(storyFav(s))}${shareBtn(storyShare(s))}</span></div>
     </div>
     ${s.image ? `<a class="thumb" href="${link}" data-nav tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(s.image))}" alt="" loading="lazy" referrerpolicy="no-referrer"></a>` : ""}
   </article>`;
@@ -1009,15 +1014,16 @@ function pickBySide(s) {
 function leadStory(s, cat) {
   const link = href({ h: s.id });
   const by = pickBySide(s);
-  return `<article class="lead${s.image ? "" : " noimg"}">
+  const st = seenState(s);
+  return `<article class="lead${s.image ? "" : " noimg"}${st?.seen ? " is-seen" : ""}">
     ${s.image ? `<a class="lead-media" href="${link}" data-nav tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(s.image))}" alt="" referrerpolicy="no-referrer"><span class="credit">${esc(s.imageSource || "")}</span></a>` : ""}
     <div>
-      <div class="kicker">${catKicker(s, cat)}${reason(s)}${s.ai ? ` ${aiTag}` : ""}</div>
+      <div class="kicker">${newTag(s)}${catKicker(s, cat)}${reason(s)}${s.ai ? ` ${aiTag}` : ""}</div>
       <h2 data-no-tr><a href="${link}" data-nav>${titleOf(s)}</a>${trTag(s)}</h2>
       ${dekOf(s, true)}
       ${coveredBy(s, 4)}
       ${bigBar(s.counts)}
-      <div class="story-foot">${splitHtml(s.counts)}${flags(s)}<span class="acts">${favBtn(storyFav(s), true)}${shareBtn(storyShare(s), true)}${imgShareBtn(s)}</span></div>
+      <div class="story-foot">${splitHtml(s.counts)}${flags(s)}${seenFlag(st)}<span class="acts">${favBtn(storyFav(s), true)}${shareBtn(storyShare(s), true)}${imgShareBtn(s)}</span></div>
       <div class="angles3">${SIDES.map((side) => {
         const a = by[side.key];
         return `<div><div class="side"><i style="background:${side.color}"></i>${side.label}</div>
@@ -1102,6 +1108,7 @@ function openSettings() {
       <p class="note" id="setCityNote" style="margin:6px 0 0"></p></section>
     <section><h3>Ce qui m'intéresse <small>pour le fil « Pour toi »</small></h3>
       <div class="chips">${CATS.slice(1).map(([c, l]) => `<button class="chip" type="button" data-pcat="${c}" aria-pressed="${prefs.cats.includes(c)}">${esc(l)}</button>`).join("")}</div></section>
+    ${settingsExtra()}
     <section class="set-foot"><button class="btn ghost" type="button" id="setOnboard">Revoir l'accueil</button></section>
   </div>`, true);
   const box = $("#modalBody");
@@ -1283,7 +1290,7 @@ document.addEventListener("click", (e) => {
   ptr.className = "ptr";
   ptr.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/></svg>';
   document.body.appendChild(ptr);
-  const NOSWIPE = ".lenses, .topics, .cats, .wf-row, .o-chips, .o-days, .tl, .vgrid, .pack-wrap, input, select, textarea, .modal, .drawer, .tabs, .seg";
+  const NOSWIPE = "#feed .story, .sides-swipe, #smenu, .lenses, .topics, .cats, .wf-row, .o-chips, .o-days, .tl, .vgrid, .pack-wrap, input, select, textarea, .modal, .drawer, .tabs, .seg";
   addEventListener("touchstart", (e) => {
     if (e.touches.length !== 1) return;
     sx = e.touches[0].clientX; sy = e.touches[0].clientY; t0 = Date.now();
@@ -1823,6 +1830,437 @@ function sidesSwipe(s) {
   }).join("")}</div>`;
 }
 
+/* ---------- Petites touches : nouvelles depuis ta visite, reprise, gestes, « moins de ça » ---------- */
+// Dernière visite : le moment où Prisme a été quitté la dernière fois (mis en arrière-plan ou fermé).
+const RESUME_MS = 30 * 60e3;
+const visit = { prev: Number(store.get("lastSeenAt", "0")) || 0, hiddenAt: 0, pillDone: false };
+const firstSeenMs = (s) => { const t = Date.parse(s.firstSeen || ""); return Number.isFinite(t) ? t : 0; };
+const isNew = (s) => !!visit.prev && firstSeenMs(s) > visit.prev && !readS.get(s.id);
+const newTag = (s) => (isNew(s) ? `<span class="new-tag">Nouveau</span> ` : "");
+
+// Histoires lues (ouvertes, ou glissées vers la droite) : { id, n (articles au moment de la lecture), at }.
+const readS = Object.assign(listStore("readS", 800), {
+  _m: null,
+  map() { if (!this._m) this._m = new Map(this.list().map((x) => [x.id, x])); return this._m; },
+  get(id) { return this.map().get(id); },
+  mark(s) { this.save([{ id: s.id, n: s.articleCount || s.articles?.length || 0, at: Date.now() }, ...this.list().filter((x) => x.id !== s.id)]); this._m = null; },
+  unmark(id) { this.save(this.list().filter((x) => x.id !== id)); this._m = null; },
+});
+// Lue et rien de neuf : en gris. Lue, mais 3 articles ou plus sont arrivés depuis : normale, avec « +6 depuis ta lecture ».
+function seenState(s) {
+  const r = readS.get(s.id) || (s.articles?.some((a) => reads.has(a.url)) ? { n: s.articleCount || s.articles.length } : null);
+  if (!r) return null;
+  const more = (s.articleCount || s.articles?.length || 0) - r.n;
+  return more >= 3 ? { fresh: more } : { seen: true };
+}
+const seenFlag = (st) => (st?.fresh ? `<span class="flag fresh">+${st.fresh} depuis ta lecture</span>` : st?.seen ? `<span class="flag read">Lu</span>` : "");
+const cardId = (c) => { const a = c.querySelector('a[href*="h="]'); try { return a ? new URL(a.getAttribute("href"), location.href).searchParams.get("h") : null; } catch { return null; } };
+const cardsOf = (id) => $$("#view .lead, #view .story").filter((c) => cardId(c) === id);
+
+// « Moins de ça » : une rubrique ou un média descend dans ton fil, sans jamais disparaître complètement.
+const less = {
+  get() { try { const v = JSON.parse(store.get("less", "{}")); return { c: v.c || [], m: v.m || [] }; } catch { return { c: [], m: [] }; } },
+  set(v) { store.set("less", JSON.stringify(v)); },
+  addCat(c) { const v = this.get(); if (!v.c.includes(c)) v.c.push(c); this.set(v); },
+  addMed(d, n) { const v = this.get(); if (!v.m.some((x) => x.d === d)) v.m.push({ d, n }); this.set(v); },
+  delCat(c) { const v = this.get(); v.c = v.c.filter((x) => x !== c); this.set(v); },
+  delMed(d) { const v = this.get(); v.m = v.m.filter((x) => x.d !== d); this.set(v); },
+};
+function lessScorer(cat) {
+  const L = less.get();
+  const cats = new Set(L.c.filter((c) => c !== cat)), med = new Set(L.m.map((x) => x.d));
+  if (!cats.size && !med.size) return null;
+  return (s) => {
+    let f = 1;
+    if (s.categories?.some((c) => cats.has(c))) f *= 0.25;
+    if (med.size && s.articles?.length) {
+      if (med.has(s.leadDomain)) f *= 0.5;
+      f *= 1 - 0.7 * (s.articles.filter((a) => med.has(a.domain)).length / s.articles.length);
+    }
+    return f;
+  };
+}
+// Les autres fils seront recalculés ; celui qu'on regarde garde sa place.
+const dropOtherFeeds = () => { const k = state.route?.view === "feed" ? feedKey(state.route) : null; for (const key of [...state.feeds.keys()]) if (key !== k) state.feeds.delete(key); };
+
+// Un petit message, avec « Annuler » quand on peut revenir en arrière.
+function toastUndo(msg, undo) {
+  toast(msg);
+  const el = $("#toast");
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "toast-undo"; b.textContent = "Annuler";
+  b.onclick = () => { undo(); el.classList.remove("on"); };
+  el.append(" ", b);
+  el.classList.add("has-undo");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("on", "has-undo"), 3600);
+}
+
+// Favori d'une histoire depuis un geste ou le menu (les boutons étoile visibles se mettent à jour).
+function toggleStoryFav(s) {
+  const item = storyFav(s);
+  const on = favs.toggle(item);
+  if (on) saveFavStory(s);
+  for (const b of $$(`[data-fav-key="${CSS.escape(item.k)}"]`)) {
+    b.setAttribute("aria-pressed", on);
+    b.title = on ? "Retirer des favoris" : "Enregistrer dans mes favoris";
+    const sp = $("span", b); if (sp) sp.textContent = on ? "Enregistré" : "Enregistrer";
+  }
+  return on;
+}
+function setSeen(s, on) {
+  if (on) readS.mark(s); else readS.unmark(s.id);
+  for (const c of cardsOf(s.id)) {
+    c.classList.toggle("is-seen", on);
+    $(".new-tag", c)?.remove();
+    const fl = $(".flag.read, .flag.fresh", c);
+    if (on && !fl) $(".story-foot .acts", c)?.insertAdjacentHTML("beforebegin", `<span class="flag read">Lu</span>`);
+    if (!on) fl?.remove();
+  }
+}
+// Retire une histoire du fil affiché (après « Moins de ça »), en douceur.
+function collapseCard(s) {
+  const f = state.feeds.get(feedKey(state.route));
+  for (const c of cardsOf(s.id)) {
+    c.style.height = `${c.offsetHeight}px`;
+    requestAnimationFrame(() => { c.classList.add("gone"); c.style.height = "0px"; });
+    setTimeout(() => c.remove(), 320);
+  }
+  if (f) {
+    const i = f.stories.findIndex((x) => x.id === s.id);
+    if (i >= 0) { f.stories.splice(i, 1); const el = $("#feed"); if (el) el.dataset.count = String(Math.max(0, Number(el.dataset.count || 0) - 1)); }
+  }
+}
+
+/* Menu de l'appui long */
+const MI = {
+  listen: '<path d="M4 9v6h4l5 4V5L8 9Z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/>',
+  sides: '<path d="M4 18V8M12 18V5M20 18v-7"/>',
+  read: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+  less: '<circle cx="12" cy="12" r="8.5"/><path d="M8 12h8"/>',
+};
+function openStoryMenu(s) {
+  closeStoryMenu();
+  const cat = s.categories?.[0];
+  const st = seenState(s);
+  const on = favs.has(`s:${s.id}`);
+  const m = document.createElement("div");
+  m.id = "smenu";
+  m.innerHTML = `<div class="smenu-scrim" data-sm="close"></div>
+    <div class="smenu-box" role="menu" aria-label="Actions">
+      <div class="smenu-prev">${s.image ? `<img src="${esc(safeUrl(s.image))}" alt="" referrerpolicy="no-referrer">` : ""}
+        <div><b data-no-tr>${titleOf(s)}</b>${bar(s.counts)}<small>${plural(s.sources, "média")}</small></div></div>
+      <div class="smenu-list">
+        <button type="button" role="menuitem" data-sm="fav">${ico("star")}<span>${on ? "Retirer des favoris" : "Enregistrer"}</span></button>
+        <button type="button" role="menuitem" data-sm="share">${ico("share")}<span>Partager</span></button>
+        ${canSpeak ? `<button type="button" role="menuitem" data-sm="listen"><svg viewBox="0 0 24 24" aria-hidden="true">${MI.listen}</svg><span>Écouter</span></button>` : ""}
+        <button type="button" role="menuitem" data-sm="open"><svg viewBox="0 0 24 24" aria-hidden="true">${MI.sides}</svg><span>Comparer les côtés</span></button>
+        <button type="button" role="menuitem" data-sm="read"><svg viewBox="0 0 24 24" aria-hidden="true">${MI.read}</svg><span>${st?.seen ? "Marquer comme non lu" : "Marquer comme lu"}</span></button>
+        ${cat ? `<button type="button" role="menuitem" data-sm="lesscat"><svg viewBox="0 0 24 24" aria-hidden="true">${MI.less}</svg><span>Moins de « ${esc(CAT_LABEL[cat] || cat)} »</span></button>` : ""}
+        ${s.leadDomain ? `<button type="button" role="menuitem" data-sm="lessmed"><svg viewBox="0 0 24 24" aria-hidden="true">${MI.less}</svg><span>Moins de <span data-no-tr>${esc(s.leadSource || s.leadDomain)}</span></span></button>` : ""}
+      </div>
+    </div>`;
+  document.body.appendChild(m);
+  requestAnimationFrame(() => m.classList.add("on"));
+  m.onclick = (e) => {
+    const b = e.target.closest("[data-sm]");
+    if (!b) return;
+    const k = b.dataset.sm;
+    closeStoryMenu();
+    if (k === "fav") { const now = toggleStoryFav(s); toast(now ? "Enregistré dans tes favoris ★" : "Retiré de tes favoris"); }
+    else if (k === "share") shareIt(storyShare(s));
+    else if (k === "listen") speak(storySpeech(s), null);
+    else if (k === "open") go(href({ h: s.id }));
+    else if (k === "read") { const was = !!seenState(s)?.seen; setSeen(s, !was); }
+    else if (k === "lesscat") {
+      less.addCat(cat); dropOtherFeeds(); collapseCard(s);
+      toastUndo(`Moins de « ${CAT_LABEL[cat] || cat} » dans ton fil`, () => { less.delCat(cat); state.feeds.clear(); render({ scroll: scrollY }); });
+    } else if (k === "lessmed") {
+      less.addMed(s.leadDomain, s.leadSource || s.leadDomain); dropOtherFeeds(); collapseCard(s);
+      toastUndo(`Moins de ${s.leadSource || s.leadDomain} dans ton fil`, () => { less.delMed(s.leadDomain); state.feeds.clear(); render({ scroll: scrollY }); });
+    }
+  };
+}
+function closeStoryMenu() {
+  const m = $("#smenu");
+  if (!m) return;
+  m.classList.remove("on");
+  setTimeout(() => m.remove(), 200);
+}
+addEventListener("keydown", (e) => { if (e.key === "Escape") closeStoryMenu(); });
+
+// Appui long sur une histoire (téléphone, iPad) : le menu, avec une petite vibration quand l'appareil le permet.
+{
+  let timer = null, x0 = 0, y0 = 0, firedAt = 0;
+  const stop = () => { clearTimeout(timer); timer = null; $$(".pressing").forEach((c) => c.classList.remove("pressing")); };
+  addEventListener("touchstart", (e) => {
+    stop();
+    if (e.touches.length !== 1) return;
+    const card = e.target.closest("#view .story, #view .lead, #panel .story");
+    if (!card || e.target.closest(".sides-swipe, .acts, button, input, .covered a")) return;
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+    if (x0 < 24) return;
+    timer = setTimeout(() => {
+      timer = null;
+      const s = state.stories.get(cardId(card));
+      if (!s) return;
+      firedAt = Date.now();
+      card.classList.remove("pressing");
+      navigator.vibrate?.(12);
+      openStoryMenu(s);
+    }, 460);
+    setTimeout(() => { if (timer) card.classList.add("pressing"); }, 120);
+  }, { passive: true });
+  addEventListener("touchmove", (e) => {
+    if (timer && (Math.abs(e.touches[0].clientX - x0) > 10 || Math.abs(e.touches[0].clientY - y0) > 10)) stop();
+  }, { passive: true });
+  addEventListener("touchend", stop, { passive: true });
+  addEventListener("touchcancel", stop, { passive: true });
+  // Le toucher qui termine l'appui long n'ouvre pas l'histoire (et ne ferme pas le menu).
+  document.addEventListener("click", (e) => { if (Date.now() - firedAt < 600) { e.preventDefault(); e.stopPropagation(); } }, true);
+  // Pas de menu du navigateur par-dessus le nôtre (Android).
+  addEventListener("contextmenu", (e) => { if (coarse.matches && e.target.closest("#view .story, #view .lead")) e.preventDefault(); });
+}
+
+// Glisser une histoire du fil : vers la gauche, elle est enregistrée ; vers la droite, marquée comme lue.
+{
+  const SW = 84;
+  let card = null, x0 = 0, y0 = 0, dx = 0, mode = null;
+  addEventListener("touchstart", (e) => {
+    card = null; mode = null; dx = 0;
+    if (e.touches.length !== 1 || innerWidth > 1100) return;
+    const c = e.target.closest("#feed .story");
+    if (!c || e.target.closest(".sides-swipe")) return;
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+    if (x0 < 24) return;
+    card = c;
+  }, { passive: true });
+  addEventListener("touchmove", (e) => {
+    if (!card) return;
+    const mx = e.touches[0].clientX - x0, my = e.touches[0].clientY - y0;
+    if (!mode) {
+      if (Math.abs(mx) > 14 && Math.abs(mx) > Math.abs(my) * 1.4) { mode = "h"; card.classList.add("swiping"); }
+      else if (Math.abs(my) > 10) { card = null; return; }
+      else return;
+    }
+    dx = Math.max(-150, Math.min(150, mx));
+    card.style.setProperty("--dx", `${dx}px`);
+    const dir = dx < 0 ? "l" : "r";
+    if (card.dataset.dir !== dir) { card.dataset.dir = dir; card.dataset.lbl = dir === "l" ? tr(favs.has(`s:${cardId(card)}`) ? "Retirer ★" : "★ Enregistrer") : tr(card.classList.contains("is-seen") ? "↺ Non lu" : "✓ Lu"); }
+    const past = Math.abs(dx) > SW;
+    if (past !== card.classList.contains("armed")) { card.classList.toggle("armed", past); if (past) navigator.vibrate?.(8); }
+  }, { passive: true });
+  const end = () => {
+    if (!card || mode !== "h") { card = null; return; }
+    const c = card; card = null;
+    c.classList.remove("swiping", "armed");
+    c.style.removeProperty("--dx");
+    delete c.dataset.dir;
+    const s = state.stories.get(cardId(c));
+    if (!s || Math.abs(dx) <= SW) return;
+    if (dx < 0) {
+      const on = toggleStoryFav(s);
+      toastUndo(on ? "Enregistré dans tes favoris ★" : "Retiré de tes favoris", () => toggleStoryFav(s));
+    } else {
+      const was = !!seenState(s)?.seen;
+      setSeen(s, !was);
+      toastUndo(was ? "Marquée comme non lue" : "Marquée comme lue", () => setSeen(s, was));
+    }
+  };
+  addEventListener("touchend", end, { passive: true });
+  addEventListener("touchcancel", end, { passive: true });
+}
+
+// Toucher l'onglet (ou la rubrique) où l'on est déjà : on remonte en haut ; déjà en haut, on rafraîchit.
+for (const sel of ["#tabbar", "#cats"]) {
+  $(sel)?.addEventListener("click", (e) => {
+    const a = e.target.closest("a[data-nav]");
+    if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+    if (new URL(a.getAttribute("href"), location.href).search !== location.search) return;
+    e.preventDefault(); e.stopPropagation();
+    if (scrollY > 30) { scrollTo({ top: 0, behavior: reduceMotion() ? "auto" : "smooth" }); return; }
+    if (state.route?.view === "feed") { dataCache.clear(); state.feeds.clear(); toast("Fil mis à jour"); render(); }
+  });
+}
+
+// Reprendre où on était : la position dans le fil est gardée 30 minutes.
+function topCard() {
+  const top = $("#topbar")?.getBoundingClientRect().bottom || 0;
+  return storyCards().find((c) => c.getBoundingClientRect().bottom > top + 8) || null;
+}
+function saveResume() {
+  if (state.route?.view !== "feed" && !state.panel) { store.set("resume", "null"); return; }
+  const c = state.panel ? null : topCard();
+  const top = $("#topbar")?.getBoundingClientRect().bottom || 0;
+  store.set("resume", JSON.stringify({ u: state.panel ? state.panel.base : location.search, y: scrollY, id: c ? cardId(c) : null, off: c ? c.getBoundingClientRect().top - top : 0, at: Date.now() }));
+}
+// Appelée quand le fil a des histoires : on retrouve l'histoire du haut (en chargeant les pages qu'il faut), sinon la hauteur.
+function tryResume(f, key) {
+  const r = state.resume;
+  if (!r || feedKey(state.route) !== key) return;
+  const card = r.id && storyCards().find((c) => cardId(c) === r.id);
+  if (card) {
+    state.resume = null;
+    requestAnimationFrame(() => {
+      const top = $("#topbar")?.getBoundingClientRect().bottom || 0;
+      scrollTo(0, Math.max(0, card.getBoundingClientRect().top + scrollY - top - r.off));
+    });
+    return;
+  }
+  if (f.hasMore && f.page < 6) { setTimeout(() => loadMore(key), 0); return; }
+  state.resume = null;
+  if (r.y) requestAnimationFrame(() => scrollTo(0, Math.min(r.y, document.documentElement.scrollHeight - innerHeight)));
+}
+{
+  let r = null;
+  try { r = JSON.parse(store.get("resume", "null")); } catch { r = null; }
+  if (r && Date.now() - r.at < RESUME_MS && !location.search && (r.u || r.y)) {
+    if (r.u) history.replaceState({ y: 0, d: 0 }, "", r.u);
+    state.resume = r;
+  }
+  // Un doigt qui bouge avant la fin du chargement : on n'impose plus de position.
+  const cancel = () => { if (state.resume) state.resume = null; };
+  addEventListener("touchstart", cancel, { passive: true });
+  addEventListener("wheel", cancel, { passive: true });
+}
+addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") {
+    visit.hiddenAt = Date.now();
+    store.set("lastSeenAt", String(visit.hiddenAt));
+    saveResume();
+    updateBadge();
+    return;
+  }
+  // De retour après plus de 30 minutes : le fil repart du haut, avec les nouvelles fraîches.
+  if (visit.hiddenAt && Date.now() - visit.hiddenAt > RESUME_MS) {
+    visit.prev = visit.hiddenAt;
+    visit.pillDone = false;
+    if (state.route?.view === "feed" && !state.panel) { dataCache.clear(); state.feeds.clear(); render({ scroll: 0 }); }
+  }
+  drawFresh();
+});
+addEventListener("pagehide", () => { store.set("lastSeenAt", String(Date.now())); saveResume(); });
+
+// « 8 nouvelles depuis ta dernière visite » : chaque toucher mène à la nouvelle histoire suivante.
+function drawNewPill(f) {
+  const el = $("#newPill");
+  if (!el) return;
+  const n = f.fresh || 0;
+  if (!n || visit.pillDone || f.params.q) { el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = `<span class="np-dot"></span>${n > 1 ? `${n} nouvelles depuis ta dernière visite` : "1 nouvelle depuis ta dernière visite"}<span class="np-go" aria-hidden="true">↓</span>`;
+  el.onclick = () => {
+    const top = $("#topbar")?.getBoundingClientRect().bottom || 0;
+    const next = $$("#feed .new-tag").map((t) => t.closest(".lead, .story")).find((c) => c && c.getBoundingClientRect().top > top + 60);
+    if (!next) {
+      // La suivante n'est pas encore chargée : on charge la page d'après, puis on y va.
+      const key = feedKey(state.route), f2 = state.feeds.get(key);
+      if (f2?.hasMore && (el._tries = (el._tries || 0) + 1) <= 3) { loadMore(key).then(() => el.click()); return; }
+      visit.pillDone = true; el.hidden = true; return;
+    }
+    el._tries = 0;
+    scrollTo({ top: next.getBoundingClientRect().top + scrollY - top - 12, behavior: reduceMotion() ? "auto" : "smooth" });
+  };
+}
+// En continu (du plus récent au plus ancien) : une seule ligne, avant la première histoire qui n'a pas bougé
+// depuis ta dernière visite. Tout ce qui est au-dessus est arrivé (ou a été mis à jour) depuis.
+const sinceLine = `<div class="since-line" role="separator"><span>Tu t'étais arrêté ici</span></div>`;
+const lastMs = (s) => { const t = Date.parse(s.lastSeen || s.firstSeen || ""); return Number.isFinite(t) ? t : 0; };
+function feedRows(f, from) {
+  const cat = f.params.cat, chrono = f.params.lens === "recent" && !f.params.q;
+  if (chrono && visit.prev && f.sinceAt == null) {
+    const k = f.stories.findIndex((s, i) => i > 0 && lastMs(f.stories[i - 1]) > visit.prev && lastMs(s) <= visit.prev);
+    if (k > 0) f.sinceAt = k;
+  }
+  let html = "";
+  for (let i = from; i < f.stories.length; i++) {
+    const s = f.stories[i];
+    if (chrono && i === f.sinceAt) html += sinceLine;
+    html += i === 0 ? leadStory(s, cat) : storyRow(s, cat);
+  }
+  return html;
+}
+
+// « À jour il y a 12 minutes » (et « Hors ligne » sans réseau).
+function drawFresh() {
+  const el = $("#fresh");
+  const f = state.route?.view === "feed" ? state.feeds.get(feedKey(state.route)) : null;
+  const off = !navigator.onLine;
+  if (off !== document.body.classList.contains("is-offline")) { document.body.classList.toggle("is-offline", off); $("#topbar").dataset.off = tr("Hors ligne · tes favoris restent lisibles"); topbarSize(); }
+  if (!el) return;
+  if (!navigator.onLine) {
+    el.hidden = false; el.className = "fresh off";
+    el.innerHTML = `<span class="fr-dot"></span>Hors ligne · tes histoires enregistrées restent lisibles <a class="link" href="${href({ v: "favoris" })}" data-nav>Favoris</a>`;
+    return;
+  }
+  if (!f?.fetchedAt) { el.hidden = true; return; }
+  const old = Date.now() - Date.parse(f.fetchedAt) > 2 * 36e5;
+  el.hidden = false; el.className = `fresh${old ? " old" : ""}`;
+  el.innerHTML = `<span class="fr-dot"></span>${old ? "Dernière mise à jour" : "À jour"} ${esc(ago(f.fetchedAt))}`;
+}
+addEventListener("online", () => { drawFresh(); toast("De retour en ligne"); });
+addEventListener("offline", drawFresh);
+setInterval(drawFresh, 60e3);
+
+// Pastille sur l'icône de l'app (écran d'accueil) : les histoires non lues de tes sujets suivis. Seulement si activée.
+const badgeOn = () => store.get("badge") === "1" && "setAppBadge" in navigator;
+function updateBadge() {
+  if (!("setAppBadge" in navigator)) return;
+  if (store.get("badge") !== "1") { navigator.clearAppBadge?.().catch(() => {}); return; }
+  const n = alertCount();
+  (n ? navigator.setAppBadge(Math.min(n, 99)) : navigator.clearAppBadge()).catch(() => {});
+}
+
+// La barre de l'histoire qui reste en haut quand on descend (titre, couverture, Écouter / Enregistrer / Partager).
+function storySticky(v, s) {
+  const st = $(".s-sticky", v), h1 = $(".s-head h1", v);
+  if (!st || !h1) return;
+  const inPanel = v.id === "panelBody";
+  state.stickyIO?.disconnect();
+  state.stickyIO = new IntersectionObserver(([en]) => {
+    st.classList.toggle("on", !en.isIntersecting && en.boundingClientRect.top < (inPanel ? v.getBoundingClientRect().top : innerHeight / 2));
+  }, { root: inPanel ? v : null, rootMargin: inPanel ? "0px" : `-${$("#topbar")?.offsetHeight || 0}px 0px 0px 0px` });
+  state.stickyIO.observe(h1);
+  $(".ss-tl", st).onclick = () => (inPanel ? v.scrollTo({ top: 0, behavior: "smooth" }) : scrollTo({ top: 0, behavior: "smooth" }));
+}
+const stickyBar = (s) => `<div class="s-sticky"><div class="ss-bar">
+    <button class="ss-tl" type="button" title="Revenir en haut"><b data-no-tr>${titleOf(s)}</b>${bar(s.counts)}</button>
+    <div class="ss-acts">${canSpeak ? listenBtn(s.id) : ""}${favBtn(storyFav(s))}${shareBtn(storyShare(s))}</div>
+  </div></div>`;
+
+// Ce que j'ai mis en « Moins de ça », et la pastille de l'icône : dans les réglages.
+function settingsExtra() {
+  const L = less.get();
+  const items = [...L.c.map((c) => `<button class="chip on" type="button" data-unless-cat="${esc(c)}">${esc(CAT_LABEL[c] || c)} <span aria-hidden="true">✕</span></button>`),
+    ...L.m.map((x) => `<button class="chip on" type="button" data-unless-med="${esc(x.d)}"><span data-no-tr>${esc(x.n)}</span> <span aria-hidden="true">✕</span></button>`)];
+  return `<section id="setLess"><h3>Moins de ça <small>baissé dans ton fil, jamais caché</small></h3>
+      ${items.length ? `<div class="chips">${items.join("")}</div><p class="note" style="margin:6px 0 0">Touche un élément pour le remettre comme avant.</p>`
+        : `<p class="note" style="margin:0">Rien pour l'instant. Appuie longtemps sur une histoire, puis choisis « Moins de… ».</p>`}</section>
+    ${"setAppBadge" in navigator ? `<section><h3>Pastille sur l'icône</h3>
+      <div class="seg seg-big" role="group"><button type="button" data-badge-set="0" aria-pressed="${!badgeOn()}">Non</button><button type="button" data-badge-set="1" aria-pressed="${badgeOn()}">Oui</button></div>
+      <p class="note" style="margin:6px 0 0">Le nombre d'histoires non lues sur tes sujets suivis, sur l'icône de Prisme. L'iPhone le met à jour quand Prisme s'ouvre ou vient de servir.</p></section>` : ""}`;
+}
+document.addEventListener("click", async (e) => {
+  const c = e.target.closest("[data-unless-cat], [data-unless-med]");
+  if (c) {
+    if (c.dataset.unlessCat) less.delCat(c.dataset.unlessCat); else less.delMed(c.dataset.unlessMed);
+    state.feeds.clear();
+    const sec = $("#setLess");
+    if (sec) sec.outerHTML = settingsExtra().split("</section>")[0] + "</section>";
+    return;
+  }
+  const b = e.target.closest("[data-badge-set]");
+  if (b) {
+    const want = b.dataset.badgeSet === "1";
+    if (want && "Notification" in window && Notification.permission === "default") await Notification.requestPermission().catch(() => {});
+    if (want && "Notification" in window && Notification.permission === "denied") { toast("Autorise les notifications de Prisme dans les réglages de l'iPhone."); return; }
+    store.set("badge", want ? "1" : "0");
+    $$("[data-badge-set]").forEach((x) => x.setAttribute("aria-pressed", x.dataset.badgeSet === (want ? "1" : "0")));
+    updateBadge();
+    if (want && !topics.list().length) toast("Suis un sujet pour voir la pastille bouger.");
+  }
+});
+
 /* ---------- Le fil ---------- */
 // Montrée une seule fois : comment lire un bloc du fil.
 const HOWTO = `<aside class="howto" aria-label="Comment lire Prisme">
@@ -1851,7 +2289,7 @@ function viewFeed(v, route) {
     ${route.lens === "local" ? `<div class="city-bar" id="cityBar"></div>` : ""}
     <div class="topics" id="topics"></div>
     <div class="layout">
-      <div class="main-col">${installCard()}${store.get("howto") ? "" : HOWTO}<div id="feed"></div><div id="sentinel"></div><div id="feedStatus"></div></div>
+      <div class="main-col"><button class="new-pill" id="newPill" type="button" hidden></button><div class="feed-top"><p class="fresh" id="fresh" hidden></p></div>${installCard()}${store.get("howto") ? "" : HOWTO}<div id="feed"></div><div id="sentinel"></div><div id="feedStatus"></div></div>
       <aside class="rail" aria-label="Autour du fil"><div class="rail-in" id="rail"></div></aside>
     </div>`;
   const ht = $("#howtoOk", v);
@@ -1892,7 +2330,7 @@ function mountFeed(key, params) {
   let f = state.feeds.get(key);
   if (!f) { f = { stories: [], page: -1, hasMore: true, loading: false, params }; state.feeds.set(key, f); }
   drawFeed(f);
-  if (f.page < 0) loadMore(key);
+  if (f.page < 0) loadMore(key); else tryResume(f, key);
   const sentinel = $("#sentinel");
   state.observer = new IntersectionObserver((entries) => {
     if (entries.some((e) => e.isIntersecting)) loadMore(key);
@@ -1915,7 +2353,8 @@ async function loadMore(key) {
     const d = await api(`/api/feed?${p}`);
     f.page = d.page;
     f.hasMore = d.hasMore;
-    if (d.summary) { f.summary = d.summary; f.trending = d.trending; f.total = d.total; }
+    if (d.summary) { f.summary = d.summary; f.trending = d.trending; f.total = d.total; f.fresh = d.fresh || 0; }
+    if (d.fetchedAt) f.fetchedAt = d.fetchedAt;
     const fresh = d.stories.filter((s) => !f.stories.some((x) => x.id === s.id));
     for (const s of fresh) state.stories.set(s.id, s);
     f.stories.push(...fresh);
@@ -1933,6 +2372,7 @@ async function loadMore(key) {
     // Si la page est encore courte, on continue de remplir.
     const s = $("#sentinel");
     if (f.hasMore && s && s.getBoundingClientRect().top < innerHeight + 1200) loadMore(key);
+    tryResume(f, key);
   }
 }
 
@@ -1945,9 +2385,10 @@ function drawFeed(f) {
     el.innerHTML = f.page < 0 || f.loading ? skeleton() : "";
   } else {
     el.dataset.count = String(f.stories.length);
-    const [first, ...rest] = f.stories;
-    el.innerHTML = leadStory(first, cat) + rest.map((s) => storyRow(s, cat)).join("");
+    el.innerHTML = feedRows(f, 0);
   }
+  drawNewPill(f);
+  drawFresh();
   drawStatus(f);
   drawTopics(f);
   drawRail(f);
@@ -1956,7 +2397,7 @@ function drawFeed(f) {
 function appendFeed(f) {
   const el = $("#feed");
   const shown = Number(el.dataset.count || 0);
-  el.insertAdjacentHTML("beforeend", f.stories.slice(shown).map((s) => storyRow(s, f.params.cat)).join(""));
+  el.insertAdjacentHTML("beforeend", feedRows(f, shown));
   el.dataset.count = String(f.stories.length);
   drawStatus(f);
 }
@@ -2080,7 +2521,7 @@ async function viewStory(v, route) {
     ${a.media.known ? `<div class="own">${esc(a.media.owner)}</div>` : ""}
   </li>`;
 
-  v.innerHTML = `${back}
+  v.innerHTML = `${stickyBar(s)}${back}
     <div class="layout" style="padding-top:0">
       <div class="main-col">
         <header class="s-head">
@@ -2158,6 +2599,8 @@ async function viewStory(v, route) {
   const b = $("#backBtn", v);
   if (b) b.onclick = (e) => { e.preventDefault(); history.back(); };
   for (const x of $$("[data-expand]", v)) x.onclick = () => { x.previousElementSibling.hidden = false; x.remove(); };
+  storySticky(v, s);
+  setSeen(s, true);
   storyExtras(s, hlItem);
 }
 
