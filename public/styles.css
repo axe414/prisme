@@ -1115,3 +1115,13 @@ html, body { overflow-x: clip; }
   .s-key { padding: 14px 14px 4px; }
   .s-key ol { font-size: 15.5px; }
 }
+
+/* ---------- Résumés écrits par IA ---------- */
+.ai-tag { display: inline-flex; align-items: center; gap: 3px; margin-left: 4px; padding: 1px 6px; font: 600 10px var(--mono); letter-spacing: .05em; text-transform: uppercase; color: #6B4E00; background: #F6E7B8; border-radius: 2px; vertical-align: 1px; white-space: nowrap; cursor: help; }
+:root[data-theme="dark"] .ai-tag { color: #F6E7B8; background: #4A3B10; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ai-tag { color: #F6E7B8; background: #4A3B10; } }
+.matin-list .ai-tag { margin: 0 0 6px; }
+.dek-ai { border-left: 3px solid #E3B23C; padding-left: 10px; }
+.s-key.has-ai { border-top-color: #E3B23C; }
+.s-key .block-h small#keySrc { color: #8A6A10; }
+.ai-note { margin: 2px 0 10px; font: 12.5px/1.45 var(--sans); color: var(--ink-3); }

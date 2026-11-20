@@ -950,9 +950,9 @@ function storyRow(s, cat) {
   const link = href({ h: s.id });
   return `<article class="story${s.image ? "" : " noimg"}">
     <div>
-      <div class="kicker">${catKicker(s, cat)}${reason(s)} ${langTag(s.lang)}</div>
+      <div class="kicker">${catKicker(s, cat)}${reason(s)} ${langTag(s.lang)}${s.ai ? ` ${aiTag}` : ""}</div>
       <h3 data-no-tr><a href="${link}" data-nav>${titleOf(s)}</a>${trTag(s)}</h3>
-      ${s.summary ? `<p class="dek" data-no-tr>${esc(s.summary)}</p>` : ""}
+      ${dekOf(s)}
       ${coveredBy(s)}
       <div class="story-foot">${bar(s.counts)}${splitHtml(s.counts)}${flags(s)}${s.articles.some((a) => reads.has(a.url)) ? `<span class="flag read">Lu</span>` : ""}<span class="acts">${favBtn(storyFav(s))}${shareBtn(storyShare(s))}</span></div>
     </div>
@@ -975,9 +975,9 @@ function leadStory(s, cat) {
   return `<article class="lead${s.image ? "" : " noimg"}">
     ${s.image ? `<a class="lead-media" href="${link}" data-nav tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(s.image))}" alt="" referrerpolicy="no-referrer"><span class="credit">${esc(s.imageSource || "")}</span></a>` : ""}
     <div>
-      <div class="kicker">${catKicker(s, cat)}${reason(s)}</div>
+      <div class="kicker">${catKicker(s, cat)}${reason(s)}${s.ai ? ` ${aiTag}` : ""}</div>
       <h2 data-no-tr><a href="${link}" data-nav>${titleOf(s)}</a>${trTag(s)}</h2>
-      ${s.summary ? `<p class="dek" data-no-tr>${esc(s.summary)}</p><p class="dek-src">Résumé : ${esc(s.summarySource || "")}</p>` : ""}
+      ${dekOf(s, true)}
       ${coveredBy(s, 4)}
       ${bigBar(s.counts)}
       <div class="story-foot">${splitHtml(s.counts)}${flags(s)}<span class="acts">${favBtn(storyFav(s), true)}${shareBtn(storyShare(s), true)}${imgShareBtn(s)}</span></div>
@@ -1393,10 +1393,23 @@ const imgShareBtn = (s) => `<button class="act act-l" type="button" data-share-i
 
 /* ---------- Titres anglais traduits en français (préparés par le robot) ---------- */
 async function withTitlesFr(stories) {
-  if (LANG !== "fr") return stories;
-  const tr = await dataJson("translations.json", 30 * 60e3).catch(() => ({}));
-  for (const s of stories) if (!s.titleFr && tr[s.title]) s.titleFr = tr[s.title];
+  const [tr, sums] = await Promise.all([
+    LANG === "fr" ? dataJson("translations.json", 30 * 60e3).catch(() => ({})) : {},
+    dataJson("summaries.json").catch(() => ({})),
+  ]);
+  state.summaries = sums;
+  for (const s of stories) {
+    if (!s.titleFr && tr[s.title]) s.titleFr = tr[s.title];
+    if (sums[s.id]?.summary) s.ai = sums[s.id];
+  }
   return stories;
+}
+// Le chapeau d'une histoire dans le fil : le résumé neutre de l'IA s'il existe, sinon celui d'un média.
+const aiTag = `<span class="ai-tag" title="Résumé neutre écrit par une IA à partir des titres de tous les médias">✦ Résumé IA</span>`;
+function dekOf(s, lead = false) {
+  if (s.ai?.summary) return `<p class="dek dek-ai"><span data-no-tr>${esc(s.ai.summary)}</span></p>${lead ? `<p class="dek-src">✦ Écrit par une IA à partir des titres de ${plural(s.sources, "média")}, de tous les côtés.</p>` : ""}`;
+  if (!s.summary) return "";
+  return `<p class="dek" data-no-tr>${esc(s.summary)}</p>${lead ? `<p class="dek-src">Résumé : ${esc(s.summarySource || "")}</p>` : ""}`;
 }
 const titleOf = (s) => esc(s.titleFr || s.title);
 const trTag = (s) => (s.titleFr ? `<span class="trd" title="Titre original : ${esc(s.title)}">traduit</span>` : "");
@@ -1719,32 +1732,33 @@ function keyPoints(s) {
   const angle = s.blindspot ? `Angle mort : les médias de ${s.blindspot === "right" ? "droite" : "gauche"} en parlent très peu.`
     : s.lean === "left" ? "Surtout couverte par des médias de gauche." : s.lean === "right" ? "Surtout couverte par des médias de droite."
     : s.sides === 3 ? "La gauche, le centre et la droite en parlent tous." : "Peu de médias évalués en parlent pour l'instant.";
-  return `<section class="s-key" aria-label="L'essentiel">
-    <h2 class="block-h">L'essentiel <small>en 3 points</small></h2>
+  const ai = s.ai || state.summaries?.[s.id];
+  return `<section class="s-key${ai?.summary ? " has-ai" : ""}" aria-label="L'essentiel">
+    <h2 class="block-h">L'essentiel <small id="keySrc">${ai?.summary ? "✦ résumé neutre écrit par IA" : "en 3 points"}</small></h2>
     <ol>
-      <li><b>Ce qui se passe.</b> <span id="keyWhat" data-no-tr>${esc(s.summary || "Les titres de chaque média sont plus bas.")}</span></li>
+      <li><b>Ce qui se passe.</b> <span id="keyWhat" data-no-tr>${esc(ai?.summary || s.summary || "Les titres de chaque média sont plus bas.")}</span></li>
       <li><b>Qui en parle.</b> ${plural(s.sources, "média")} : ${sd.left} à gauche, ${sd.center} au centre, ${sd.right} à droite${others ? `, ${others} non évalué${others > 1 ? "s" : ""}` : ""}.${first ? ` En premier : <b data-no-tr>${esc(first.sourceName)}</b>, ${esc(ago(first.published))}.` : ""}</li>
-      <li><b>L'angle.</b> <span id="keyAngle">${angle}</span></li>
+      <li><b>L'angle.</b> <span id="keyAngle">${ai?.left || ai?.right ? `${ai.left ? `<span class="bb bb-l2">Gauche</span> <span data-no-tr>${esc(ai.left)}</span> ` : ""}${ai.right ? `<span class="bb bb-r2">Droite</span> <span data-no-tr>${esc(ai.right)}</span>` : ""}` : angle}</span></li>
     </ol>
+    <p class="ai-note" id="keyNote"${ai?.summary ? "" : " hidden"}>✦ Ce résumé a été écrit par une IA (Gemini) à partir des titres de tous les médias, de la gauche à la droite. Elle peut se tromper : les titres de chaque média sont plus bas.</p>
   </section>`;
 }
 
 // Les à-côtés d'une histoire, chargés après l'affichage.
 async function storyExtras(s, hlItem) {
   // Résumé neutre (IA), seulement si une clé est configurée. Le palier gratuit est lent : on l'annonce.
-  const sumEl = $("#sxSummary");
-  const pending = setTimeout(() => {
-    if (!sumEl || !still(s.id) || !sumEl.hidden || s.sources < 2) return;
-    sumEl.hidden = false;
-    sumEl.innerHTML = `<h2 class="block-h">Résumé neutre <small>écrit par IA à partir de tous les titres</small></h2><div class="ai"><p class="ai-wait">L'IA lit les ${plural(s.sources, "média")} et écrit un résumé neutre… (10 à 20 secondes la première fois)</p></div>`;
-  }, 900);
   api(`/api/summary?id=${encodeURIComponent(s.id)}&region=${state.region}`).then((r) => {
-    clearTimeout(pending);
     const el = $("#sxSummary");
     if (!el || !still(s.id)) return;
-    if (r.summary) { const kw = $("#keyWhat"); if (kw) kw.textContent = r.summary; }
-    if (r.left || r.right) { const ka = $("#keyAngle"); if (ka) ka.innerHTML = `${r.left ? `<span class="bb bb-l2">Gauche</span> ${esc(r.left)} ` : ""}${r.right ? `<span class="bb bb-r2">Droite</span> ${esc(r.right)}` : ""}`; }
-    if (!r.configured || (!r.summary && !r.error)) { el.hidden = true; return; }
+    if (r.summary) {
+      const kw = $("#keyWhat"); if (kw) kw.textContent = r.summary;
+      const ks = $("#keySrc"); if (ks) ks.textContent = "✦ résumé neutre écrit par IA";
+      const kn = $("#keyNote"); if (kn) kn.hidden = false;
+      $(".s-key")?.classList.add("has-ai");
+    }
+    if (r.left || r.right) { const ka = $("#keyAngle"); if (ka) ka.innerHTML = `${r.left ? `<span class="bb bb-l2">Gauche</span> <span data-no-tr>${esc(r.left)}</span> ` : ""}${r.right ? `<span class="bb bb-r2">Droite</span> <span data-no-tr>${esc(r.right)}</span>` : ""}`; }
+    // Le résumé est déjà en tête de page : pas de section en double.
+    if (!r.configured || r.summary || !r.error) { el.hidden = true; return; }
     el.hidden = false;
     el.innerHTML = r.error ? `<h2 class="block-h">Résumé neutre</h2><p class="note">${esc(r.error)}</p>`
       : `<h2 class="block-h">Résumé neutre <small>écrit par IA (${esc(r.provider)}) à partir de tous les titres</small></h2>
@@ -2640,7 +2654,7 @@ async function viewMatin(v) {
       return `<div><div class="side"><span class="bb bb-${side.key === "left" ? "l2" : side.key === "right" ? "r2" : "c"}">${side.label}</span></div>
         ${a ? `${artLink(a)}<div class="by">${esc(a.sourceName)}</div>` : `<div class="none">Aucun média de ${side.label.toLowerCase()} n'en parle.</div>`}</div>`;
     }).join("")}</div>`; };
-    state.matinSpeech = [`${hello}. Voici ton matin Prisme : cinq histoires.`, ...picked.flatMap((s, i) => { const sd = sides(s.counts); return [`${i + 1}. ${s.titleFr || s.title}.`, s.summary || "", `${plural(s.sources, "média")} en parlent : ${sd.left} à gauche, ${sd.center} au centre, ${sd.right} à droite.`]; })];
+    state.matinSpeech = [`${hello}. Voici ton matin Prisme : cinq histoires.`, ...picked.flatMap((s, i) => { const sd = sides(s.counts); return [`${i + 1}. ${s.titleFr || s.title}.`, s.ai?.summary || s.summary || "", `${plural(s.sources, "média")} en parlent : ${sd.left} à gauche, ${sd.center} au centre, ${sd.right} à droite.`]; })];
     $("#matin").innerHTML = `
       <div class="matin-listen">${listenBtn("matin")}<span class="note">Écoute les cinq histoires, environ trois minutes.</span></div>
       <ol class="matin-list">${picked.map((s, i) => `<li>
@@ -2648,7 +2662,7 @@ async function viewMatin(v) {
         <div>
           <div class="kicker">${catKicker(s)}${reason(s)}</div>
           <h2 data-no-tr><a href="${href({ h: s.id })}" data-nav>${titleOf(s)}</a>${trTag(s)}</h2>
-          ${s.summary ? `<p class="dek" data-no-tr>${esc(s.summary)}</p>` : ""}
+          ${s.ai ? aiTag : ""}${dekOf(s)}
           ${bigBar(s.counts)}
           ${sidesHtml(s)}
         </div>
