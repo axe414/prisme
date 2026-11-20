@@ -3210,7 +3210,7 @@ async function openVideoBref() {
   addEventListener("touchstart", (e) => {
     box = e.target.closest("#modal.open .modal-box");
     if (!box || innerWidth > 760 || e.touches.length !== 1) { box = null; return; }
-    const scroller = box.querySelector(".modal-body") || box;
+    const scroller = box.querySelector("#modalBody") || box;
     if (scroller.scrollTop > 0 && !e.target.closest(".modal-grab")) { box = null; return; }
     y0 = e.touches[0].clientY; dy = 0;
   }, { passive: true });

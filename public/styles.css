@@ -2164,3 +2164,15 @@ html.soir img { filter: brightness(.92); }
 .rem-row input, .rem-row select { height: 38px; padding: 0 10px; border-radius: 10px; border: 1px solid var(--hair); background: var(--paper); color: var(--ink); font: 600 15px var(--sans); }
 /* Aa */
 .act .aa { font: 700 15px/1 var(--serif); }
+
+/* Fenêtres : seul l'intérieur défile ; le ✕ et la poignée restent toujours visibles en haut */
+.modal-box { display: flex; flex-direction: column; overflow: hidden; }
+#modalBody { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.modal-close { z-index: 5; background: color-mix(in srgb, var(--paper) 85%, transparent); border-radius: 50%; }
+@media (max-width: 760px) {
+  .modal { align-items: end; }
+  .modal-box { max-height: calc(100dvh - env(safe-area-inset-top) - 16px); }
+  .modal-box::before { position: static; margin: 8px auto 2px; flex: none; }
+  .modal-close { top: 10px; right: 10px; }
+}
+.modal-close { background: var(--paper) !important; box-shadow: 0 2px 10px -2px rgba(0, 0, 0, .45); }
