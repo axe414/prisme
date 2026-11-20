@@ -56,7 +56,7 @@ for (const region of REGIONS) {
 
 // 3 b) L'archive de 7 jours : page de chaque média et recherche sur 7 jours.
 {
-  const { loadArchive, mergeArchive, saveArchive, outletFiles, outletFileName, olderFile } = await import("../lib/archive.mjs");
+  const { loadArchive, mergeArchive, saveArchive, outletFiles, outletFileName } = await import("../lib/archive.mjs");
   mkdirSync(STATE, { recursive: true });
   const ARCH = join(STATE, "archive.json");
   const arch = mergeArchive(loadArchive(ARCH), index);
@@ -64,9 +64,13 @@ for (const region of REGIONS) {
   mkdirSync(join(DATA, "m"), { recursive: true });
   const files = outletFiles(arch);
   for (const [domain, file] of files) writeFileSync(join(DATA, "m", outletFileName(domain)), JSON.stringify(file));
-  const current = new Set(index.articles.map((a) => a.url));
-  for (const region of REGIONS) writeFileSync(join(DATA, `older-${region}.json`), JSON.stringify(olderFile(arch, region, current)));
   log(`archive : ${Object.keys(arch.items).length} articles sur 7 jours, ${files.length} pages de médias`);
+  // Index de recherche (tous pays, 7 jours, titres + extraits).
+  const { writeSearchIndex } = await import("../lib/search-index.mjs");
+  const build = Date.now().toString(36);
+  const si = writeSearchIndex(arch, DATA, build);
+  writeFileSync(join(DATA, "search.json"), JSON.stringify({ build, docs: si.docs }));
+  log(`index de recherche : ${si.docs} articles, ${si.words} mots, ${si.shards} fichiers`);
 }
 
 // 4) Vidéos des chaînes de médias, et annuaire.
@@ -103,6 +107,30 @@ if (canSummarize()) {
   writeFileSync(SUMS, JSON.stringify(sums));
 }
 const published = new Set(Object.values(editions).flatMap((e) => e.stories.map((s) => s.id)));
+
+// 5 b) Titres en anglais traduits en français pour les éditions francophones (gardés d'une fois à l'autre).
+{
+  const { translateTitles } = await import("../lib/summarize.mjs");
+  const TR = join(STATE, "translations.json");
+  let tr = {};
+  try { tr = JSON.parse(readFileSync(TR, "utf8")); } catch { /* première fois */ }
+  const want = [];
+  for (const region of ["qc", "fr", "monde", "ca"]) for (const s of editions[region].stories.slice(0, 80)) {
+    if (s.lang && s.lang !== "fr" && s.title && !tr[s.title] && !want.includes(s.title)) want.push(s.title);
+  }
+  let added = 0;
+  for (let i = 0; i < Math.min(want.length, 120); i += 40) {
+    const batch = want.slice(i, i + 40);
+    try { const out = await translateTitles(batch); batch.forEach((t, j) => { if (out[j]) { tr[t] = out[j]; added++; } }); }
+    catch (e) { log(`traduction impossible : ${e.message}`); break; }
+  }
+  // On ne garde que les titres encore publiés.
+  const live = new Set(Object.values(editions).flatMap((e) => e.stories.map((s) => s.title)));
+  for (const t of Object.keys(tr)) if (!live.has(t)) delete tr[t];
+  writeFileSync(TR, JSON.stringify(tr));
+  writeFileSync(join(DATA, "translations.json"), JSON.stringify(tr));
+  log(`${added} titres traduits (${Object.keys(tr).length} en tout)`);
+}
 writeFileSync(join(DATA, "summaries.json"), JSON.stringify(Object.fromEntries(Object.entries(sums).filter(([id]) => published.has(id)))));
 
 // 6) Fiche de l'édition.

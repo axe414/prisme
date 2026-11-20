@@ -19,6 +19,7 @@ const { buildStories, editionFile, articlesFile, mondeLookup, REGIONS } = await 
 const { allVideos } = await import("./lib/videos.mjs");
 const { directory } = await import("./lib/media-db.mjs");
 const { loadArchive, mergeArchive, archiveFromIndex, outletFile, olderFile } = await import("./lib/archive.mjs");
+const { writeSearchIndex } = await import("./lib/search-index.mjs");
 
 const types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon", ".webmanifest": "application/manifest+json", ".json": "application/json; charset=utf-8" };
 const port = Number(process.env.PORT) || 8888;
@@ -65,6 +66,7 @@ setInterval(warmUp, 60e3).unref();
 
 let videosCache = { at: 0, body: null };
 let archCache = { stamp: null, arch: null };
+let searchCache = { stamp: null, body: null };
 async function dataFile(name) {
   const m = name.match(/^edition-([a-z]+)\.json$/);
   if (m && REGIONS.includes(m[1])) return editionJson(m[1]);
@@ -83,11 +85,29 @@ async function dataFile(name) {
     if (om) { const f = outletFile(arch, om[1]); return f ? JSON.stringify(f) : null; }
     return JSON.stringify(olderFile(arch, o[1], new Set(index.articles.map((x) => x.url))));
   }
+  // Index de recherche : préparé dans .data/devsite à chaque nouvelle lecture des médias.
+  if (name === "search.json" || name.startsWith("s/")) {
+    const index = await getIndex();
+    if (searchCache.stamp !== index.fetchedAt) {
+      if (archCache.stamp !== index.fetchedAt) {
+        const f = join(root, ".data", "archive.json");
+        archCache = { stamp: index.fetchedAt, arch: existsSync(f) ? mergeArchive(loadArchive(f), index) : archiveFromIndex(index) };
+      }
+      const build = Date.now().toString(36);
+      const si = writeSearchIndex(archCache.arch, join(root, ".data", "devsite"), build);
+      searchCache = { stamp: index.fetchedAt, body: JSON.stringify({ build, docs: si.docs }) };
+    }
+    if (name === "search.json") return searchCache.body;
+    const file = join(root, ".data", "devsite", normalize(name).replace(/^([/\\])+/, ""));
+    if (!file.startsWith(join(root, ".data", "devsite")) || !existsSync(file)) return null;
+    return readFileSync(file, "utf8");
+  }
   if (name === "videos.json") {
     if (!videosCache.body || Date.now() - videosCache.at > 30 * 60e3) videosCache = { at: Date.now(), body: JSON.stringify({ builtAt: new Date().toISOString(), videos: await allVideos() }) };
     return videosCache.body;
   }
   if (name === "directory.json") return JSON.stringify({ media: directory() });
+  if (name === "translations.json") { try { return readFileSync(join(root, ".data", "translations.json"), "utf8"); } catch { return "{}"; } }
   if (name === "summaries.json") { try { return readFileSync(join(root, ".data", "summaries.json"), "utf8"); } catch { return "{}"; } }
   if (name === "meta.json") { const i = await getIndex(); return JSON.stringify({ builtAt: new Date().toISOString(), articles: i.articles.length }); }
   return null;

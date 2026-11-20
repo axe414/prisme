@@ -13,6 +13,8 @@ const LENSES = {
   droite: { label: "Bulle de droite", sw: "var(--b-r2)", desc: "Ce que les médias de droite couvrent le plus en ce moment, et que la gauche couvre peu ou pas." },
   horsradar: { label: "Hors radar", desc: "Des histoires couvertes par un ou deux médias seulement : enquêtes, sujets locaux, médias indépendants." },
   recent: { label: "En continu", desc: "Tout ce que Prisme lit, du plus récent au plus ancien, sans aucun tri." },
+  pourtoi: { label: "Pour toi", desc: "Les histoires qui touchent tes sujets, tes médias suivis, tes rubriques préférées et ta ville. Rien ne quitte ton appareil." },
+  local: { label: "Ma ville", qc: true, desc: "Les histoires qui parlent de ta ville ou de ta région, ou qui viennent de ses médias." },
 };
 const BIAS = {
   l2: { label: "Gauche", color: "var(--b-l2)" },
@@ -355,7 +357,6 @@ async function api(path) {
     case "/api/directory": return { media: (await dataJson("directory.json", 864e5)).media };
     case "/api/media": return mediaLocal(p.get("domain"));
     case "/api/summary": return summaryLocal(p.get("id"));
-    case "/api/search": return searchLocal(p.get("q"), p.get("region"), Number(p.get("days") || 2));
     default: throw new Error("Demande inconnue.");
   }
 }
@@ -376,6 +377,7 @@ async function feedLocal(p) {
   if (storyId) {
     const { s } = await findStory(storyId, region);
     if (!s) throw new Error("Cette histoire n'est plus dans le fil (les fils couvrent les dernières 48 heures).");
+    await withTitlesFr([s]);
     return { story: s };
   }
   const extraId = p.get("extra");
@@ -404,10 +406,13 @@ async function feedLocal(p) {
   let list = ed.stories;
   if (q) {
     const pq = parseQuery(q);
-    list = list.filter((s) => {
-      if (!s._fold) s._fold = foldText(`${s.title} ${s.summary || ""} ${s.articles.map((a) => a.title).join(" ")}`);
-      return matchQuery(s._fold, pq);
-    });
+    const all = list;
+    list = all.filter((s) => matchQuery(storyFold(s), pq));
+    // Aucune histoire avec tous les mots : celles qui en ont le plus.
+    if (!list.length && pq.terms.length > 1) {
+      const n = (s) => pq.terms.filter((g) => g.some((w) => hasWord(storyFold(s), w))).length;
+      list = all.filter((s) => n(s) > 0).sort((a, b) => n(b) - n(a)).slice(0, 30);
+    }
   } else if (cat !== "une") list = list.filter((s) => s.categories.includes(cat));
   if (q) {
     // Une recherche qui nomme un média trouve aussi les histoires où ce média apparaît.
@@ -416,10 +421,12 @@ async function feedLocal(p) {
     list = [...list, ...byOutlet];
   }
   const key = q ? "essentiel" : lens;
+  if (key === "pourtoi") { const sc = forYouScorer(); for (const s of list) s.scores.pourtoi = sc(s); }
+  if (key === "local") for (const s of list) s.scores.local = localScore(s) * (s.scores.essentiel + 0.2);
   if (key !== "recent") list = list.filter((s) => s.scores[key] > 0);
   list = [...list].sort((a, b) => b.scores[key] - a.scores[key]);
 
-  const out = { region, page, fetchedAt: ed.fetchedAt, total: list.length, hasMore: (page + 1) * PAGE < list.length, stories: list.slice(page * PAGE, (page + 1) * PAGE) };
+  const out = { region, page, fetchedAt: ed.fetchedAt, total: list.length, hasMore: (page + 1) * PAGE < list.length, stories: await withTitlesFr(list.slice(page * PAGE, (page + 1) * PAGE)) };
   if (page === 0) {
     const counts = Object.fromEntries(ORDER.map((k) => [k, 0]));
     const doms = new Map(), owners = new Map();
@@ -458,6 +465,7 @@ async function videosLocal(p) {
 
 async function summaryLocal(id) {
   const sums = await dataJson("summaries.json").catch(() => ({}));
+  state.summaries = sums;
   return sums[id] ? { configured: true, ...sums[id] } : { configured: false };
 }
 
@@ -560,9 +568,6 @@ function decodeArticles(raw) {
   return (raw._decoded = { domains, items });
 }
 const articlesOf = async (region) => decodeArticles(await dataJson(`articles-${region}.json`, 15 * 60e3));
-// Les articles de 2 à 7 jours (archive du robot), chargés seulement quand on cherche sur 7 jours.
-const olderOf = async (region) => decodeArticles(await dataJson(`older-${region}.json`, 60 * 60e3));
-
 // Les médias dont le nom ou l'adresse correspond à la recherche (« tva nouvelle » → TVA Nouvelles).
 function matchOutlets(domains, q) {
   const fq = foldText(q).trim(), compact = fq.replace(/[^\p{L}\p{N}]+/gu, "");
@@ -572,19 +577,6 @@ function matchOutlets(domains, q) {
     .sort((a, b) => b.count - a.count).slice(0, 8);
 }
 
-// Recherche élargie : tous les articles lus par Prisme dans l'édition (48 h), y compris ceux d'un média nommé.
-async function searchLocal(q, region, days = 2) {
-  const idx = await articlesOf(region);
-  const pools = [idx.items];
-  let olderError = null;
-  if (days > 2) { try { pools.push((await olderOf(region)).items); } catch (e) { olderError = "L'archive de 7 jours n'est pas encore prête. Réessaie plus tard."; } }
-  const pq = parseQuery(q);
-  const outlets = new Set(matchOutlets(idx.domains, q).map((d) => d.domain));
-  const articles = [];
-  for (const pool of pools) for (const a of pool) if (outlets.has(a.domain) || matchQuery(a.fold, pq)) articles.push(a);
-  articles.sort((a, b) => (b.published || "").localeCompare(a.published || ""));
-  return { query: q, days, articles: articles.slice(0, 1500), total: articles.length, also: pq.also, marks: pq.marks, olderError };
-}
 
 /* ---------- Routes ---------- */
 function parseRoute() {
@@ -596,6 +588,7 @@ function parseRoute() {
   if (p.get("v") === "moi") return { view: "me", region: r };
   if (["matin", "videos", "quiz", "favoris"].includes(p.get("v"))) return { view: p.get("v"), region: r };
   if (p.get("m")) return { view: "outlet", m: p.get("m").toLowerCase(), region: r };
+  if (p.get("v") === "comparer") return { view: "comparer", a: (p.get("a") || "").toLowerCase(), b: (p.get("b") || "").toLowerCase(), region: r };
   const cat = CATS.some(([v]) => v === p.get("c")) ? p.get("c") : "une";
   const lens = p.get("l") in LENSES ? p.get("l") : "essentiel";
   return { view: "feed", cat, lens, region: r };
@@ -637,6 +630,7 @@ function render({ scroll = 0 } = {}) {
   if (route.region !== state.region) { state.region = route.region; store.set("region", route.region); }
   state.observer?.disconnect();
   state.onScroll = null;
+  if (canSpeak) speechSynthesis.cancel();
   renderChrome(route);
   const v = $("#view");
   if (route.view === "story") viewStory(v, route);
@@ -648,6 +642,7 @@ function render({ scroll = 0 } = {}) {
   else if (route.view === "quiz") viewQuiz(v);
   else if (route.view === "outlet") viewOutlet(v, route);
   else if (route.view === "favoris") viewFavs(v);
+  else if (route.view === "comparer") viewCompare(v, route);
   else viewFeed(v, route);
   requestAnimationFrame(() => scrollTo(0, scroll));
 }
@@ -664,6 +659,8 @@ const ICON = {
   quiz: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"/>',
   about: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
   theme: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/>',
+  reglages: '<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>',
+  comparer: '<rect x="3" y="5" width="7" height="14" rx="1"/><rect x="14" y="5" width="7" height="14" rx="1"/>',
   favoris: '<path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z"/>',
   install: '<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M12 7v7M9 11l3 3 3-3M10.5 18.5h3"/>',
 };
@@ -722,6 +719,8 @@ function openMoreSheet() {
     <div class="kicker">Prisme</div>
     <h2>Plus</h2>
     <ul class="sheet-list">
+      <li><button type="button" data-open-settings>${svg("reglages")}<span>Réglages<small>Taille du texte, langue, thème, ta ville, ce qui t'intéresse.</small></span></button></li>
+      <li><a href="${href({ v: "comparer" })}" data-nav data-close-modal>${svg("comparer")}<span>Comparer deux médias<small>Les mêmes histoires, deux titres, côte à côte.</small></span></a></li>
       <li><a href="${href({ v: "favoris" })}" data-nav data-close-modal>${svg("favoris")}<span>Mes favoris<small>Les histoires et articles enregistrés, et les médias que tu suis.</small></span></a></li>
       <li><a href="${href({ v: "proprietaires" })}" data-nav data-close-modal>${svg("proprietaires")}<span>Qui possède quoi<small>Les médias regroupés par propriétaire, et la toile des familles.</small></span></a></li>
       <li><a href="${href({ v: "quiz" })}" data-nav data-close-modal>${svg("quiz")}<span>Devine le média<small>Un titre : gauche, centre ou droite ?</small></span></a></li>
@@ -735,6 +734,7 @@ function openMoreSheet() {
   if (ib) ib.onclick = async () => { installEvt.prompt(); await installEvt.userChoice.catch(() => null); installEvt = null; closeLayer("#modal"); };
 }
 document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-open-settings]")) { e.preventDefault(); openSettings(); return; }
   if (e.target.closest("[data-close-modal]")) closeLayer("#modal");
   if (e.target.closest("[data-close-drawer]")) closeLayer("#drawer");
 });
@@ -757,7 +757,7 @@ function topbarSize() { document.documentElement.style.setProperty("--top-h", `$
   addEventListener("resize", topbarSize);
   bar.addEventListener("transitionend", topbarSize);
   // Téléphone : une fois descendu, la recherche se range derrière une loupe dans le bandeau.
-  $("#searchBtn").onclick = () => { bar.classList.add("searching"); bar.classList.remove("tucked"); $("#search input").focus(); };
+  $("#searchBtn").onclick = () => { bar.classList.add("searching"); bar.classList.remove("tucked"); $("#search input").focus({ preventScroll: true }); };
   $("#search input").addEventListener("blur", () => setTimeout(() => bar.classList.remove("searching"), 150));
 }
 
@@ -836,10 +836,10 @@ function markWords(text, words) {
         ${item(`href="${href({ q })}" data-q="${esc(q)}" data-wide`, `${sgIcon("all")}<span class="sg-main">Chercher « ${esc(q)} » dans tous les articles (48 h)</span>`).replace('class="sg"', 'class="sg sg-all"')}`);
     };
     draw([]);
-    articlesOf(state.region).then((idx) => draw(matchOutlets(idx.domains, q).slice(0, 4))).catch(() => {});
+    searchBase().then((m) => draw(matchOutlets(m.D, q).slice(0, 4))).catch(() => {});
   }
 
-  input.addEventListener("focus", () => { suggest(); articlesOf(state.region).catch(() => {}); });
+  input.addEventListener("focus", () => { suggest(); searchBase().catch(() => {}); });
   input.addEventListener("input", suggest);
   input.addEventListener("keydown", (e) => {
     if (box.hidden) return;
@@ -951,7 +951,7 @@ function storyRow(s, cat) {
   return `<article class="story${s.image ? "" : " noimg"}">
     <div>
       <div class="kicker">${catKicker(s, cat)}${reason(s)} ${langTag(s.lang)}</div>
-      <h3 data-no-tr><a href="${link}" data-nav>${esc(s.title)}</a></h3>
+      <h3 data-no-tr><a href="${link}" data-nav>${titleOf(s)}</a>${trTag(s)}</h3>
       ${s.summary ? `<p class="dek" data-no-tr>${esc(s.summary)}</p>` : ""}
       ${coveredBy(s)}
       <div class="story-foot">${bar(s.counts)}${splitHtml(s.counts)}${flags(s)}${s.articles.some((a) => reads.has(a.url)) ? `<span class="flag read">Lu</span>` : ""}<span class="acts">${favBtn(storyFav(s))}${shareBtn(storyShare(s))}</span></div>
@@ -976,11 +976,11 @@ function leadStory(s, cat) {
     ${s.image ? `<a class="lead-media" href="${link}" data-nav tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(s.image))}" alt="" referrerpolicy="no-referrer"><span class="credit">${esc(s.imageSource || "")}</span></a>` : ""}
     <div>
       <div class="kicker">${catKicker(s, cat)}${reason(s)}</div>
-      <h2 data-no-tr><a href="${link}" data-nav>${esc(s.title)}</a></h2>
+      <h2 data-no-tr><a href="${link}" data-nav>${titleOf(s)}</a>${trTag(s)}</h2>
       ${s.summary ? `<p class="dek" data-no-tr>${esc(s.summary)}</p><p class="dek-src">Résumé : ${esc(s.summarySource || "")}</p>` : ""}
       ${coveredBy(s, 4)}
       ${bigBar(s.counts)}
-      <div class="story-foot">${splitHtml(s.counts)}${flags(s)}<span class="acts">${favBtn(storyFav(s), true)}${shareBtn(storyShare(s), true)}</span></div>
+      <div class="story-foot">${splitHtml(s.counts)}${flags(s)}<span class="acts">${favBtn(storyFav(s), true)}${shareBtn(storyShare(s), true)}${imgShareBtn(s)}</span></div>
       <div class="angles3">${SIDES.map((side) => {
         const a = by[side.key];
         return `<div><div class="side"><i style="background:${side.color}"></i>${side.label}</div>
@@ -990,6 +990,416 @@ function leadStory(s, cat) {
     </div>
   </article>`;
 }
+
+/* ---------- Préférences : taille du texte, ville, rubriques préférées ---------- */
+const SCALES = [[0.92, "Petit"], [1, "Normal"], [1.12, "Grand"], [1.25, "Très grand"]];
+const prefs = {
+  get scale() { return Number(store.get("scale", "1")) || 1; },
+  get city() { return store.get("city", ""); },
+  get cats() { try { return JSON.parse(store.get("prefCats", "[]")); } catch { return []; } },
+};
+const applyScale = () => document.documentElement.style.setProperty("--scale", String(prefs.scale));
+applyScale();
+
+// Les villes et régions du Québec : mots qui les nomment et médias régionaux.
+const CITIES = {
+  montreal: { label: "Montréal", words: ["montreal", "montrealais", "ville de laval", "longueuil", "rive-sud", "rive-nord", "plateau mont-royal", "rosemont", "verdun", "lasalle", "ahuntsic", "westmount", "saint-laurent", "hochelaga", "villeray", "stm", "brossard"], domains: ["montrealgazette.com", "mtlblog.com", "24heures.ca"] },
+  quebec: { label: "Québec (ville)", words: ["ville de quebec", "capitale-nationale", "levis", "sainte-foy", "beauport", "charlesbourg", "limoilou", "vieux-quebec", "saint-roch", "rtc", "bruno marchand", "tramway de quebec"], domains: ["lesoleil.com", "quebechebdo.com"] },
+  gatineau: { label: "Gatineau et Outaouais", words: ["gatineau", "outaouais", "aylmer", "hull", "ottawa"], domains: ["ledroit.com"] },
+  sherbrooke: { label: "Sherbrooke et Estrie", words: ["sherbrooke", "estrie", "magog", "coaticook"], domains: ["latribune.ca"] },
+  troisrivieres: { label: "Trois-Rivières et Mauricie", words: ["trois-rivieres", "mauricie", "shawinigan", "becancour"], domains: ["lenouvelliste.ca"] },
+  saguenay: { label: "Saguenay–Lac-Saint-Jean", words: ["saguenay", "chicoutimi", "jonquiere", "lac-saint-jean", "alma", "roberval", "dolbeau"], domains: ["lequotidien.com"] },
+  monteregie: { label: "Montérégie", words: ["monteregie", "saint-jean-sur-richelieu", "granby", "saint-hyacinthe", "chateauguay", "vaudreuil", "sorel"], domains: ["lavoixdelest.ca"] },
+  laurentides: { label: "Laurentides et Lanaudière", words: ["laurentides", "saint-jerome", "mirabel", "mont-tremblant", "lanaudiere", "joliette", "terrebonne", "repentigny"], domains: [] },
+  bsl: { label: "Bas-Saint-Laurent et Gaspésie", words: ["rimouski", "bas-saint-laurent", "gaspesie", "matane", "riviere-du-loup", "iles-de-la-madeleine"], domains: [] },
+  abitibi: { label: "Abitibi-Témiscamingue", words: ["abitibi", "rouyn-noranda", "val-d'or", "temiscamingue", "amos"], domains: [] },
+  cotenord: { label: "Côte-Nord", words: ["cote-nord", "sept-iles", "baie-comeau", "havre-saint-pierre"], domains: [] },
+};
+const storyFold = (s) => s._fold || (s._fold = foldText(`${s.title} ${s.summary || ""} ${s.articles.map((a) => a.title).join(" ")}`));
+
+// « Ma ville » : les histoires qui nomment la ville choisie ou viennent de ses médias.
+function localScore(s) {
+  const c = CITIES[prefs.city];
+  if (!c) return 0;
+  const t = storyFold(s);
+  const hit = c.words.some((w) => hasWord(t, w)) || s.articles.some((a) => c.domains.includes(a.domain));
+  return hit ? 1 + Math.max(0, 48 - (s.age || 0)) / 48 : 0;
+}
+// « Pour toi » : sujets et médias suivis, rubriques préférées, médias que tu lis souvent.
+function forYouScorer() {
+  const tps = topics.list().map((t) => parseQuery(t));
+  const fol = new Set(follows.list().map((x) => x.d));
+  const cats = new Set(prefs.cats);
+  const readN = new Map();
+  for (const r of reads.list().slice(-200)) readN.set(r.d, (readN.get(r.d) || 0) + 1);
+  return (s) => {
+    let boost = 0;
+    if (tps.some((pq) => matchQuery(storyFold(s), pq))) boost += 3;
+    if (s.articles.some((a) => fol.has(a.domain))) boost += 2;
+    if (s.categories.some((c) => cats.has(c))) boost += 1.5;
+    if (prefs.city && localScore(s)) boost += 1.5;
+    boost += Math.min(1.5, s.articles.reduce((n, a) => n + (readN.get(a.domain) ? 0.3 : 0), 0));
+    return boost > 0 ? (s.scores.essentiel || 0.05) * (1 + boost) : 0;
+  };
+}
+const hasPrefs = () => topics.list().length || follows.list().length || prefs.cats.length || prefs.city || reads.list().length >= 5;
+
+/* ---------- Réglages ---------- */
+function openSettings() {
+  const theme = store.get("theme", "auto");
+  const regionOpts = REGIONS.map(([v, l]) => `<option value="${v}" ${v === state.region ? "selected" : ""}>${esc(l)}</option>`).join("");
+  openModal(`<div class="modal-pad settings">
+    <div class="kicker">Prisme</div>
+    <h2>Réglages</h2>
+    <section><h3>Taille du texte</h3>
+      <div class="seg seg-big" role="group" aria-label="Taille du texte">${SCALES.map(([v, l]) => `<button type="button" data-scale="${v}" aria-pressed="${prefs.scale === v}"><span style="font-size:${Math.round(15 * v)}px">A</span>${l}</button>`).join("")}</div>
+      <p class="set-preview">Voici à quoi ressemble le texte des histoires.</p></section>
+    <section><h3>Langue de l'app</h3>
+      <div class="seg seg-big" role="group"><button type="button" data-lang-set="fr" aria-pressed="${LANG === "fr"}">Français</button><button type="button" data-lang-set="en" aria-pressed="${LANG === "en"}">English</button></div></section>
+    <section><h3>Thème</h3>
+      <div class="seg seg-big" role="group">${[["light", "Clair"], ["dark", "Sombre"], ["auto", "Automatique"]].map(([v, l]) => `<button type="button" data-theme-set="${v}" aria-pressed="${theme === v}">${l}</button>`).join("")}</div></section>
+    <section><h3>Mon édition</h3><select id="setRegion" class="set-select">${regionOpts}</select></section>
+    <section><h3>Ma ville <small>pour le fil « Ma ville » (Québec)</small></h3>
+      <select id="setCity" class="set-select"><option value="">Aucune</option>${Object.entries(CITIES).map(([k, c]) => `<option value="${k}" ${prefs.city === k ? "selected" : ""}>${esc(c.label)}</option>`).join("")}</select></section>
+    <section><h3>Ce qui m'intéresse <small>pour le fil « Pour toi »</small></h3>
+      <div class="chips">${CATS.slice(1).map(([c, l]) => `<button class="chip" type="button" data-pcat="${c}" aria-pressed="${prefs.cats.includes(c)}">${esc(l)}</button>`).join("")}</div></section>
+    <section class="set-foot"><button class="btn ghost" type="button" id="setOnboard">Revoir l'accueil</button></section>
+  </div>`, true);
+  const box = $("#modalBody");
+  box.onclick = (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    if (b.dataset.scale) { store.set("scale", b.dataset.scale); applyScale(); $$("[data-scale]", box).forEach((x) => x.setAttribute("aria-pressed", x === b)); }
+    if (b.dataset.langSet && b.dataset.langSet !== LANG) setLang(b.dataset.langSet);
+    if (b.dataset.themeSet) {
+      const v = b.dataset.themeSet;
+      store.set("theme", v);
+      if (v === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = v;
+      $$("[data-theme-set]", box).forEach((x) => x.setAttribute("aria-pressed", x === b));
+    }
+    if (b.dataset.pcat) {
+      const l = prefs.cats, c = b.dataset.pcat;
+      store.set("prefCats", JSON.stringify(l.includes(c) ? l.filter((x) => x !== c) : [...l, c]));
+      b.setAttribute("aria-pressed", !l.includes(c));
+      state.feeds.clear();
+    }
+    if (b.id === "setOnboard") { closeLayer("#modal"); setTimeout(openOnboarding, 250); }
+  };
+  $("#setRegion").onchange = (e) => { state.region = e.target.value; store.set("region", state.region); closeLayer("#modal"); go(href({})); };
+  $("#setCity").onchange = (e) => { store.set("city", e.target.value); state.feeds.clear(); if (state.route.view === "feed") render(); };
+}
+
+/* ---------- Accueil, la première fois ---------- */
+function openOnboarding() {
+  let step = 0;
+  const choice = { region: state.region, city: prefs.city, cats: new Set(prefs.cats), scale: prefs.scale };
+  const steps = [
+    () => `<div class="ob-hero"><svg class="ob-logo" viewBox="0 0 64 40" aria-hidden="true"><path d="M1 23.5 L21 21" style="stroke:var(--ink)"/><path d="M27 4 L41 34 H13 Z" style="stroke:var(--ink)"/><path d="M32.5 18.5 L63 7" style="stroke:var(--b-l2)"/><path d="M33.3 20 L63 14" style="stroke:var(--b-l1)"/><path d="M34 21.5 L63 21" style="stroke:var(--b-c)"/><path d="M34.7 23 L63 28" style="stroke:var(--b-r1)"/><path d="M35.4 24.5 L63 35" style="stroke:var(--b-r2)"/></svg>
+        <h2>Bienvenue dans Prisme</h2>
+        <ul class="ob-points">
+          <li><b>Les nouvelles de partout</b>, lues directement dans près de 3 000 médias.</li>
+          <li><b>Chaque histoire montre qui en parle</b> : la gauche, le centre, la droite.</li>
+          <li><b>Et à qui appartiennent les médias.</b> Gratuit, sans pub, sans compte.</li>
+        </ul></div>`,
+    () => `<h2>Tes nouvelles viennent d'où ?</h2><p class="ob-sub">Tu pourras changer en tout temps.</p>
+      <div class="ob-grid">${REGIONS.map(([v, l]) => `<button type="button" data-ob-region="${v}" aria-pressed="${choice.region === v}">${esc(l)}</button>`).join("")}</div>
+      ${choice.region === "qc" ? `<h3 class="ob-h3">Ta région au Québec <small>(facultatif)</small></h3><div class="ob-grid ob-small">${Object.entries(CITIES).map(([k, c]) => `<button type="button" data-ob-city="${k}" aria-pressed="${choice.city === k}">${esc(c.label)}</button>`).join("")}</div>` : ""}`,
+    () => `<h2>Qu'est-ce qui t'intéresse ?</h2><p class="ob-sub">Ça sert au fil « Pour toi ». Choisis-en autant que tu veux.</p>
+      <div class="ob-grid">${CATS.slice(1).map(([c, l]) => `<button type="button" data-ob-cat="${c}" aria-pressed="${choice.cats.has(c)}">${esc(l)}</button>`).join("")}</div>`,
+    () => `<h2>La taille du texte</h2><p class="ob-sub">Choisis ce qui est le plus confortable à lire.</p>
+      <div class="ob-grid ob-sizes">${SCALES.map(([v, l]) => `<button type="button" data-ob-scale="${v}" aria-pressed="${choice.scale === v}"><span style="font-size:${Math.round(20 * v)}px">Aa</span>${l}</button>`).join("")}</div>
+      <p class="ob-preview" style="font-size:${Math.round(17 * choice.scale)}px">Les histoires du jour, vues de tous les côtés.</p>`,
+  ];
+  const draw = () => {
+    openModal(`<div class="modal-pad ob">
+      <div class="ob-dots">${steps.map((_, i) => `<i class="${i === step ? "on" : ""}"></i>`).join("")}</div>
+      <div class="ob-body">${steps[step]()}</div>
+      <div class="ob-nav">${step ? `<button class="btn ghost" type="button" data-ob="back">Retour</button>` : `<button class="btn ghost" type="button" data-ob="skip">Passer</button>`}
+        <button class="btn" type="button" data-ob="next">${step === steps.length - 1 ? "C'est parti" : "Continuer"}</button></div>
+    </div>`, true);
+    $("#modalBody").onclick = (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      if (b.dataset.obRegion) { choice.region = b.dataset.obRegion; if (choice.region !== "qc") choice.city = ""; draw(); }
+      else if (b.dataset.obCity) { choice.city = choice.city === b.dataset.obCity ? "" : b.dataset.obCity; draw(); }
+      else if (b.dataset.obCat) { choice.cats.has(b.dataset.obCat) ? choice.cats.delete(b.dataset.obCat) : choice.cats.add(b.dataset.obCat); b.setAttribute("aria-pressed", choice.cats.has(b.dataset.obCat)); }
+      else if (b.dataset.obScale) { choice.scale = Number(b.dataset.obScale); draw(); }
+      else if (b.dataset.ob === "back") { step--; draw(); }
+      else if (b.dataset.ob === "skip") finish();
+      else if (b.dataset.ob === "next") { if (step < steps.length - 1) { step++; draw(); } else finish(); }
+    };
+  };
+  const finish = () => {
+    store.set("onboarded", "1");
+    store.set("city", choice.city);
+    store.set("prefCats", JSON.stringify([...choice.cats]));
+    store.set("scale", String(choice.scale));
+    applyScale();
+    state.feeds.clear();
+    closeLayer("#modal");
+    if (choice.region !== state.region) { state.region = choice.region; store.set("region", choice.region); }
+    go(href({ lens: choice.cats.size || choice.city ? "pourtoi" : "essentiel" }));
+  };
+  draw();
+}
+
+/* ---------- Écouter (voix du téléphone, gratuite) ---------- */
+const canSpeak = "speechSynthesis" in window;
+function speak(parts, btn) {
+  if (!canSpeak) { toast("La lecture à voix haute n'est pas offerte sur cet appareil."); return; }
+  const setBtn = (on) => { if (!btn) return; btn.setAttribute("aria-pressed", on); const sp = $("span", btn); if (sp) sp.textContent = on ? "Arrêter" : "Écouter"; };
+  if (speechSynthesis.speaking || speechSynthesis.pending) { speechSynthesis.cancel(); setBtn(false); return; }
+  const want = LANG === "en" ? "en" : "fr";
+  const voices = speechSynthesis.getVoices();
+  const voice = voices.find((x) => x.lang.toLowerCase() === (want === "fr" ? "fr-ca" : "en-ca")) || voices.find((x) => x.lang.toLowerCase().startsWith(want));
+  const list = parts.filter(Boolean).map((t) => String(t).replace(/\s+/g, " ").trim()).filter(Boolean);
+  list.forEach((t, i) => {
+    const u = new SpeechSynthesisUtterance(t);
+    u.lang = voice?.lang || (want === "fr" ? "fr-CA" : "en-CA");
+    if (voice) u.voice = voice;
+    u.rate = 1;
+    if (i === list.length - 1) { u.onend = () => setBtn(false); u.onerror = () => setBtn(false); }
+    speechSynthesis.speak(u);
+  });
+  setBtn(true);
+}
+if (canSpeak) { speechSynthesis.getVoices(); addEventListener("pagehide", () => speechSynthesis.cancel()); }
+const listenBtn = (id) => `<button class="act act-l" type="button" data-listen="${esc(id)}" aria-pressed="false" title="Écouter">${'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9Z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>'}<span>Écouter</span></button>`;
+function storySpeech(s) {
+  const sd = sides(s.counts);
+  const parts = [s.titleFr || s.title];
+  const ai = state.summaries?.[s.id];
+  parts.push(ai?.summary || s.summary || "");
+  parts.push(`${plural(s.sources, "média")} en parlent : ${sd.left} à gauche, ${sd.center} au centre, ${sd.right} à droite.`);
+  if (ai?.left) parts.push(`À gauche : ${ai.left}`);
+  if (ai?.right) parts.push(`À droite : ${ai.right}`);
+  if (s.blindspot) parts.push(`Angle mort : les médias de ${s.blindspot === "right" ? "droite" : "gauche"} en parlent très peu.`);
+  return parts;
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-listen]");
+  if (!b) return;
+  const id = b.dataset.listen;
+  if (id === "matin") { speak(state.matinSpeech || [], b); return; }
+  const s = state.stories.get(id);
+  if (s) speak(storySpeech(s), b);
+});
+
+/* ---------- Recherche à la voix ---------- */
+{
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const mic = $("#micBtn");
+  if (SR && mic) {
+    mic.hidden = false;
+    $("#search").classList.add("has-mic");
+    mic.onclick = () => {
+      const rec = new SR();
+      rec.lang = LANG === "en" ? "en-CA" : "fr-CA";
+      rec.interimResults = true;
+      const input = $("#search input");
+      mic.classList.add("on");
+      input.placeholder = "Je t'écoute…";
+      rec.onresult = (ev) => {
+        const t = [...ev.results].map((r) => r[0].transcript).join("");
+        input.value = t;
+        if (ev.results[ev.results.length - 1].isFinal && t.trim().length >= 2) { rec.stop(); recent.add(t.trim()); go(href({ q: t.trim() })); }
+      };
+      const end = () => { mic.classList.remove("on"); input.placeholder = "Un sujet, un média…"; };
+      rec.onend = end;
+      rec.onerror = (ev) => { end(); if (ev.error === "not-allowed") toast("Autorise le micro pour chercher à la voix."); };
+      try { rec.start(); } catch { end(); }
+    };
+  }
+}
+
+/* ---------- Gestes sur téléphone : glisser entre rubriques, tirer pour rafraîchir ---------- */
+{
+  let sx = 0, sy = 0, t0 = 0, pulling = false, blocked = false;
+  const ptr = document.createElement("div");
+  ptr.className = "ptr";
+  ptr.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/></svg>';
+  document.body.appendChild(ptr);
+  const NOSWIPE = ".lenses, .topics, .cats, .wf-row, .o-chips, .o-days, .tl, .vgrid, .pack-wrap, input, select, textarea, .modal, .drawer, .tabs, .seg";
+  addEventListener("touchstart", (e) => {
+    if (e.touches.length !== 1) return;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; t0 = Date.now();
+    blocked = !!e.target.closest(NOSWIPE);
+    pulling = scrollY <= 0 && !blocked && state.route?.view === "feed";
+  }, { passive: true });
+  addEventListener("touchmove", (e) => {
+    if (!pulling) return;
+    const dy = e.touches[0].clientY - sy;
+    if (dy > 0 && scrollY <= 0) { const p = Math.min(1, dy / 110); ptr.style.opacity = p; ptr.style.transform = `translate(-50%, ${Math.min(dy, 110) * 0.6}px) rotate(${p * 270}deg)`; ptr.classList.toggle("ready", p >= 1); }
+  }, { passive: true });
+  addEventListener("touchend", (e) => {
+    const x = e.changedTouches[0].clientX, y = e.changedTouches[0].clientY;
+    const dx = x - sx, dy = y - sy;
+    if (pulling) {
+      const ready = ptr.classList.contains("ready");
+      ptr.style.opacity = ""; ptr.style.transform = ""; ptr.classList.remove("ready");
+      pulling = false;
+      if (ready) { dataCache.clear(); state.feeds.clear(); toast("Fil mis à jour"); render(); return; }
+    }
+    // Glisser à gauche ou à droite : rubrique suivante ou précédente (fil seulement).
+    if (blocked || state.route?.view !== "feed" || innerWidth > 1100) return;
+    if (Math.abs(dx) < 70 || Math.abs(dy) > 45 || Date.now() - t0 > 600) return;
+    const i = CATS.findIndex(([c]) => c === state.route.cat);
+    const next = CATS[i + (dx < 0 ? 1 : -1)];
+    if (!next) return;
+    go(href({ cat: next[0], lens: state.route.lens }));
+  }, { passive: true });
+}
+
+/* ---------- Comparer deux médias ---------- */
+async function viewCompare(v, route) {
+  document.title = "Comparer deux médias — Prisme";
+  const pick = (k, d) => `<label class="cmp-pick"><span class="label">${k === "a" ? "Premier média" : "Deuxième média"}</span>
+      <input type="search" data-cmp="${k}" placeholder="ex. ${k === "a" ? "La Presse" : "Le Journal de Montréal"}" value="${esc(d?.name || "")}" autocomplete="off"><div class="cmp-sug" data-sug="${k}" hidden></div></label>`;
+  const meta = await searchBase().catch(() => null);
+  const find = (dom) => meta?.D.find((x) => x.domain === dom) || null;
+  const A = find(route.a), B = find(route.b);
+  v.innerHTML = `<header class="page-h"><div class="kicker">Comparer</div><h1>Deux médias, côte à côte</h1>
+      <p>Choisis deux médias : Prisme montre comment chacun titre les mêmes histoires, ce que l'un couvre et pas l'autre, et leurs sujets.</p></header>
+    <div class="cmp-picks">${pick("a", A)}<span class="cmp-vs">vs</span>${pick("b", B)}</div>
+    <div id="cmpBody">${A && B ? '<div class="loader">Comparaison…</div>' : `<div class="empty"><p>Tape le nom de deux médias ci-dessus.</p>${meta ? `<div class="chips">${[["lapresse.ca", "journaldemontreal.com"], ["ledevoir.com", "tvanouvelles.ca"], ["cbc.ca", "nationalpost.com"], ["foxnews.com", "cnn.com"]].filter(([a, b]) => find(a) && find(b)).map(([a, b]) => `<a class="chip" href="${href({ v: "comparer" })}&a=${a}&b=${b}" data-nav>${esc(find(a).name)} vs ${esc(find(b).name)}</a>`).join("")}</div>` : ""}</div>`}</div>`;
+  // Choix des médias avec suggestions.
+  for (const input of $$("[data-cmp]", v)) {
+    const k = input.dataset.cmp, box = $(`[data-sug="${k}"]`, v);
+    input.oninput = () => {
+      const hits = meta ? matchOutlets(meta.D, input.value).slice(0, 6) : [];
+      box.hidden = !hits.length;
+      box.innerHTML = hits.map((d) => `<button type="button" data-dom="${esc(d.domain)}">${favicon(d.domain, d.name)}<span>${esc(d.name)}</span>${badge(d.media)}</button>`).join("");
+    };
+    box.onclick = (e) => {
+      const b = e.target.closest("[data-dom]");
+      if (!b) return;
+      const p = new URLSearchParams(location.search);
+      p.set("v", "comparer"); p.set(k, b.dataset.dom);
+      go(`?${p}`);
+    };
+  }
+  if (!A || !B) return;
+  const [da, db, ed, mo] = await Promise.all([outletArticles(A.domain), outletArticles(B.domain), edition(state.region).catch(() => null), edition("monde").catch(() => null)]);
+  if (state.route.view !== "comparer") return;
+  const stories = new Map();
+  for (const s of [...(ed?.stories || []), ...(mo?.stories || [])]) if (s.sources >= 2 && !stories.has(s.id)) stories.set(s.id, s);
+  const both = [], onlyA = [], onlyB = [];
+  for (const s of stories.values()) {
+    const a = s.articles.find((x) => x.domain === A.domain), b = s.articles.find((x) => x.domain === B.domain);
+    if (a && b) both.push({ s, a, b }); else if (a) onlyA.push(s); else if (b) onlyB.push(s);
+  }
+  for (const s of stories.values()) state.stories.set(s.id, s);
+  const subjA = outletSubjects(da?.items || [], 10), subjB = outletSubjects(db?.items || [], 10);
+  const card = (D, data, subj) => `<div class="cmp-card">
+      <a class="cmp-name" href="${href({ m: D.domain })}" data-nav>${favicon(D.domain, D.name)}<b>${esc(D.name)}</b></a>
+      <div class="cmp-meta">${badge(D.media)}${D.media.known ? `<span>${esc(D.media.owner)}</span>` : ""}</div>
+      <div class="cmp-num"><b>${data?.items.length || 0}</b><small>articles en ${data?.days > 2 ? "7 jours" : "48 h"}</small></div>
+      <div class="chips">${subj.map(([w, c]) => `<span class="chip">${esc(w)} <span class="muted">${c}</span></span>`).join("") || '<span class="muted">—</span>'}</div>
+    </div>`;
+  const sRow = (s) => `<li><a href="${href({ h: s.id })}" data-nav data-no-tr>${esc(s.titleFr || s.title)}</a><small>${plural(s.sources, "média")}</small></li>`;
+  $("#cmpBody").innerHTML = `<div class="cmp-cards">${card(A, da, subjA)}${card(B, db, subjB)}</div>
+    <section class="sec"><h2 class="block-h">Les mêmes histoires, deux titres <small>${plural(both.length, "histoire")}</small></h2>
+      ${both.length ? `<ul class="cmp-both">${both.slice(0, 20).map(({ s, a, b }) => `<li><a class="cmp-story" href="${href({ h: s.id })}" data-nav>${plural(s.sources, "média")} en parlent →</a>
+        <div class="cmp-two"><div><span class="label">${esc(A.name)}</span>${artLink(a, "t")}</div><div><span class="label">${esc(B.name)}</span>${artLink(b, "t")}</div></div></li>`).join("")}</ul>`
+        : `<p class="note">Aucune histoire commune dans les éditions en cours.</p>`}</section>
+    <div class="cmp-only">
+      <section class="sec"><h2 class="block-h">Seulement chez ${esc(A.name)} <small>${onlyA.length}</small></h2><ul class="cmp-list">${onlyA.sort((x, y) => y.sources - x.sources).slice(0, 10).map(sRow).join("") || '<li class="muted">—</li>'}</ul></section>
+      <section class="sec"><h2 class="block-h">Seulement chez ${esc(B.name)} <small>${onlyB.length}</small></h2><ul class="cmp-list">${onlyB.sort((x, y) => y.sources - x.sources).slice(0, 10).map(sRow).join("") || '<li class="muted">—</li>'}</ul></section>
+    </div>`;
+}
+
+/* ---------- Partager une histoire en image (pour Messenger, Facebook…) ---------- */
+async function storyImage(s) {
+  try { await Promise.all([document.fonts.load("700 60px Newsreader"), document.fonts.load("600 30px 'IBM Plex Sans'"), document.fonts.load("500 26px 'IBM Plex Mono'")]); } catch { /* polices par défaut */ }
+  const W = 1080, H = 1500, P = 80;
+  const c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const g = c.getContext("2d");
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  g.fillStyle = "#F4F2EC"; g.fillRect(0, 0, W, H);
+  g.fillStyle = "#121212"; g.fillRect(0, 0, W, 130);
+  const cols = ["--b-l2", "--b-l1", "--b-c", "--b-r1", "--b-r2"].map(css);
+  cols.forEach((col, i) => { g.fillStyle = col; g.fillRect((W / 5) * i, 130, W / 5, 10); });
+  g.fillStyle = "#F2EFE8"; g.font = "700 58px Newsreader, Georgia, serif"; g.fillText("Prisme", P, 88);
+  g.font = "500 24px 'IBM Plex Mono', monospace"; g.fillStyle = "#C9C5BC"; g.textAlign = "right"; g.fillText("QUI EN PARLE, ET DE QUEL CÔTÉ", W - P, 84); g.textAlign = "left";
+  let y = 230;
+  g.fillStyle = "#6E6A62"; g.font = "500 28px 'IBM Plex Mono', monospace";
+  g.fillText(`${plural(s.sources, "MÉDIA", "MÉDIAS")} EN PARLENT`, P, y);
+  y += 40;
+  // Titre, coupé en lignes.
+  g.fillStyle = "#141414"; g.font = "700 66px Newsreader, Georgia, serif";
+  const words = (s.titleFr || s.title).split(/\s+/);
+  let line = "";
+  const lines = [];
+  for (const w of words) { const t = line ? `${line} ${w}` : w; if (g.measureText(t).width > W - 2 * P) { lines.push(line); line = w; } else line = t; }
+  if (line) lines.push(line);
+  for (const l of lines.slice(0, 7)) { y += 78; g.fillText(l, P, y); }
+  if (lines.length > 7) { g.fillText("…", P, y + 60); y += 60; }
+  // La barre gauche/centre/droite.
+  y += 80;
+  const sd = sides(s.counts);
+  const parts = [["Gauche", sd.left, css("--b-l2")], ["Centre", sd.center, css("--b-c")], ["Droite", sd.right, css("--b-r2")]].filter((p) => p[1]);
+  const tot = parts.reduce((a, p) => a + p[1], 0);
+  if (tot) {
+    let x = P;
+    for (const [l, n, col] of parts) {
+      const w = ((W - 2 * P) * n) / tot;
+      g.fillStyle = col; g.fillRect(x, y, w - 4, 70);
+      g.fillStyle = l === "Centre" ? "#1E1D1A" : "#fff"; g.font = "600 26px 'IBM Plex Mono', monospace";
+      if (w > 150) g.fillText(`${l.toUpperCase()} ${Math.round((n / tot) * 100)} %`, x + 18, y + 45);
+      x += w;
+    }
+    y += 120;
+  }
+  // Les médias.
+  const names = [...new Set(s.articles.map((a) => a.sourceName))];
+  g.fillStyle = "#3A3833"; g.font = "400 32px 'IBM Plex Sans', sans-serif";
+  const cov = `Couvert par ${names.slice(0, 4).join(", ")}${names.length > 4 ? ` et ${s.sources - 4} autres` : ""}`;
+  line = ""; let n = 0;
+  for (const w of cov.split(" ")) { const t = line ? `${line} ${w}` : w; if (g.measureText(t).width > W - 2 * P) { g.fillText(line, P, y); y += 44; line = w; n++; if (n > 2) break; } else line = t; }
+  if (n <= 2) g.fillText(line, P, y);
+  // Pied, juste sous le contenu ; l'image est ensuite coupée à la bonne hauteur.
+  const F = Math.max(y + 80, 760);
+  g.fillStyle = "#121212"; g.fillRect(0, F, W, 120);
+  g.fillStyle = "#F2EFE8"; g.font = "600 32px 'IBM Plex Sans', sans-serif"; g.fillText("Voir tous les côtés sur Prisme", P, F + 68);
+  g.fillStyle = "#C9C5BC"; g.font = "500 26px 'IBM Plex Mono', monospace"; g.textAlign = "right"; g.fillText("axe414.github.io/prisme", W - P, F + 68); g.textAlign = "left";
+  const out = document.createElement("canvas");
+  out.width = W; out.height = Math.min(H, F + 120);
+  out.getContext("2d").drawImage(c, 0, 0);
+  return new Promise((ok) => out.toBlob(ok, "image/png"));
+}
+async function shareStoryImage(s) {
+  toast("Préparation de l'image…");
+  const blob = await storyImage(s);
+  const file = new File([blob], `prisme-${s.id}.png`, { type: "image/png" });
+  const url = absUrl(href({ h: s.id }));
+  if (navigator.canShare?.({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: s.titleFr || s.title, text: `${s.titleFr || s.title} — ${url}` }); return; } catch (e) { if (e.name === "AbortError") return; }
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = file.name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast("Image enregistrée : tu peux l'envoyer dans Messenger.");
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-share-img]");
+  if (!b) return;
+  const s = state.stories.get(b.dataset.shareImg);
+  if (s) shareStoryImage(s);
+});
+const imgShareBtn = (s) => `<button class="act act-l" type="button" data-share-img="${esc(s.id)}" title="Partager en image">${'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><circle cx="9" cy="10" r="1.8"/><path d="m20.5 16-5-5-8 8.5"/></svg>'}<span>Image</span></button>`;
+
+/* ---------- Titres anglais traduits en français (préparés par le robot) ---------- */
+async function withTitlesFr(stories) {
+  if (LANG !== "fr") return stories;
+  const tr = await dataJson("translations.json", 30 * 60e3).catch(() => ({}));
+  for (const s of stories) if (!s.titleFr && tr[s.title]) s.titleFr = tr[s.title];
+  return stories;
+}
+const titleOf = (s) => esc(s.titleFr || s.title);
+const trTag = (s) => (s.titleFr ? `<span class="trd" title="Titre original : ${esc(s.title)}">traduit</span>` : "");
 
 /* ---------- Le fil ---------- */
 // Montrée une seule fois : comment lire un bloc du fil.
@@ -1008,7 +1418,7 @@ function viewFeed(v, route) {
   const key = feedKey(route);
   const lensHtml = `<div class="lensbar">
       <span class="label">Voir par</span>
-      <div class="lenses" role="group" aria-label="Lentille">${Object.entries(LENSES).map(([k, l]) =>
+      <div class="lenses" role="group" aria-label="Lentille">${Object.entries(LENSES).filter(([k, l]) => !l.qc || state.region === "qc").map(([k, l]) =>
         `<button type="button" data-lens="${k}" aria-pressed="${route.lens === k}">${l.sw ? `<span class="sw" style="background:${l.sw}"></span>` : ""}${l.label}</button>`).join("")}</div>
       <p class="lens-desc">${esc(LENSES[route.lens].desc)}</p>
       <div class="legend-row"><span class="label">Orientation des médias</span>${legend()}</div>
@@ -1118,6 +1528,9 @@ function drawStatus(f) {
 
 function emptyFeed(f) {
   if (f.params.q) return "";
+  if (f.params.lens === "pourtoi" && !hasPrefs()) return `<div class="empty"><h3>Dis à Prisme ce qui t'intéresse.</h3><p>Choisis des rubriques, ta ville, suis des sujets ou des médias : ce fil se remplira avec ce qui te touche.</p><button class="btn" type="button" data-open-settings>Choisir ce qui m'intéresse</button></div>`;
+  if (f.params.lens === "local" && !prefs.city) return `<div class="empty"><h3>Choisis ta ville ou ta région.</h3><p>Prisme te montrera les histoires qui en parlent.</p><button class="btn" type="button" data-open-settings>Choisir ma ville</button></div>`;
+  if (f.params.lens === "local") return `<div class="empty"><h3>Rien sur ${esc(CITIES[prefs.city]?.label || "ta ville")} en ce moment.</h3><p>Reviens plus tard, ou change de région dans les réglages.</p><button class="btn ghost" type="button" data-open-settings>Réglages</button></div>`;
   const lens = LENSES[f.params.lens];
   return `<div class="empty"><h3>Rien dans « ${esc(lens.label)} » pour l'instant.</h3>
     <p>${f.params.lens === "angles" ? "Aucune histoire n'est assez couverte d'un seul côté en ce moment. C'est plutôt bon signe." : "Essaie une autre lentille ou une autre édition."}</p>
@@ -1221,10 +1634,12 @@ async function viewStory(v, route) {
       <div class="main-col">
         <header class="s-head">
           <div class="kicker">${(s.categories || []).map((c) => esc(CAT_LABEL[c] || c)).join(" · ") || "Histoire"} · ${reason(s)}${s.firstBy ? ` · révélée par <b>${esc(s.firstBy)}</b>` : ""}</div>
-          <h1 data-no-tr>${esc(s.title)}</h1>
+          <h1 data-no-tr>${titleOf(s)}</h1>
+          ${s.titleFr ? `<p class="s-orig">Titre original : <span data-no-tr>${esc(s.title)}</span></p>` : ""}
           ${s.summary ? `<p class="dek" data-no-tr>${esc(s.summary)}</p><p class="dek-src">Résumé : ${esc(s.summarySource || "")}</p>` : ""}
-          <div class="s-acts">${favBtn(storyFav(s), true)}${shareBtn(storyShare(s), true)}</div>
+          <div class="s-acts">${listenBtn(s.id)}${favBtn(storyFav(s), true)}${shareBtn(storyShare(s), true)}${imgShareBtn(s)}</div>
         </header>
+        ${keyPoints(s)}
         ${s.image ? `<figure class="s-hero"><img src="${esc(safeUrl(s.image))}" alt="" referrerpolicy="no-referrer"><span class="credit">${esc(s.imageSource || "")}</span></figure>` : ""}
 
         <section class="sec" id="sxSummary" hidden></section>
@@ -1237,8 +1652,6 @@ async function viewStory(v, route) {
           ${s.counts.state ? `<div class="callout"><b>MÉDIAS D'ÉTAT.</b> ${plural(s.counts.state, "média contrôlé", "médias contrôlés")} par un gouvernement couvre${s.counts.state > 1 ? "nt" : ""} aussi cette histoire.</div>` : ""}
         </section>
 
-        <section class="sec" id="sxSilent" hidden></section>
-
         <section class="sec">
           <h2 class="block-h">Comment ils le titrent</h2>
           ${words.left.length || words.right.length ? `<div class="words">
@@ -1250,7 +1663,7 @@ async function viewStory(v, route) {
           </div>` : ""}
           <div class="cols3">${groups.map((g) => `<section>
             <div class="col-h"><i style="background:${g.color}"></i>${g.label}<small>${plural(g.items.length, "article")}</small></div>
-            ${g.items.length ? `<ul class="hl">${g.items.map(hlItem).join("")}</ul>` : `<div class="col-empty">Aucun média de ${g.label.toLowerCase()} lu par Prisme n'a couvert cette histoire.</div>`}
+            ${g.items.length ? `<ul class="hl">${g.items.slice(0, 4).map(hlItem).join("")}</ul>${g.items.length > 4 ? `<ul class="hl" hidden>${g.items.slice(4).map(hlItem).join("")}</ul><button class="col-more" type="button" data-expand>Voir les ${g.items.length - 4} autres</button>` : ""}` : `<div class="col-empty">Aucun média de ${g.label.toLowerCase()} lu par Prisme n'a couvert cette histoire.</div>`}
           </section>`).join("")}</div>
         </section>
 
@@ -1259,9 +1672,13 @@ async function viewStory(v, route) {
           <ul class="hl">${others.map(hlItem).join("")}</ul>
         </section>` : ""}
 
-        <section class="sec" id="sxWorld" hidden></section>
-        <section class="sec" id="sxVideos" hidden></section>
-        <section class="sec" id="sxChanged" hidden></section>
+        <details class="s-more"${innerWidth > 1020 ? " open" : ""}>
+          <summary>Plus de contexte <small>qui se tait, vu d'ailleurs, vidéos, titres modifiés</small></summary>
+          <section class="sec" id="sxSilent" hidden></section>
+          <section class="sec" id="sxWorld" hidden></section>
+          <section class="sec" id="sxVideos" hidden></section>
+          <section class="sec" id="sxChanged" hidden></section>
+        </details>
       </div>
 
       <aside class="rail"><div class="rail-in">
@@ -1278,14 +1695,39 @@ async function viewStory(v, route) {
           <p class="note" style="margin:0 0 10px">Cherche ce sujet dans tous les médias lus par Prisme, ou suis-le.</p>
           <div class="chips">${(s.keywords || keywordsOf(s)).slice(0, 4).map((k) => `<a class="chip" href="${href({ q: k })}" data-nav>${esc(k)}</a>`).join("")}</div>
         </section>
+        <section>
+          <h2 class="block-h">Vérifier</h2>
+          <p class="note" style="margin:0 0 10px">Des vérificateurs de faits (Les Décrypteurs, AFP Factuel, et d'autres) ont-ils examiné ce sujet ?</p>
+          <a class="btn ghost" href="https://toolbox.google.com/factcheck/explorer/search/${encodeURIComponent((s.keywords || keywordsOf(s)).slice(0, 2).join(" ") || s.title)};hl=fr" target="_blank" rel="noopener noreferrer">Chercher des vérifications ↗</a>
+          <p class="note" style="margin:14px 0 0">Cette page mélange deux nouvelles différentes ? <a class="link" href="https://github.com/axe414/prisme/issues/new?template=signaler-un-probleme.yml&title=${encodeURIComponent(`Mauvais regroupement : ${s.title}`.slice(0, 120))}" target="_blank" rel="noopener noreferrer">Le signaler</a></p>
+        </section>
       </div></aside>
     </div>`;
   const b = $("#backBtn", v);
   if (b) b.onclick = (e) => { e.preventDefault(); history.back(); };
+  for (const x of $$("[data-expand]", v)) x.onclick = () => { x.previousElementSibling.hidden = false; x.remove(); };
   storyExtras(s, hlItem);
 }
 
 const still = (id) => state.route.view === "story" && state.route.id === id;
+
+// L'essentiel d'une histoire en 3 points : ce qui se passe, qui en parle, l'angle.
+function keyPoints(s) {
+  const sd = sides(s.counts);
+  const others = s.sources - sd.left - sd.center - sd.right;
+  const first = s.articles.filter((a) => a.published).sort((a, b) => a.published.localeCompare(b.published))[0];
+  const angle = s.blindspot ? `Angle mort : les médias de ${s.blindspot === "right" ? "droite" : "gauche"} en parlent très peu.`
+    : s.lean === "left" ? "Surtout couverte par des médias de gauche." : s.lean === "right" ? "Surtout couverte par des médias de droite."
+    : s.sides === 3 ? "La gauche, le centre et la droite en parlent tous." : "Peu de médias évalués en parlent pour l'instant.";
+  return `<section class="s-key" aria-label="L'essentiel">
+    <h2 class="block-h">L'essentiel <small>en 3 points</small></h2>
+    <ol>
+      <li><b>Ce qui se passe.</b> <span id="keyWhat" data-no-tr>${esc(s.summary || "Les titres de chaque média sont plus bas.")}</span></li>
+      <li><b>Qui en parle.</b> ${plural(s.sources, "média")} : ${sd.left} à gauche, ${sd.center} au centre, ${sd.right} à droite${others ? `, ${others} non évalué${others > 1 ? "s" : ""}` : ""}.${first ? ` En premier : <b data-no-tr>${esc(first.sourceName)}</b>, ${esc(ago(first.published))}.` : ""}</li>
+      <li><b>L'angle.</b> <span id="keyAngle">${angle}</span></li>
+    </ol>
+  </section>`;
+}
 
 // Les à-côtés d'une histoire, chargés après l'affichage.
 async function storyExtras(s, hlItem) {
@@ -1300,6 +1742,8 @@ async function storyExtras(s, hlItem) {
     clearTimeout(pending);
     const el = $("#sxSummary");
     if (!el || !still(s.id)) return;
+    if (r.summary) { const kw = $("#keyWhat"); if (kw) kw.textContent = r.summary; }
+    if (r.left || r.right) { const ka = $("#keyAngle"); if (ka) ka.innerHTML = `${r.left ? `<span class="bb bb-l2">Gauche</span> ${esc(r.left)} ` : ""}${r.right ? `<span class="bb bb-r2">Droite</span> ${esc(r.right)}` : ""}`; }
     if (!r.configured || (!r.summary && !r.error)) { el.hidden = true; return; }
     el.hidden = false;
     el.innerHTML = r.error ? `<h2 class="block-h">Résumé neutre</h2><p class="note">${esc(r.error)}</p>`
@@ -1416,11 +1860,11 @@ function viewSearch(v, route) {
   v.innerHTML = `<header class="page-h">
       <div class="kicker">Sujet · ${esc(REGIONS.find(([r]) => r === state.region)[1])}</div>
       <h1>« ${esc(route.q)} »</h1>
-      <p>Les histoires des dernières 48 heures, dans les médias que Prisme lit directement.</p>
+      <p>D'abord les histoires de l'édition (48 h), puis tous les articles des 7 derniers jours, de partout.</p>
       ${pq.also.length ? `<p class="q-also">Prisme cherche aussi : ${pq.also.map((w) => `<b>${esc(w)}</b>`).join(", ")}</p>` : ""}
       <div class="actions">
         <button class="btn${followed ? " ghost" : ""}" type="button" id="follow">${followed ? "✓ Suivi" : "★ Suivre ce sujet"}</button>
-        <a class="btn ghost" href="#wide" id="wideBtn">Chercher dans tous les articles</a>
+        <a class="btn ghost" href="#wide" id="wideBtn">Voir tous les articles (7 jours)</a>
         ${shareBtn({ title: `« ${route.q} » sur Prisme`, text: `Qui parle de « ${route.q} », de la gauche à la droite`, url: absUrl(href({ q: route.q })) }, true)}
       </div>
       <details class="q-help"><summary>Astuces de recherche</summary>
@@ -1435,6 +1879,7 @@ function viewSearch(v, route) {
     <section id="outletHits" hidden></section>
     <div class="layout">
       <div class="main-col"><div id="feed"></div><div id="sentinel"></div><div id="feedStatus"></div>
+        <section id="worldStories" class="sec" hidden></section>
         <section id="wide" class="sec"></section>
       </div>
       <aside class="rail"><div class="rail-in" id="rail"></div></aside>
@@ -1451,24 +1896,34 @@ function viewSearch(v, route) {
   const key = feedKey(route);
   mountFeed(key, { q: route.q });
   const f = state.feeds.get(key);
-  // Peu de résultats dans l'index : on élargit tout de suite.
-  const check = () => {
+  // Peu d'histoires dans l'édition : on montre aussi celles du monde entier.
+  const check = async () => {
     const ff = state.feeds.get(key);
     if (ff.loading || ff.page < 0) return setTimeout(check, 300);
-    if (ff.stories.length < 3 && state.route.view === "search" && state.route.q === route.q) loadWide(route.q, false);
+    if (ff.stories.length >= 3 || state.region === "monde") return;
+    const w = await api(`/api/feed?q=${encodeURIComponent(route.q)}&region=monde&page=0`).catch(() => null);
+    const el = $("#worldStories");
+    const extra = (w?.stories || []).filter((s) => !ff.stories.some((x) => x.id === s.id)).slice(0, 8);
+    if (!el || !extra.length || state.route.view !== "search" || state.route.q !== route.q) return;
+    for (const s of extra) state.stories.set(s.id, s);
+    el.hidden = false;
+    el.innerHTML = `<h2 class="block-h">Histoires dans le monde entier <small>${plural(extra.length, "histoire")}</small></h2>${extra.map((s) => storyRow(s)).join("")}`;
   };
   if (f) check();
-  if (state.wide.has(`${route.q}|${state.region}|${state.wf.days}`) || state.pendingWide === route.q) { state.pendingWide = null; loadWide(route.q, state.wide.size > 0); }
+  // Tous les articles (index de 7 jours, partout) : toujours affichés sous les histoires.
+  const goWide = state.pendingWide === route.q;
+  state.pendingWide = null;
+  loadWide(route.q, goWide);
   // La recherche nomme peut-être un média : on le propose en premier.
-  articlesOf(state.region).then((idx) => {
-    const hits = matchOutlets(idx.domains, route.q);
+  searchBase().then((m) => {
+    const hits = matchOutlets(m.D, route.q);
     const el = $("#outletHits");
     if (!el || !hits.length || state.route.view !== "search" || state.route.q !== route.q) return;
     el.hidden = false;
     el.innerHTML = `<h2 class="block-h">Médias <small>qui correspondent à « ${esc(route.q)} »</small></h2>
       <div class="outlet-hits">${hits.map((d) => `<a class="outlet-hit" href="${href({ m: d.domain })}" data-nav>
         ${favicon(d.domain, d.name)}<span class="oh-main"><b>${esc(d.name)}</b><small>${d.media.known ? esc(d.media.owner.replace(/\s*\(.*\)$/, "")) : esc(d.domain)}</small></span>
-        <span class="oh-side">${badge(d.media)}<small>${plural(d.count, "article")} en 48 h</small></span></a>`).join("")}</div>`;
+        <span class="oh-side">${badge(d.media)}<small>${plural(d.count, "article")} en 7 jours</small></span></a>`).join("")}</div>`;
   }).catch(() => {});
 }
 
@@ -1573,6 +2028,7 @@ async function viewOutlet(v, route) {
         <button class="btn${followed ? " ghost" : ""}" type="button" id="oFollow">${followed ? "✓ Suivi" : "★ Suivre ce média"}</button>
         ${shareBtn({ title: `${name} sur Prisme`, text: `Les articles de ${name}, son orientation et son propriétaire`, url: absUrl(href({ m: domain })) }, true)}
         <button class="act act-l" type="button" data-domain="${esc(domain)}" data-name="${esc(name)}">${ico("plus")}<span>Fiche complète</span></button>
+        <a class="act act-l" href="${href({ v: "comparer" })}&a=${encodeURIComponent(domain)}" data-nav>${svg("comparer")}<span>Comparer</span></a>
       </div>
       <div class="o-stats">
         <div><b>${items.length}</b><small>articles en ${data.days > 2 ? "7 jours" : "48 h"}</small></div>
@@ -1772,148 +2228,307 @@ async function viewFavs(v, tab = store.get("favTab", "tout"), q = "") {
   $("#fvQ").oninput = (e) => { clearTimeout(t); t = setTimeout(() => { viewFavs(v, tab, e.target.value).then(() => { const i = $("#fvQ"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }); }, 200); };
 }
 
-// Filtres des résultats : période, côté, langue, rubrique (gardés pendant la session).
-state.wf = { days: 2, hours: 0, side: "all", lang: "all", cat: "all" };
+/* ---------- Le moteur de recherche : tous les articles des 7 derniers jours, de partout ----------
+   Le robot prépare un index (data/s/<n°>/). L'app ne télécharge que les morceaux utiles :
+   la liste des médias (une fois), les mots cherchés, puis le détail des articles affichés. */
+const S_STOP = new Set(("le la les un une des du de d l au aux et ou en a à dans sur pour par avec sans sous ce cet cette ces son sa ses leur leurs " +
+  "qui que quoi dont ne pas plus moins est sont été etre être avoir a ont il elle ils elles on nous vous je tu se s y lui " +
+  "the a an of to in on for and or with by from at as is are was were be been it its this that these those not but after over about into " +
+  "el los las del y por con para un una que al lo se es").split(" "));
+const sNorm = (w) => (w.length > 4 && w.endsWith("s") && !w.endsWith("ss") ? w.slice(0, -1) : w);
+const sWords = (text) => foldText(text).split(/[^\p{L}\p{N}]+/u).filter((w) => w.length >= 2 && !S_STOP.has(w)).map(sNorm);
+const shardOf = (w) => {
+  const c = [...w];
+  if (/[a-z0-9]/.test(c[0])) return c[0] + (c[1] && /[a-z0-9]/.test(c[1]) ? c[1] : "_");
+  return `u${(c[0].codePointAt(0) >> 6).toString(16)}`;
+};
+const SEARCH = { build: null, meta: null, words: new Map(), chunks: new Map() };
+
+async function searchBase() {
+  const s = await dataJson("search.json", 10 * 60e3);
+  if (SEARCH.build !== s.build) Object.assign(SEARCH, { build: s.build, meta: null, words: new Map(), chunks: new Map() });
+  if (!SEARCH.meta) {
+    SEARCH.meta = dataJson(`s/${s.build}/meta.json`, 864e5).then((m) => {
+      const counts = new Uint32Array(m.domains.length);
+      for (const d of m.dom) counts[d]++;
+      m.D = m.domains.map(([domain, name, k, owner, country, bias, st], i) => ({
+        domain, name, count: counts[i], fold: foldText(name), country, media: mediaFromKey(name, k, owner, country, bias, st),
+        side: k === "unk" || k === "state" ? "other" : ["l2", "l1"].includes(k) ? "left" : k === "c" ? "center" : "right",
+      }));
+      return m;
+    });
+    SEARCH.meta.catch(() => { SEARCH.meta = null; });
+  }
+  return SEARCH.meta;
+}
+// Les articles qui contiennent un mot (liste triée), ou les mots proches s'il n'existe pas (fautes de frappe).
+async function postings(w) {
+  if (SEARCH.words.has(w)) return SEARCH.words.get(w);
+  const shard = await dataJson(`s/${SEARCH.build}/w/${shardOf(w)}.json`, 864e5).catch(() => ({}));
+  const gaps = shard[w];
+  let ids = [];
+  if (gaps) { let v = 0; ids = gaps.map((g) => (v += g)); }
+  ids.shard = shard;
+  SEARCH.words.set(w, ids);
+  return ids;
+}
+const inter = (a, b) => { const out = []; let i = 0, j = 0; while (i < a.length && j < b.length) { if (a[i] === b[j]) { out.push(a[i]); i++; j++; } else if (a[i] < b[j]) i++; else j++; } return out; };
+const union = (lists) => [...new Set(lists.flat())].sort((x, y) => x - y);
+function lev(a, b) {
+  if (Math.abs(a.length - b.length) > 2) return 9;
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  return d[a.length][b.length];
+}
+
+// Cherche dans l'index. Rend les articles qui contiennent tous les mots ; sinon ceux qui en contiennent une partie.
+async function indexSearch(q) {
+  const meta = await searchBase();
+  const pq = parseQuery(q);
+  const N = meta.dom.length;
+  const termIds = async (variants) => union(await Promise.all(variants.map(async (v) => {
+    const ws = sWords(v);
+    if (!ws.length) return [];
+    let ids = await postings(ws[0]);
+    for (const w of ws.slice(1)) ids = inter(ids, await postings(w));
+    return ids;
+  })));
+  const groups = [...pq.terms.map((g) => ({ label: g[0], variants: g })), ...pq.phrases.map((p) => ({ label: `"${p}"`, variants: [p] }))]
+    .filter((g) => g.variants.some((v) => sWords(v).length));
+  const lists = await Promise.all(groups.map((g) => termIds(g.variants)));
+  const notIds = new Set((await Promise.all(pq.not.flatMap((w) => sWords(w)).map(postings))).flat());
+  let strict = lists.length ? lists.reduce((a, b) => inter(a, b)) : [];
+  strict = strict.filter((id) => !notIds.has(id));
+  let ids = strict, partial = false, found = [];
+  if (strict.length < 8 && lists.length > 1) {
+    // Pas assez d'articles avec tous les mots : on garde ceux qui ont le plus de mots, les plus rares d'abord.
+    const idf = lists.map((l) => (l.length ? Math.log(N / l.length) : 0));
+    const score = new Map();
+    lists.forEach((l, i) => { for (const id of l) if (!notIds.has(id)) score.set(id, (score.get(id) || 0) + 1000 + idf[i]); });
+    const rarest = idf.indexOf(Math.max(...idf));
+    const keep = lists[rarest].length ? new Set(lists[rarest]) : null;
+    ids = [...score.entries()].filter(([id]) => !keep || keep.has(id)).sort((a, b) => b[1] - a[1] || a[0] - b[0]).map(([id]) => id);
+    partial = ids.length > strict.length;
+    found = groups.filter((g, i) => lists[i].length).map((g) => g.label);
+  }
+  // Fautes de frappe : un mot introuvable ? On cherche le mot le plus proche dans le même fichier.
+  let suggestion = null;
+  if (ids.length < 3) {
+    let fixed = q, changed = false;
+    for (const g of pq.terms) for (const v of g) for (const w of sWords(v)) {
+      const p = await postings(w);
+      if (p.length) continue;
+      let best = null, bestN = 0;
+      for (const [cand, gaps] of Object.entries(p.shard || {})) {
+        const dist = lev(w, cand);
+        if (dist <= (w.length > 6 ? 2 : 1) && gaps.length > bestN) { best = cand; bestN = gaps.length; }
+      }
+      if (best) { fixed = fixed.replace(new RegExp(reEsc(w), "i"), best); changed = true; }
+    }
+    if (changed && foldText(fixed) !== foldText(q)) suggestion = fixed;
+  }
+  return { query: q, ids, strict: strict.length, partial, found, suggestion, marks: pq.marks, also: pq.also, meta };
+}
+// Le détail d'articles (par blocs de 250, téléchargés au besoin).
+async function docsFor(ids) {
+  const meta = await searchBase();
+  const C = meta.chunk;
+  const need = [...new Set(ids.map((id) => Math.floor(id / C)))];
+  await Promise.all(need.map((c) => {
+    if (!SEARCH.chunks.has(c)) SEARCH.chunks.set(c, dataJson(`s/${SEARCH.build}/d/${c}.json`, 864e5).catch(() => []));
+    return SEARCH.chunks.get(c);
+  }));
+  const out = [];
+  for (const id of ids) {
+    const row = (await SEARCH.chunks.get(Math.floor(id / C)))[id % C];
+    if (!row) continue;
+    const [title, url, di, min, image, summary] = row;
+    const d = meta.D[di];
+    const li = meta.lang[id];
+    out.push({ id, title, url, domain: d.domain, sourceName: d.name, media: d.media, published: min ? new Date(min * 60000).toISOString() : null,
+      image, summary, lang: li < 0 ? null : meta.langs[li] || "xx", cats: meta.cats[id], fold: foldText(`${title} ${summary || ""}`) });
+  }
+  return out;
+}
+
+/* ---------- Résultats de recherche : filtres, chronologie, articles ---------- */
+state.wf = { scope: "auto", hours: 0, side: "all", lang: "all", cat: "all" };
 const WF_PERIODS = [[6, "6 h"], [24, "24 h"], [48, "48 h"], [0, "7 jours"]];
 const WF_SIDES = [["all", "Tous les côtés"], ["left", "Gauche"], ["center", "Centre"], ["right", "Droite"], ["other", "État ou non évalués"]];
-function wideFilter(list) {
-  const f = state.wf, now = Date.now();
-  return list.filter((a) => (!f.hours || (a.published && now - Date.parse(a.published) <= f.hours * 36e5))
-    && (f.side === "all" || (sideOf(a.media) || "other") === f.side)
-    && (f.lang === "all" || (f.lang === "autres" ? a.lang && !["fr", "en"].includes(a.lang) : (a.lang || "fr") === f.lang))
-    && (f.cat === "all" || (a.cats & (1 << (CATS.findIndex(([c]) => c === f.cat) - 1)))));
+const SIDE_COLOR = { left: "var(--b-l2)", center: "var(--b-c)", right: "var(--b-r2)", other: "var(--b-unk)" };
+
+async function regionCountries(region) {
+  if (region === "monde") return null;
+  const ed = await edition(region).catch(() => null);
+  return ed?.countries || null;
+}
+// Applique les filtres à une liste d'articles (sans rien télécharger de plus).
+function filterIds(r, countries, f, skip = "") {
+  const m = r.meta, cc = countries ? new Set(countries) : null;
+  const catBit = f.cat === "all" ? 0 : 1 << (CATS.findIndex(([c]) => c === f.cat) - 1);
+  return r.ids.filter((id) => {
+    const d = m.D[m.dom[id]];
+    if (skip !== "scope" && cc && !cc.has(d.country)) return false;
+    if (skip !== "hours" && f.hours && m.age[id] * 10 > f.hours * 60) return false;
+    if (skip !== "side" && f.side !== "all" && d.side !== f.side) return false;
+    if (skip !== "lang" && f.lang !== "all") { const l = m.lang[id], code = l < 0 ? "fr" : m.langs[l]; if (f.lang === "autres" ? ["fr", "en"].includes(code) : code !== f.lang) return false; }
+    if (skip !== "cat" && catBit && !(m.cats[id] & catBit)) return false;
+    return true;
+  });
 }
 
 async function loadWide(q, scroll = true) {
   const el = $("#wide");
   if (!el) return;
-  const key = `${q}|${state.region}|${state.wf.days}`;
-  const f = state.feeds.get(feedKey(state.route));
-  const intro = f && !f.stories.length && !f.loading ? emptySearch(q) : "";
   if (scroll) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  const key = `${q}`;
   if (!state.wide.has(key)) {
-    el.innerHTML = `${intro}<h2 class="block-h">Tous les articles <small>${state.wf.days > 2 ? "7 jours" : "48 h"}</small></h2><div class="loader">Recherche dans des milliers de médias…</div>`;
-    try { state.wide.set(key, await api(`/api/search?q=${encodeURIComponent(q)}&region=${state.region}&days=${state.wf.days}`)); }
-    catch (e) { el.innerHTML = `<h2 class="block-h">Tous les articles</h2><div class="empty"><p>${esc(e.message)}</p></div>`; return; }
+    el.innerHTML = `<h2 class="block-h">Tous les articles <small>7 jours · partout</small></h2><div class="loader">Recherche dans des centaines de milliers d'articles…</div>`;
+    try {
+      let r = await indexSearch(q);
+      // Aucun résultat mais un mot proche existe : on cherche directement le mot corrigé.
+      if (!r.ids.length && r.suggestion) { const r2 = await indexSearch(r.suggestion); if (r2.ids.length) { r2.correctedFrom = q; r = r2; } }
+      state.wide.set(key, r);
+    }
+    catch (e) { el.innerHTML = `<h2 class="block-h">Tous les articles</h2><div class="empty"><p>La recherche n'est pas encore prête. Réessaie dans quelques minutes.</p></div>`; return; }
     if (state.route.view !== "search" || state.route.q !== q) return;
   }
-  drawWide(el, state.wide.get(key), intro);
+  drawWide(el, state.wide.get(key));
 }
 
-// Chronologie d'un sujet : combien d'articles par tranche, empilés par côté.
-function timelineChart(list, days) {
-  const now = Date.now(), span = days > 2 ? 7 * 864e5 : 48 * 36e5, n = days > 2 ? 28 : 24, step = span / n;
+function timelineFrom(r, ids) {
+  const n = 28, step = 7 * 1440 / n; // tranches de 6 heures
   const bins = Array.from({ length: n }, () => ({ left: 0, center: 0, right: 0, other: 0 }));
-  for (const a of list) {
-    if (!a.published) continue;
-    const i = n - 1 - Math.floor((now - Date.parse(a.published)) / step);
-    if (i >= 0 && i < n) bins[i][sideOf(a.media) || "other"]++;
+  for (const id of ids) {
+    const i = n - 1 - Math.floor((r.meta.age[id] * 10) / step);
+    if (i >= 0 && i < n) bins[i][r.meta.D[r.meta.dom[id]].side]++;
   }
   const max = Math.max(1, ...bins.map((b) => b.left + b.center + b.right + b.other));
-  const colors = { left: "var(--b-l2)", center: "var(--b-c)", right: "var(--b-r2)", other: "var(--b-unk)" };
-  const label = (i) => { const d = new Date(now - (n - 1 - i) * step); return days > 2 ? d.toLocaleDateString(LOCALE, { weekday: "short", day: "numeric" }) : d.toLocaleString(LOCALE, { weekday: "short", hour: "2-digit", minute: "2-digit" }); };
-  return `<div class="tl" role="img" aria-label="Nombre d'articles dans le temps">
-    <div class="tl-bars">${bins.map((b, i) => { const t = b.left + b.center + b.right + b.other; return `<span class="tl-col" title="${esc(label(i))} : ${plural(t, "article")}">${["other", "right", "center", "left"].map((k) => b[k] ? `<i style="height:${(b[k] / max) * 100}%;background:${colors[k]}"></i>` : "").join("")}</span>`; }).join("")}</div>
+  const label = (i) => new Date(Date.now() - (n - 1 - i) * step * 60000).toLocaleDateString(LOCALE, { weekday: "short", day: "numeric" });
+  return `<div class="tl" role="img" aria-label="Nombre d'articles par jour">
+    <div class="tl-bars">${bins.map((b, i) => { const t = b.left + b.center + b.right + b.other; return `<span class="tl-col" title="${esc(label(i))} : ${plural(t, "article")}">${["other", "right", "center", "left"].map((k) => b[k] ? `<i style="height:${(b[k] / max) * 100}%;background:${SIDE_COLOR[k]}"></i>` : "").join("")}</span>`; }).join("")}</div>
     <div class="tl-axis"><span>${esc(label(0))}</span><span>${esc(label(Math.floor(n / 2)))}</span><span>maintenant</span></div>
   </div>`;
 }
 
-function drawWide(el, d, intro = "") {
-  const all = d.articles;
-  const a = wideFilter(all);
-  const fd = { ...d, articles: a };
-  const doms = new Set(a.map((x) => x.domain)).size;
-  const counts = Object.fromEntries(ORDER.map((k) => [k, 0]));
-  const seen = new Set();
-  for (const x of a) if (!seen.has(x.domain)) { seen.add(x.domain); counts[biasKey(x.media)]++; }
+async function drawWide(el, r) {
   const f = state.wf;
+  const countries = await regionCountries(state.region);
+  const inRegion = countries ? filterIds(r, countries, { ...f, hours: 0, side: "all", lang: "all", cat: "all" }).length : r.ids.length;
+  // Au début : l'édition choisie, sauf s'il y a trop peu de résultats (alors : le monde entier).
+  const scope = !countries ? "monde" : f.scope === "auto" ? (inRegion >= 5 ? "edition" : "monde") : f.scope;
+  const cc = scope === "edition" ? countries : null;
+  const ids = filterIds(r, cc, f);
+  const m = r.meta;
+  const counts = Object.fromEntries(ORDER.map((k) => [k, 0]));
+  const seenD = new Set();
+  for (const id of ids) { const di = m.dom[id]; if (!seenD.has(di)) { seenD.add(di); counts[biasKey(m.D[di].media)]++; } }
+  const base = filterIds(r, cc, f, "lang");
   const langs = new Map();
-  for (const x of all) { const l = !x.lang || x.lang === "fr" ? "fr" : x.lang === "en" ? "en" : "autres"; langs.set(l, (langs.get(l) || 0) + 1); }
-  const cats = CATS.slice(1).filter(([c], i) => all.some((x) => x.cats & (1 << i)));
+  for (const id of base) { const l = m.lang[id], c = l < 0 || m.langs[l] === "fr" ? "fr" : m.langs[l] === "en" ? "en" : "autres"; langs.set(c, (langs.get(c) || 0) + 1); }
+  const baseCat = filterIds(r, cc, f, "cat");
+  const cats = CATS.slice(1).map(([c, l], i) => [c, l, baseCat.filter((id) => m.cats[id] & (1 << i)).length]).filter((x) => x[2]);
   const chip = (attr, val, cur, label, n) => `<button class="chip" type="button" data-${attr}="${val}" aria-pressed="${String(cur) === String(val)}">${label}${n != null ? ` <span class="muted">${n}</span>` : ""}</button>`;
-  const period = f.days > 2 && !f.hours ? 0 : f.hours || 48;
+  const regionName = regionLabel();
   const filters = `<div class="wf">
-      <div class="wf-row"><span class="label">Période</span>${WF_PERIODS.map(([h, l]) => chip("hours", h, period, l)).join("")}</div>
-      <div class="wf-row"><span class="label">Côté</span>${WF_SIDES.map(([k, l]) => chip("side", k, f.side, k === "all" ? l : `<span class="sw" style="background:${{ left: "var(--b-l2)", center: "var(--b-c)", right: "var(--b-r2)", other: "var(--b-unk)" }[k]}"></span>${l}`)).join("")}</div>
+      ${countries ? `<div class="wf-row"><span class="label">Où</span>${chip("scope", "edition", scope, esc(regionName), inRegion)}${chip("scope", "monde", scope, "Monde entier", r.ids.length)}</div>` : ""}
+      <div class="wf-row"><span class="label">Période</span>${WF_PERIODS.map(([h, l]) => chip("hours", h, f.hours, l)).join("")}</div>
+      <div class="wf-row"><span class="label">Côté</span>${WF_SIDES.map(([k, l]) => chip("side", k, f.side, k === "all" ? l : `<span class="sw" style="background:${SIDE_COLOR[k]}"></span>${l}`)).join("")}</div>
       ${langs.size > 1 ? `<div class="wf-row"><span class="label">Langue</span>${chip("lang", "all", f.lang, "Toutes")}${[["fr", "Français"], ["en", "Anglais"], ["autres", "Autres"]].filter(([k]) => langs.has(k)).map(([k, l]) => chip("lang", k, f.lang, l, langs.get(k))).join("")}</div>` : ""}
-      ${cats.length > 1 ? `<div class="wf-row"><span class="label">Rubrique</span>${chip("cat", "all", f.cat, "Toutes")}${cats.map(([k, l]) => chip("cat", k, f.cat, l)).join("")}</div>` : ""}
+      ${cats.length > 1 ? `<div class="wf-row"><span class="label">Rubrique</span>${chip("cat", "all", f.cat, "Toutes")}${cats.map(([k, l, n]) => chip("cat", k, f.cat, l, n)).join("")}</div>` : ""}
     </div>`;
-  const tabs = [["articles", "Articles", a.length], ["comparer", "Comparer", null], ["medias", "Médias", doms], ["videos", "Vidéos", null]];
-  const head = `<h2 class="block-h">Tous les articles <small>${f.days > 2 ? "7 jours" : "48 h"} · ${plural(a.length, "article")} · ${plural(doms, "média")}</small></h2>
-    <p class="note" style="margin:0 0 12px">Prisme fouille chaque article publié par les médias de cette édition, même ceux qui ne font pas partie d'une histoire. Aucun tri : du plus récent au plus ancien.${d.olderError ? ` ${esc(d.olderError)}` : ""}</p>`;
-  if (!all.length) { el.innerHTML = `${intro}${head}${filters}<div class="empty"><p>Aucun article des médias lus par Prisme ne contient tous ces mots. Essaie un mot plus court, enlève un filtre, ou change d'édition (Monde entier cherche partout).</p></div>`; bindWf(el, d); return; }
-  el.innerHTML = `${intro}${head}${filters}
-    ${a.length ? `${timelineChart(a, f.days)}${bigBar(counts)}` : ""}
+  const notes = [];
+  if (r.correctedFrom) notes.push(`<p class="q-fix">Résultats pour <b>${esc(r.query)}</b>. Rien ne correspondait à « ${esc(r.correctedFrom)} ».</p>`);
+  else if (r.suggestion) notes.push(`<p class="q-fix">Vouliez-vous dire <a href="${href({ q: r.suggestion })}" data-nav>${esc(r.suggestion)}</a> ?</p>`);
+  if (r.partial) notes.push(`<p class="q-fix">Aucun article ne contient tous les mots. Voici ceux qui contiennent <b>${r.found.map(esc).join(", ")}</b>.</p>`);
+  if (countries && scope === "monde" && f.scope === "auto" && inRegion < 5 && r.ids.length) notes.push(`<p class="q-fix">${inRegion ? `Seulement ${plural(inRegion, "article")}` : "Aucun article"} dans les médias de l'édition ${esc(regionName)} : voici les résultats du monde entier.</p>`);
+  const head = `<h2 class="block-h">Tous les articles <small>7 jours · ${plural(ids.length, "article")} · ${plural(seenD.size, "média")}</small></h2>
+    <p class="note" style="margin:0 0 12px">Prisme fouille les titres et les textes de tous les articles lus depuis 7 jours, même ceux qui ne font pas partie d'une histoire. Du plus récent au plus ancien.</p>${notes.join("")}`;
+  const tabs = [["articles", "Articles", ids.length], ["comparer", "Comparer", null], ["medias", "Médias", seenD.size], ["videos", "Vidéos", null]];
+  el.innerHTML = `${head}${filters}
+    ${ids.length ? `${timelineFrom(r, ids)}${bigBar(counts)}
     <nav class="tabs" role="tablist">${tabs.map(([k, l, n]) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${state.wideTab === k}">${l}${n != null ? `<sup>${n}</sup>` : ""}</button>`).join("")}</nav>
-    <div id="widePanel"></div>`;
-  $(".tabs", el).onclick = (e) => {
-    const b = e.target.closest("[data-tab]");
-    if (!b) return;
-    state.wideTab = b.dataset.tab;
-    $$(".tabs button", el).forEach((x) => x.setAttribute("aria-selected", x === b));
+    <div id="widePanel"></div>` : `<div class="empty"><p>${r.ids.length ? "Aucun article avec ces filtres. Essaie « 7 jours », « Tous les côtés » ou « Monde entier »." : "Aucun article lu par Prisme dans les 7 derniers jours ne contient ces mots. Vérifie l'orthographe ou essaie un mot plus court."}</p></div>`}`;
+  const fd = { r, ids, query: r.query };
+  if (ids.length) {
+    $(".tabs", el).onclick = (e) => {
+      const b = e.target.closest("[data-tab]");
+      if (!b) return;
+      state.wideTab = b.dataset.tab;
+      $$(".tabs button", el).forEach((x) => x.setAttribute("aria-selected", x === b));
+      drawWidePanel(fd);
+    };
     drawWidePanel(fd);
-  };
-  bindWf(el, d);
-  drawWidePanel(fd);
-}
-function bindWf(el, d) {
+  }
   $(".wf", el).onclick = (e) => {
     const b = e.target.closest("button");
     if (!b) return;
-    const f = state.wf;
-    if (b.dataset.hours != null) {
-      const h = Number(b.dataset.hours);
-      f.hours = h;
-      if (!h && f.days < 7) { f.days = 7; loadWide(d.query, false); return; }
-    }
+    if (b.dataset.scope) f.scope = b.dataset.scope;
+    if (b.dataset.hours != null) f.hours = Number(b.dataset.hours);
     if (b.dataset.side) f.side = b.dataset.side;
     if (b.dataset.lang) f.lang = b.dataset.lang;
     if (b.dataset.cat) f.cat = b.dataset.cat;
-    drawWide(el, d, el.querySelector(".empty h3") ? emptySearch(d.query) : "");
+    drawWide(el, r);
   };
 }
 
-// Une ligne d'article dans une liste : média, heure, titre (mots cherchés en gras), actions.
+// Une ligne d'article dans une liste : média, heure, titre (mots cherchés surlignés), extrait, actions.
 function artRow(x, marks = []) {
   const title = marks.length ? markWords(x.title, marks) : esc(x.title);
   const meta = { u: x.url, d: x.domain, n: x.sourceName, k: biasKey(x.media), o: x.media?.known ? x.media.owner : null, c: x.media?.country || null, t: x.title };
-  return `<li class="art2">
-    <div class="a2-top"><a class="src" href="${href({ m: x.domain })}" data-nav>${favicon(x.domain, x.sourceName)}<span>${esc(x.sourceName)}</span></a>${tag(x.media)}${langTag(x.lang)}<time>${esc(ago(x.published))}</time>
-      <span class="acts">${favBtn(artFav(x))}${shareBtn(artShare(x))}</span></div>
-    <a class="a2-t${reads.has(x.url) ? " is-read" : ""}" data-no-tr href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener noreferrer" data-read="${esc(JSON.stringify(meta))}">${title}</a> ${transLink(x)}
+  return `<li class="art2${x.image ? "" : " noimg"}">
+    <div class="a2-main">
+      <div class="a2-top"><a class="src" href="${href({ m: x.domain })}" data-nav>${favicon(x.domain, x.sourceName)}<span>${esc(x.sourceName)}</span></a>${tag(x.media)}${langTag(x.lang)}<time>${esc(ago(x.published))}</time></div>
+      <a class="a2-t${reads.has(x.url) ? " is-read" : ""}" data-no-tr href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener noreferrer" data-read="${esc(JSON.stringify(meta))}">${title}</a>
+      ${x.summary ? `<p class="a2-x" data-no-tr>${marks.length ? markWords(x.summary, marks) : esc(x.summary)}</p>` : ""}
+      <div class="a2-foot">${transLink(x)}<span class="acts">${favBtn(artFav(x))}${shareBtn(artShare(x))}</span></div>
+    </div>
+    ${x.image ? `<a class="a2-img" href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(x.image))}" alt="" loading="lazy" referrerpolicy="no-referrer"></a>` : ""}
   </li>`;
 }
 
-function drawWidePanel(d) {
+async function drawWidePanel(d) {
   const p = $("#widePanel");
   if (!p) return;
-  const a = d.articles;
+  const { r, ids } = d;
+  const m = r.meta;
   if (state.wideTab === "comparer") {
+    p.innerHTML = `<div class="loader">Chargement…</div>`;
+    const bySide = Object.fromEntries(SIDES.map((s) => [s.key, ids.filter((id) => m.D[m.dom[id]].side === s.key)]));
+    const docs = await docsFor(SIDES.flatMap((s) => bySide[s.key].slice(0, 12)));
+    if (state.wideTab !== "comparer" || !p.isConnected) return;
     p.innerHTML = `<div class="cols3" style="margin-top:14px">${SIDES.map((side) => {
-      const items = a.filter((x) => side.keys.includes(biasKey(x.media)));
-      return `<section><div class="col-h"><i style="background:${side.color}"></i>${side.label}<small>${plural(items.length, "article")}</small></div>
-        ${items.length ? `<ul class="hl">${items.slice(0, 15).map((x) => `<li><div class="row"><button class="src" type="button" data-domain="${esc(x.domain)}" data-name="${esc(x.sourceName)}">${favicon(x.domain, x.sourceName)}<span>${esc(x.sourceName)}</span></button>${badge(x.media)}<time>${esc(ago(x.published))}</time></div>${artLink(x, "t")}</li>`).join("")}</ul>`
+      const items = docs.filter((x) => sideOf(x.media) === side.key);
+      return `<section><div class="col-h"><i style="background:${side.color}"></i>${side.label}<small>${plural(bySide[side.key].length, "article")}</small></div>
+        ${items.length ? `<ul class="hl">${items.map((x) => `<li><div class="row"><a class="src" href="${href({ m: x.domain })}" data-nav>${favicon(x.domain, x.sourceName)}<span>${esc(x.sourceName)}</span></a>${badge(x.media)}<time>${esc(ago(x.published))}</time></div>${artLink(x, "t")}</li>`).join("")}</ul>`
           : `<div class="col-empty">Aucun média de ${side.label.toLowerCase()} dans ces résultats.</div>`}</section>`;
     }).join("")}</div>`;
     return;
   }
   if (state.wideTab === "medias") {
     const by = new Map();
-    for (const x of a) { const m = by.get(x.domain) || { ...x, n: 0 }; m.n++; by.set(x.domain, m); }
-    const list = [...by.values()].sort((x, y) => y.n - x.n);
-    p.innerHTML = `<ul class="outlets" style="margin-top:10px">${list.map((m) => `<li><button type="button" data-domain="${esc(m.domain)}" data-name="${esc(m.sourceName)}">${favicon(m.domain, m.sourceName)}<span class="nm">${esc(m.sourceName)}<small>${plural(m.n, "article")}${m.media.known ? " · " + esc(m.media.owner.replace(/\s*\(.*\)$/, "")) : ""}</small></span>${scaleMini(m.media)}</button></li>`).join("")}</ul>`;
+    for (const id of ids) { const di = m.dom[id]; by.set(di, (by.get(di) || 0) + 1); }
+    const list = [...by.entries()].sort((a, b) => b[1] - a[1]).map(([di, n]) => ({ ...m.D[di], n }));
+    p.innerHTML = `<ul class="outlets" style="margin-top:10px">${list.slice(0, 150).map((x) => `<li><a class="o-row" href="${href({ m: x.domain })}" data-nav>${favicon(x.domain, x.name)}<span class="nm">${esc(x.name)}<small>${plural(x.n, "article")}${x.media.known ? " · " + esc(x.media.owner.replace(/\s*\(.*\)$/, "")) : ""}</small></span>${scaleMini(x.media)}</a></li>`).join("")}</ul>`;
     return;
   }
-  if (state.wideTab === "videos") { drawVideos(p, d.query); return; }
-  if (!a.length) { p.innerHTML = `<div class="empty"><p>Aucun article avec ces filtres. Essaie « 7 jours » ou « Tous les côtés ».</p></div>`; return; }
-  let shown = 60;
-  const draw = () => {
-    p.innerHTML = `<ul class="arts2">${a.slice(0, shown).map((x) => artRow(x, d.marks || [])).join("")}</ul>
-      ${a.length > shown ? `<div class="more-row"><button class="btn ghost" type="button" id="wideMore">Voir ${Math.min(60, a.length - shown)} articles de plus</button></div>` : ""}`;
-    const m = $("#wideMore", p);
-    if (m) m.onclick = () => { shown += 60; draw(); };
+  if (state.wideTab === "videos") { drawVideos(p, r.query); return; }
+  let shown = 0;
+  p.innerHTML = `<ul class="arts2" id="wideList"></ul><div class="more-row" id="wideMoreRow"></div>`;
+  const more = async () => {
+    const next = ids.slice(shown, shown + 40);
+    shown += next.length;
+    const row = $("#wideMoreRow", p);
+    row.innerHTML = `<div class="loader">Chargement…</div>`;
+    const docs = await docsFor(next);
+    if (!p.isConnected) return;
+    $("#wideList", p).insertAdjacentHTML("beforeend", docs.map((x) => artRow(x, r.marks || [])).join(""));
+    row.innerHTML = ids.length > shown ? `<button class="btn ghost" type="button">Voir ${Math.min(40, ids.length - shown)} articles de plus</button>` : "";
+    const b = $("button", row);
+    if (b) b.onclick = more;
   };
-  draw();
+  more();
 }
 
 /* ---------- Vidéos (chaînes YouTube des médias, sans clé) ---------- */
@@ -2025,12 +2640,14 @@ async function viewMatin(v) {
       return `<div><div class="side"><span class="bb bb-${side.key === "left" ? "l2" : side.key === "right" ? "r2" : "c"}">${side.label}</span></div>
         ${a ? `${artLink(a)}<div class="by">${esc(a.sourceName)}</div>` : `<div class="none">Aucun média de ${side.label.toLowerCase()} n'en parle.</div>`}</div>`;
     }).join("")}</div>`; };
+    state.matinSpeech = [`${hello}. Voici ton matin Prisme : cinq histoires.`, ...picked.flatMap((s, i) => { const sd = sides(s.counts); return [`${i + 1}. ${s.titleFr || s.title}.`, s.summary || "", `${plural(s.sources, "média")} en parlent : ${sd.left} à gauche, ${sd.center} au centre, ${sd.right} à droite.`]; })];
     $("#matin").innerHTML = `
+      <div class="matin-listen">${listenBtn("matin")}<span class="note">Écoute les cinq histoires, environ trois minutes.</span></div>
       <ol class="matin-list">${picked.map((s, i) => `<li>
         <span class="num">${i + 1}</span>
         <div>
           <div class="kicker">${catKicker(s)}${reason(s)}</div>
-          <h2 data-no-tr><a href="${href({ h: s.id })}" data-nav>${esc(s.title)}</a></h2>
+          <h2 data-no-tr><a href="${href({ h: s.id })}" data-nav>${titleOf(s)}</a>${trTag(s)}</h2>
           ${s.summary ? `<p class="dek" data-no-tr>${esc(s.summary)}</p>` : ""}
           ${bigBar(s.counts)}
           ${sidesHtml(s)}
@@ -2611,6 +3228,7 @@ function closeLayer(sel) {
 $$("[data-close]").forEach((b) => b.addEventListener("click", () => closeLayer(b.closest(".drawer") ? "#drawer" : "#modal")));
 
 function openModal(html, narrow = false) {
+  $("#modalBody").onclick = null;
   $(".modal-box").classList.toggle("narrow", narrow);
   $("#modalBody").innerHTML = html;
   openLayer("#modal");
@@ -2699,7 +3317,7 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") { closeLayer($("#modal").classList.contains("open") ? "#modal" : "#drawer"); return; }
   if (e.key === "/" && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) {
     e.preventDefault();
-    $("#search input").focus();
+    $("#search input").focus({ preventScroll: true });
   }
 });
 
@@ -2710,6 +3328,9 @@ $("#langBtn").title = LANG === "en" ? "Passer en français" : "Switch to English
 $("#langBtn").onclick = () => setLang(LANG === "en" ? "fr" : "en");
 render({ scroll: history.state?.y || 0 });
 window.__prismeReady = true;
+$("#prefsBtn").onclick = openSettings;
+// La première fois (sur l'accueil seulement) : quelques questions pour personnaliser Prisme.
+if (!store.get("onboarded") && state.route.view === "feed" && !location.search) setTimeout(openOnboarding, 600);
 
 // App installable : le service worker garde l'app et les dernières histoires pour le mode hors ligne.
 if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
