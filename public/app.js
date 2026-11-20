@@ -182,6 +182,150 @@ const noteRead = (e) => {
 document.addEventListener("click", noteRead);
 document.addEventListener("auxclick", noteRead);
 
+/* ---------- Favoris, médias suivis, partage (tout reste sur cet appareil) ---------- */
+const listStore = (name, max) => ({
+  list() { try { return JSON.parse(store.get(name, "[]")); } catch { return []; } },
+  save(l) { store.set(name, JSON.stringify(l.slice(0, max))); },
+});
+// Un favori : { k (clé), type "s" (histoire) ou "a" (article), t, u, id, r, d, n, src, img, at }
+const favs = Object.assign(listStore("favs", 500), {
+  has(k) { return this.list().some((x) => x.k === k); },
+  toggle(item) {
+    const l = this.list();
+    const on = !l.some((x) => x.k === item.k);
+    this.save(on ? [{ ...item, at: Date.now() }, ...l] : l.filter((x) => x.k !== item.k));
+    return on;
+  },
+  remove(k) { this.save(this.list().filter((x) => x.k !== k)); },
+});
+// Médias suivis : { d, n, at }
+const follows = Object.assign(listStore("follows", 100), {
+  has(d) { return this.list().some((x) => x.d === d); },
+  toggle(d, n) { const l = this.list(); const on = !l.some((x) => x.d === d); this.save(on ? [{ d, n, at: Date.now() }, ...l] : l.filter((x) => x.d !== d)); return on; },
+});
+
+const ICO = {
+  star: '<path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z"/>',
+  share: '<path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 12v6.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V12"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+};
+const ico = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICO[k]}</svg>`;
+const storyFav = (s) => ({ k: `s:${s.id}`, type: "s", id: s.id, r: state.region, t: s.title, src: s.sources, img: s.image || null, d: s.articles?.[0]?.domain, n: s.articles?.[0]?.sourceName });
+const artFav = (a) => ({ k: `a:${a.url}`, type: "a", u: a.url, t: a.title, d: a.domain, n: a.sourceName, img: a.image || null, lang: a.lang || null, p: a.published || null });
+const absUrl = (rel) => new URL(rel, location.href).href;
+// Bouton étoile (favori) et bouton partager ; « label » ajoute le texte à côté de l'icône.
+function favBtn(item, label = false) {
+  const on = favs.has(item.k);
+  return `<button class="act${label ? " act-l" : ""}" type="button" data-fav="${esc(JSON.stringify(item))}" data-fav-key="${esc(item.k)}" aria-pressed="${on}" title="${on ? "Retirer des favoris" : "Enregistrer dans mes favoris"}">${ico("star")}${label ? `<span>${on ? "Enregistré" : "Enregistrer"}</span>` : ""}</button>`;
+}
+function shareBtn(data, label = false) {
+  return `<button class="act${label ? " act-l" : ""}" type="button" data-share="${esc(JSON.stringify(data))}" title="Partager">${ico("share")}${label ? "<span>Partager</span>" : ""}</button>`;
+}
+const storyShare = (s) => ({ title: s.title, text: `${s.title} — ${plural(s.sources, "média")} en parlent, de la gauche à la droite, sur Prisme`, url: absUrl(href({ h: s.id })) });
+const artShare = (a) => ({ title: a.title, text: `${a.title} (${a.sourceName})`, url: a.url });
+
+let toastTimer = null;
+function toast(msg) {
+  let el = $("#toast");
+  if (!el) { el = document.createElement("div"); el.id = "toast"; el.className = "toast"; el.setAttribute("role", "status"); document.body.appendChild(el); }
+  el.textContent = msg;
+  el.classList.add("on");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("on"), 2400);
+}
+async function shareIt(d) {
+  if (navigator.share) { try { await navigator.share(d); return; } catch (e) { if (e.name === "AbortError") return; } }
+  try { await navigator.clipboard.writeText(d.url); toast("Lien copié : tu peux le coller où tu veux."); }
+  catch { prompt("Copie ce lien :", d.url); }
+}
+document.addEventListener("click", (e) => {
+  const f = e.target.closest("[data-fav]");
+  if (f) {
+    e.preventDefault(); e.stopPropagation();
+    const item = JSON.parse(f.dataset.fav);
+    const on = favs.toggle(item);
+    for (const b of $$(`[data-fav-key="${CSS.escape(item.k)}"]`)) {
+      b.setAttribute("aria-pressed", on);
+      b.title = on ? "Retirer des favoris" : "Enregistrer dans mes favoris";
+      const sp = $("span", b); if (sp) sp.textContent = on ? "Enregistré" : "Enregistrer";
+    }
+    toast(on ? "Enregistré dans tes favoris ★" : "Retiré de tes favoris");
+    return;
+  }
+  const s = e.target.closest("[data-share]");
+  if (s) { e.preventDefault(); e.stopPropagation(); shareIt(JSON.parse(s.dataset.share)); }
+}, true);
+
+/* ---------- Recherche avancée : « phrase exacte », -exclure, synonymes et traductions ---------- */
+const SYN = [
+  ["ovni", "ovnis", "ufo", "ufos", "uap", "pan", "phenomene aerien non identifie", "phenomenes aeriens non identifies", "soucoupe volante", "extraterrestre"],
+  ["ia", "ai", "intelligence artificielle", "artificial intelligence", "chatgpt", "openai"],
+  ["climat", "climate", "climatique", "rechauffement", "global warming", "ges"],
+  ["russie", "russia", "russe", "russian", "kremlin", "poutine", "putin"],
+  ["chine", "china", "chinois", "chinese", "pekin", "beijing"],
+  ["etats-unis", "united states", "americain", "american", "usa", "washington"],
+  ["ukraine", "ukrainien", "ukrainian", "kyiv", "kiev"],
+  ["israel", "israelien", "israeli", "gaza", "hamas"],
+  ["immigration", "immigrant", "immigrants", "migrant", "migrants", "demandeurs d'asile", "asylum"],
+  ["logement", "housing", "loyer", "loyers", "rent", "locataires"],
+  ["election", "elections", "electoral", "scrutin", "vote", "sondage", "poll"],
+  ["economie", "economy", "economique", "economic", "recession"],
+  ["sante", "health", "hopital", "hopitaux", "hospital"],
+  ["guerre", "war", "conflit", "conflict"],
+  ["tarifs", "tariffs", "tariff", "droits de douane", "douanes"],
+  ["petrole", "oil", "pipeline", "oleoduc"],
+  ["incendie", "incendies", "feux de foret", "wildfire", "wildfires"],
+  ["vaccin", "vaccins", "vaccine", "vaccines", "vaccination"],
+  ["tremblement de terre", "seisme", "earthquake"],
+  ["ouragan", "hurricane", "tempete", "storm"],
+  ["inondation", "inondations", "flood", "floods"],
+  ["hockey", "lnh", "nhl", "canadiens", "habs"],
+  ["greve", "greves", "strike", "syndicat", "union"],
+  ["trump", "maga"],
+  ["carney", "premier ministre du canada"],
+  ["legault", "caq"],
+];
+const SYN_BY = new Map();
+for (const g of SYN) for (const w of g) SYN_BY.set(w, g);
+const WORD_RE = /[^\p{L}\p{N}'’-]+/u;
+
+function parseQuery(q) {
+  let rest = foldText(q || "");
+  const phrases = [], not = [];
+  rest = rest.replace(/"([^"]+)"|«\s*([^»]+?)\s*»/g, (m, a, b) => { phrases.push((a || b).trim()); return " "; });
+  rest = rest.replace(/(^|\s)-([\p{L}\p{N}][\p{L}\p{N}'’-]*)/gu, (m, s, w) => { not.push(w); return " "; });
+  rest = rest.replace(/\s+/g, " ").trim();
+  const terms = [], synUsed = [];
+  if (rest && SYN_BY.has(rest)) { terms.push(SYN_BY.get(rest)); synUsed.push(rest); }
+  else {
+    for (const w of rest.split(WORD_RE).filter((x) => x.length >= 2)) {
+      const g = SYN_BY.get(w);
+      terms.push(g || [w]);
+      if (g) synUsed.push(w);
+    }
+  }
+  const empty = !terms.length && !phrases.length;
+  // Les mots à surligner dans les résultats.
+  const marks = [...new Set([...terms.flat(), ...phrases])].filter((w) => w.length >= 2);
+  const also = synUsed.length ? [...new Set(terms.filter((g) => g.length > 1).flat())].filter((w) => !synUsed.includes(w)).slice(0, 8) : [];
+  return { terms, phrases, not, empty, marks, also };
+}
+const reEsc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const shortRe = new Map();
+// Les mots courts (« ia », « us », « pan ») doivent être des mots entiers, pas un morceau d'un autre mot.
+const hasWord = (text, w) => {
+  if (w.length > 3) return text.includes(w);
+  if (!shortRe.has(w)) shortRe.set(w, new RegExp("(^|[^\\p{L}\\p{N}])" + reEsc(w) + "([^\\p{L}\\p{N}]|$)", "u"));
+  return shortRe.get(w).test(text);
+};
+// Le texte (déjà sans accents) correspond-il à la recherche ?
+function matchQuery(text, pq) {
+  if (pq.empty) return false;
+  return pq.terms.every((g) => g.some((w) => hasWord(text, w)))
+    && pq.phrases.every((p) => text.includes(p))
+    && !pq.not.some((w) => hasWord(text, w));
+}
+
 /* ---------- Données ----------
    Prisme n'a pas de serveur : un robot (GitHub) prépare toutes les 30 minutes des fichiers d'édition dans data/.
    La fonction api() répond aux mêmes questions qu'avant (/api/feed, /api/videos…) à partir de ces fichiers. */
@@ -211,7 +355,7 @@ async function api(path) {
     case "/api/directory": return { media: (await dataJson("directory.json", 864e5)).media };
     case "/api/media": return mediaLocal(p.get("domain"));
     case "/api/summary": return summaryLocal(p.get("id"));
-    case "/api/search": return searchLocal(p.get("q"), p.get("region"));
+    case "/api/search": return searchLocal(p.get("q"), p.get("region"), Number(p.get("days") || 2));
     default: throw new Error("Demande inconnue.");
   }
 }
@@ -259,10 +403,10 @@ async function feedLocal(p) {
   const page = Number(p.get("page") || 0);
   let list = ed.stories;
   if (q) {
-    const words = foldText(q).split(/[^\p{L}\p{N}]+/u).filter((w) => w.length >= 2);
+    const pq = parseQuery(q);
     list = list.filter((s) => {
-      const text = foldText(`${s.title} ${s.summary || ""} ${s.articles.map((a) => a.title).join(" ")}`);
-      return words.every((w) => text.includes(w));
+      if (!s._fold) s._fold = foldText(`${s.title} ${s.summary || ""} ${s.articles.map((a) => a.title).join(" ")}`);
+      return matchQuery(s._fold, pq);
     });
   } else if (cat !== "une") list = list.filter((s) => s.categories.includes(cat));
   if (q) {
@@ -400,21 +544,24 @@ WHERE {
 }
 
 // Tous les articles d'une édition (48 h), publiés par le robot en format compact.
-async function articlesOf(region) {
-  const raw = await dataJson(`articles-${region}.json`, 15 * 60e3);
+const mediaFromKey = (name, k, owner, country, bias, st) => (k === "unk" ? { known: false, name, country } : { known: true, name, owner, country, bias: k === "state" ? null : bias, state: st });
+const catsOf = (mask) => CATS.slice(1).filter((c, i) => mask & (1 << i)).map(([c]) => c);
+function decodeArticles(raw) {
   if (raw._decoded) return raw._decoded;
   const counts = new Map();
   for (const it of raw.items) counts.set(it[2], (counts.get(it[2]) || 0) + 1);
   const domains = raw.domains.map(([domain, name, k, owner, country, bias, st], i) => ({
-    domain, name, count: counts.get(i) || 0, fold: foldText(name),
-    media: k === "unk" ? { known: false, name, country } : { known: true, name, owner, country, bias: k === "state" ? null : bias, state: st },
+    domain, name, count: counts.get(i) || 0, fold: foldText(name), media: mediaFromKey(name, k, owner, country, bias, st),
   }));
-  const items = raw.items.map(([title, url, di, min, lang]) => ({
+  const items = raw.items.map(([title, url, di, min, lang, cats]) => ({
     title, url, domain: domains[di].domain, sourceName: domains[di].name, media: domains[di].media,
-    published: min ? new Date(min * 60000).toISOString() : null, lang, fold: foldText(title),
+    published: min ? new Date(min * 60000).toISOString() : null, lang, cats: cats || 0, fold: foldText(title),
   }));
   return (raw._decoded = { domains, items });
 }
+const articlesOf = async (region) => decodeArticles(await dataJson(`articles-${region}.json`, 15 * 60e3));
+// Les articles de 2 à 7 jours (archive du robot), chargés seulement quand on cherche sur 7 jours.
+const olderOf = async (region) => decodeArticles(await dataJson(`older-${region}.json`, 60 * 60e3));
 
 // Les médias dont le nom ou l'adresse correspond à la recherche (« tva nouvelle » → TVA Nouvelles).
 function matchOutlets(domains, q) {
@@ -426,13 +573,17 @@ function matchOutlets(domains, q) {
 }
 
 // Recherche élargie : tous les articles lus par Prisme dans l'édition (48 h), y compris ceux d'un média nommé.
-async function searchLocal(q, region) {
+async function searchLocal(q, region, days = 2) {
   const idx = await articlesOf(region);
-  const words = foldText(q).split(/[^\p{L}\p{N}]+/u).filter((w) => w.length >= 2);
+  const pools = [idx.items];
+  let olderError = null;
+  if (days > 2) { try { pools.push((await olderOf(region)).items); } catch (e) { olderError = "L'archive de 7 jours n'est pas encore prête. Réessaie plus tard."; } }
+  const pq = parseQuery(q);
   const outlets = new Set(matchOutlets(idx.domains, q).map((d) => d.domain));
-  const articles = idx.items.filter((a) => outlets.has(a.domain) || (words.length && words.every((w) => a.fold.includes(w))));
+  const articles = [];
+  for (const pool of pools) for (const a of pool) if (outlets.has(a.domain) || matchQuery(a.fold, pq)) articles.push(a);
   articles.sort((a, b) => (b.published || "").localeCompare(a.published || ""));
-  return { query: q, articles: articles.slice(0, 300) };
+  return { query: q, days, articles: articles.slice(0, 1500), total: articles.length, also: pq.also, marks: pq.marks, olderError };
 }
 
 /* ---------- Routes ---------- */
@@ -443,7 +594,7 @@ function parseRoute() {
   if (p.get("q")) return { view: "search", q: p.get("q").trim().slice(0, 120), region: r };
   if (p.get("v") === "proprietaires") return { view: "owners", region: r };
   if (p.get("v") === "moi") return { view: "me", region: r };
-  if (["matin", "videos", "quiz"].includes(p.get("v"))) return { view: p.get("v"), region: r };
+  if (["matin", "videos", "quiz", "favoris"].includes(p.get("v"))) return { view: p.get("v"), region: r };
   if (p.get("m")) return { view: "outlet", m: p.get("m").toLowerCase(), region: r };
   const cat = CATS.some(([v]) => v === p.get("c")) ? p.get("c") : "une";
   const lens = p.get("l") in LENSES ? p.get("l") : "essentiel";
@@ -496,12 +647,13 @@ function render({ scroll = 0 } = {}) {
   else if (route.view === "videos") viewVideos(v);
   else if (route.view === "quiz") viewQuiz(v);
   else if (route.view === "outlet") viewOutlet(v, route);
+  else if (route.view === "favoris") viewFavs(v);
   else viewFeed(v, route);
   requestAnimationFrame(() => scrollTo(0, scroll));
 }
 
 /* ---------- Bandeau et rubriques ---------- */
-const PAGES = [["matin", "Le matin"], ["videos", "Vidéos"], ["moi", "Mon prisme"], ["proprietaires", "Qui possède quoi"], ["quiz", "Devine le média"]];
+const PAGES = [["matin", "Le matin"], ["videos", "Vidéos"], ["moi", "Mon prisme"], ["favoris", "Favoris"], ["proprietaires", "Qui possède quoi"], ["quiz", "Devine le média"]];
 const ICON = {
   une: '<path d="M4 5h13v14H5a1 1 0 0 1-1-1V5Z"/><path d="M17 9h3v9a1 1 0 0 1-1 1h-2M7 9h7M7 12h7M7 15h4"/>',
   matin: '<circle cx="12" cy="14" r="4"/><path d="M12 4v3M4.9 8.9l2 2M19.1 8.9l-2 2M2 18h20M3 14h2M19 14h2"/>',
@@ -512,10 +664,11 @@ const ICON = {
   quiz: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"/>',
   about: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
   theme: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/>',
+  favoris: '<path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z"/>',
   install: '<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M12 7v7M9 11l3 3 3-3M10.5 18.5h3"/>',
 };
 const svg = (name) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[name]}</svg>`;
-const routePage = (r) => ({ me: "moi", owners: "proprietaires", matin: "matin", videos: "videos", quiz: "quiz" }[r.view] || null);
+const routePage = (r) => ({ me: "moi", owners: "proprietaires", matin: "matin", videos: "videos", quiz: "quiz", favoris: "favoris" }[r.view] || null);
 
 function renderChrome(route) {
   const page = routePage(route);
@@ -529,7 +682,7 @@ function renderChrome(route) {
     <a href="${href({ v: "matin" })}" data-nav ${page === "matin" ? 'aria-current="page"' : ""}>${svg("matin")}Le matin</a>
     <a href="${href({ v: "videos" })}" data-nav ${page === "videos" ? 'aria-current="page"' : ""}>${svg("videos")}Vidéos</a>
     <a href="${href({ v: "moi" })}" data-nav ${page === "moi" ? 'aria-current="page"' : ""}>${svg("moi")}Mon prisme</a>
-    <button type="button" id="moreBtnTab" ${["proprietaires", "quiz"].includes(page) ? 'aria-current="page"' : ""}>${svg("plus")}Plus</button>`;
+    <button type="button" id="moreBtnTab" ${["proprietaires", "quiz", "favoris"].includes(page) ? 'aria-current="page"' : ""}>${svg("plus")}Plus</button>`;
   $("#moreBtnTab").onclick = openMoreSheet;
   // Garde visible la rubrique choisie dans la barre défilante (téléphone).
   const el = $("#cats [aria-current]");
@@ -569,6 +722,7 @@ function openMoreSheet() {
     <div class="kicker">Prisme</div>
     <h2>Plus</h2>
     <ul class="sheet-list">
+      <li><a href="${href({ v: "favoris" })}" data-nav data-close-modal>${svg("favoris")}<span>Mes favoris<small>Les histoires et articles enregistrés, et les médias que tu suis.</small></span></a></li>
       <li><a href="${href({ v: "proprietaires" })}" data-nav data-close-modal>${svg("proprietaires")}<span>Qui possède quoi<small>Les médias regroupés par propriétaire, et la toile des familles.</small></span></a></li>
       <li><a href="${href({ v: "quiz" })}" data-nav data-close-modal>${svg("quiz")}<span>Devine le média<small>Un titre : gauche, centre ou droite ?</small></span></a></li>
       <li><button type="button" data-about>${svg("about")}<span>Comment Prisme choisit<small>Les sources, les lentilles et les limites.</small></span></button></li>
@@ -580,7 +734,10 @@ function openMoreSheet() {
   const ib = $("#installBtn");
   if (ib) ib.onclick = async () => { installEvt.prompt(); await installEvt.userChoice.catch(() => null); installEvt = null; closeLayer("#modal"); };
 }
-document.addEventListener("click", (e) => { if (e.target.closest("[data-close-modal]")) closeLayer("#modal"); });
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-close-modal]")) closeLayer("#modal");
+  if (e.target.closest("[data-close-drawer]")) closeLayer("#drawer");
+});
 
 /* ---------- Le haut de page reste à portée de main ---------- */
 function topbarSize() { document.documentElement.style.setProperty("--top-h", `${$("#topbar").offsetHeight}px`); }
@@ -653,8 +810,9 @@ function markWords(text, words) {
     if (my !== token) return;
     const trending = ed?.trending || [];
     if (fq.length < 2) {
-      const rec = recent.list(), mine = topics.list();
+      const rec = recent.list(), mine = topics.list(), fol = follows.list();
       open(`${rec.length ? `<div class="sg-h">Recherches récentes <button type="button" data-clear>Effacer</button></div>${rec.slice(0, 5).map((t) => sgSearch(t, "clock")).join("")}` : ""}
+        ${fol.length ? `<div class="sg-h">Mes médias</div>${fol.slice(0, 4).map((x) => item(`href="${href({ m: x.d })}" data-nav`, `${favicon(x.d, x.n)}<span class="sg-main" data-no-tr><b>${esc(x.n)}</b><small>${esc(x.d)}</small></span>`)).join("")}` : ""}
         ${mine.length ? `<div class="sg-h">Mes sujets</div>${mine.slice(0, 5).map((t) => sgSearch(t, "star")).join("")}` : ""}
         ${trending.length ? `<div class="sg-h">En ce moment</div>${trending.slice(0, 7).map((t) => sgSearch(t, "trend")).join("")}` : ""}
         <p class="sg-tips">Cherche un sujet (une personne, une ville, un enjeu) ou le nom d'un média, comme « TVA » ou « Le Devoir ».</p>`);
@@ -792,7 +950,7 @@ function storyRow(s, cat) {
       <h3 data-no-tr><a href="${link}" data-nav>${esc(s.title)}</a></h3>
       ${s.summary ? `<p class="dek" data-no-tr>${esc(s.summary)}</p>` : ""}
       ${coveredBy(s)}
-      <div class="story-foot">${bar(s.counts)}${splitHtml(s.counts)}${flags(s)}${s.articles.some((a) => reads.has(a.url)) ? `<span class="flag read">Lu</span>` : ""}</div>
+      <div class="story-foot">${bar(s.counts)}${splitHtml(s.counts)}${flags(s)}${s.articles.some((a) => reads.has(a.url)) ? `<span class="flag read">Lu</span>` : ""}<span class="acts">${favBtn(storyFav(s))}${shareBtn(storyShare(s))}</span></div>
     </div>
     ${s.image ? `<a class="thumb" href="${link}" data-nav tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(s.image))}" alt="" loading="lazy" referrerpolicy="no-referrer"></a>` : ""}
   </article>`;
@@ -818,7 +976,7 @@ function leadStory(s, cat) {
       ${s.summary ? `<p class="dek" data-no-tr>${esc(s.summary)}</p><p class="dek-src">Résumé : ${esc(s.summarySource || "")}</p>` : ""}
       ${coveredBy(s, 4)}
       ${bigBar(s.counts)}
-      <div class="story-foot">${splitHtml(s.counts)}${flags(s)}</div>
+      <div class="story-foot">${splitHtml(s.counts)}${flags(s)}<span class="acts">${favBtn(storyFav(s), true)}${shareBtn(storyShare(s), true)}</span></div>
       <div class="angles3">${SIDES.map((side) => {
         const a = by[side.key];
         return `<div><div class="side"><i style="background:${side.color}"></i>${side.label}</div>
@@ -1048,7 +1206,7 @@ async function viewStory(v, route) {
   const words = loadedWords(s);
   const marksFor = (a) => { const sd = sideOf(a.media); return sd === "left" ? words.leftSet : sd === "right" ? words.rightSet : null; };
   const hlItem = (a) => `<li>
-    <div class="row"><button class="src" type="button" data-domain="${esc(a.domain)}" data-name="${esc(a.sourceName)}">${favicon(a.domain, a.sourceName)}<span>${esc(a.sourceName)}</span></button>${badge(a.media)}${langTag(a.lang)}<time>${esc(ago(a.published))}</time></div>
+    <div class="row"><button class="src" type="button" data-domain="${esc(a.domain)}" data-name="${esc(a.sourceName)}">${favicon(a.domain, a.sourceName)}<span>${esc(a.sourceName)}</span></button>${badge(a.media)}${langTag(a.lang)}<time>${esc(ago(a.published))}</time><span class="acts">${favBtn(artFav(a))}${shareBtn(artShare(a))}</span></div>
     ${artLink(a, "t", marksFor(a))} ${transLink(a)}
     ${a.prevTitle ? `<div class="was">Titre modifié · avant : <s>${esc(a.prevTitle)}</s></div>` : ""}
     ${a.media.known ? `<div class="own">${esc(a.media.owner)}</div>` : ""}
@@ -1061,6 +1219,7 @@ async function viewStory(v, route) {
           <div class="kicker">${(s.categories || []).map((c) => esc(CAT_LABEL[c] || c)).join(" · ") || "Histoire"} · ${reason(s)}${s.firstBy ? ` · révélée par <b>${esc(s.firstBy)}</b>` : ""}</div>
           <h1 data-no-tr>${esc(s.title)}</h1>
           ${s.summary ? `<p class="dek" data-no-tr>${esc(s.summary)}</p><p class="dek-src">Résumé : ${esc(s.summarySource || "")}</p>` : ""}
+          <div class="s-acts">${favBtn(storyFav(s), true)}${shareBtn(storyShare(s), true)}</div>
         </header>
         ${s.image ? `<figure class="s-hero"><img src="${esc(safeUrl(s.image))}" alt="" referrerpolicy="no-referrer"><span class="credit">${esc(s.imageSource || "")}</span></figure>` : ""}
 
@@ -1249,14 +1408,25 @@ function keywordsOf(s) {
 function viewSearch(v, route) {
   document.title = `${route.q} — Prisme`;
   const followed = topics.has(route.q);
+  const pq = parseQuery(route.q);
   v.innerHTML = `<header class="page-h">
       <div class="kicker">Sujet · ${esc(REGIONS.find(([r]) => r === state.region)[1])}</div>
       <h1>« ${esc(route.q)} »</h1>
       <p>Les histoires des dernières 48 heures, dans les médias que Prisme lit directement.</p>
+      ${pq.also.length ? `<p class="q-also">Prisme cherche aussi : ${pq.also.map((w) => `<b>${esc(w)}</b>`).join(", ")}</p>` : ""}
       <div class="actions">
         <button class="btn${followed ? " ghost" : ""}" type="button" id="follow">${followed ? "✓ Suivi" : "★ Suivre ce sujet"}</button>
-        <a class="btn ghost" href="#wide" id="wideBtn">Chercher dans tous les articles (48 h)</a>
+        <a class="btn ghost" href="#wide" id="wideBtn">Chercher dans tous les articles</a>
+        ${shareBtn({ title: `« ${route.q} » sur Prisme`, text: `Qui parle de « ${route.q} », de la gauche à la droite`, url: absUrl(href({ q: route.q })) }, true)}
       </div>
+      <details class="q-help"><summary>Astuces de recherche</summary>
+        <ul>
+          <li><b>"phrase exacte"</b> entre guillemets : <code>"banque du canada"</code></li>
+          <li><b>-mot</b> pour exclure : <code>canadiens -hockey</code></li>
+          <li>Les <b>synonymes et traductions</b> sont inclus : <code>ovni</code> trouve aussi <i>UFO</i> et <i>PAN</i>, <code>ia</code> trouve <i>AI</i>.</li>
+          <li>Le <b>nom d'un média</b> (« TVA », « Le Devoir ») ouvre sa page, où tu peux fouiller ses articles.</li>
+        </ul>
+      </details>
     </header>
     <section id="outletHits" hidden></section>
     <div class="layout">
@@ -1284,7 +1454,7 @@ function viewSearch(v, route) {
     if (ff.stories.length < 3 && state.route.view === "search" && state.route.q === route.q) loadWide(route.q, false);
   };
   if (f) check();
-  if (state.wide.has(`${route.q}|${state.region}`) || state.pendingWide === route.q) { state.pendingWide = null; loadWide(route.q, state.wide.size > 0); }
+  if (state.wide.has(`${route.q}|${state.region}|${state.wf.days}`) || state.pendingWide === route.q) { state.pendingWide = null; loadWide(route.q, state.wide.size > 0); }
   // La recherche nomme peut-être un média : on le propose en premier.
   articlesOf(state.region).then((idx) => {
     const hits = matchOutlets(idx.domains, route.q);
@@ -1300,64 +1470,376 @@ function viewSearch(v, route) {
 
 const emptySearch = (q) => `<div class="empty" style="padding-bottom:10px"><h3>Rien dans les dernières 48 heures.</h3><p>Aucune histoire de Prisme ne correspond à « ${esc(q)} ». Voici ce qu'on trouve dans tous les articles lus par Prisme.</p></div>`;
 
-/* ---------- La page d'un média : ses derniers articles et ses histoires du moment ---------- */
+/* ---------- La page d'un média : fouiller ses articles des 7 derniers jours ---------- */
+const outletFileName = (d) => `${d.toLowerCase().replace(/[^a-z0-9.-]/g, "_")}.json`;
+// Les articles d'un média (archive de 7 jours du robot, avec image et extrait). Repli : l'édition en cours.
+async function outletArticles(domain) {
+  try {
+    const raw = await dataJson(`m/${outletFileName(domain)}`, 15 * 60e3);
+    if (raw._decoded) return raw._decoded;
+    const [name, k, owner, country, bias, st] = raw.meta;
+    const media = mediaFromKey(name, k, owner, country, bias, st);
+    const items = raw.items.map(([title, url, min, lang, cats, image, summary]) => ({
+      title, url, domain, sourceName: name, media, published: min ? new Date(min * 60000).toISOString() : null,
+      lang, cats: cats || 0, image, summary, fold: foldText(`${title} ${summary || ""}`),
+    }));
+    return (raw._decoded = { domain, name, media, items, days: 7 });
+  } catch {
+    for (const r of [state.region, "monde"]) {
+      const idx = await articlesOf(r).catch(() => null);
+      const d = idx?.domains.find((x) => x.domain === domain);
+      if (d) return { domain, name: d.name, media: d.media, items: idx.items.filter((a) => a.domain === domain), days: 2 };
+    }
+    return null;
+  }
+}
+
+const dayKey = (iso) => { const d = new Date(iso); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+function dayLabel(key) {
+  const today = dayKey(new Date().toISOString()), y = dayKey(new Date(Date.now() - 864e5).toISOString());
+  if (key === today) return "Aujourd'hui";
+  if (key === y) return "Hier";
+  const [Y, M, D] = key.split("-").map(Number);
+  const s = new Date(Y, M - 1, D).toLocaleDateString(LOCALE, { weekday: "long", day: "numeric", month: "long" });
+  return s[0].toUpperCase() + s.slice(1);
+}
+// Les noms propres qui reviennent le plus dans les titres d'un média.
+const SUBJ_STOP = /^(Le|La|Les|Un|Une|Des|Du|De|Au|Aux|En|Et|Pour|Avec|Sur|Dans|The|A|An|In|On|Of|For|And|With|How|Why|What|Who|When|This|After|Quand|Comment|Pourquoi|Voici|Selon|Après|Avant|Il|Elle|Ils|Ce|Ces|Cette|Son|Sa|Ses|Leur|Que|Qui|Où|Is|Are|It|He|She|They|We|You|Here|Not|No|Our|Your|Their|His|Her|Its|My|VIDÉO|VIDEO|EN|DIRECT|LIVE|PHOTOS|Opinion|Chronique|Analyse|Lettre|Éditorial|Exclusive|Watch|Breaking)$/;
+function outletSubjects(items, n = 12) {
+  const count = new Map(), shape = new Map();
+  for (const a of items) {
+    const seen = new Set();
+    for (const m of a.title.matchAll(/\b(\p{Lu}[\p{L}'’-]{2,}(?:\s+\p{Lu}[\p{L}'’-]{2,})?)/gu)) {
+      const raw = m[1];
+      if (SUBJ_STOP.test(raw.split(/\s+/)[0]) || (/^[\p{Lu}\s'’-]+$/u.test(raw) && raw.length > 4)) continue;
+      const k = foldText(raw);
+      if (seen.has(k)) continue;
+      seen.add(k);
+      count.set(k, (count.get(k) || 0) + 1);
+      if (!shape.has(k)) shape.set(k, raw);
+    }
+  }
+  return [...count.entries()].filter(([, c]) => c >= 2).sort((a, b) => b[1] - a[1]).slice(0, n).map(([k, c]) => [shape.get(k), c]);
+}
+
+const OF_PERIODS = [["all", "7 jours"], ["24", "24 h"], ["6", "6 h"]];
 async function viewOutlet(v, route) {
-  v.innerHTML = `<div class="page-h">${'<div class="skel" style="height:44px;width:50%;margin-top:10px"></div>'.repeat(2)}</div>`;
-  let idx = await articlesOf(state.region).catch(() => null);
-  let d = idx?.domains.find((x) => x.domain === route.m);
-  if (!d && state.region !== "monde") { idx = await articlesOf("monde").catch(() => null); d = idx?.domains.find((x) => x.domain === route.m); }
+  v.innerHTML = `<div class="page-h">${'<div class="skel" style="height:44px;width:50%;margin-top:10px"></div>'.repeat(3)}</div>`;
+  const [data, ed] = await Promise.all([outletArticles(route.m), edition(state.region).catch(() => null)]);
   if (state.route.view !== "outlet" || state.route.m !== route.m) return;
-  if (!d) {
-    v.innerHTML = `<div class="empty"><h3>Ce média n'a rien publié dans les dernières 48 heures.</h3><p><button class="btn ghost" type="button" data-domain="${esc(route.m)}" data-name="${esc(route.m)}">Voir sa fiche</button></p></div>`;
+  if (!data || !data.items.length) {
+    v.innerHTML = `<div class="empty"><h3>Ce média n'a rien publié dans les derniers jours.</h3><p>Prisme ne trouve aucun article récent de <b>${esc(route.m)}</b>.</p><p><button class="btn ghost" type="button" data-domain="${esc(route.m)}" data-name="${esc(route.m)}">Voir sa fiche</button></p></div>`;
     return;
   }
-  document.title = `${d.name} — Prisme`;
-  const items = idx.items.filter((a) => a.domain === d.domain).slice(0, 120);
-  const ed = await edition(state.region).catch(() => null);
-  const stories = (ed?.stories || []).filter((s) => s.sources >= 2 && s.articles.some((a) => a.domain === d.domain)).slice(0, 6);
+  const { domain, name, media: m, items } = data;
+  document.title = `${name} — Prisme`;
+  // Quelles histoires de l'édition contiennent ses articles ?
+  const storyOf = new Map();
+  for (const s of ed?.stories || []) if (s.sources >= 2) for (const a of s.articles) if (a.domain === domain) storyOf.set(a.url, s);
+  const stories = [...new Set(storyOf.values())].sort((a, b) => b.sources - a.sources).slice(0, 5);
   for (const s of stories) state.stories.set(s.id, s);
-  const m = d.media;
-  v.innerHTML = `<header class="page-h outlet-head">
-      <div class="kicker">Média · ${esc(regionLabel())}</div>
-      <h1>${favicon(d.domain, d.name)} ${esc(d.name)}</h1>
-      <p class="outlet-meta">${badge(m)} ${m.known ? `<span>Propriété : <b>${esc(m.owner)}</b></span>` : ""} ${m.country ? `<span>${esc(countryName(m.country))}</span>` : ""} <a class="link" href="https://${esc(d.domain)}" target="_blank" rel="noopener noreferrer">${esc(d.domain)} ↗</a></p>
-      <div class="actions"><button class="btn" type="button" data-domain="${esc(d.domain)}" data-name="${esc(d.name)}">Fiche complète (propriétaire, groupe)</button></div>
+
+  // Activité des 7 derniers jours.
+  const days = [];
+  for (let i = 6; i >= 0; i--) days.push(dayKey(new Date(Date.now() - i * 864e5).toISOString()));
+  const perDay = Object.fromEntries(days.map((d) => [d, 0]));
+  for (const a of items) if (a.published) { const k = dayKey(a.published); if (k in perDay) perDay[k]++; }
+  const activeDays = Math.max(1, days.filter((d) => perDay[d]).length);
+  const maxDay = Math.max(1, ...Object.values(perDay));
+  const recent48 = items.filter((a) => a.published && Date.now() - Date.parse(a.published) < 48 * 36e5);
+  const inStories = recent48.filter((a) => storyOf.has(a.url)).length;
+  const catCount = CATS.slice(1).map(([c, l], i) => [c, l, items.filter((a) => a.cats & (1 << i)).length]).filter((x) => x[2]).sort((a, b) => b[2] - a[2]);
+  const langCount = new Map();
+  for (const a of items) { const l = a.lang || "fr"; langCount.set(l, (langCount.get(l) || 0) + 1); }
+  const subjects = outletSubjects(items);
+  const followed = follows.has(domain);
+
+  const f = state.of && state.of.domain === domain ? state.of : (state.of = { domain, q: "", period: "all", cat: "all", lang: "all", inStory: false, sort: "new", view: store.get("ofView", "list"), shown: 40 });
+
+  v.innerHTML = `<div class="o-page"><header class="o-hero">
+      <div class="o-id">
+        <span class="o-logo">${favicon(domain, name)}</span>
+        <div>
+          <div class="kicker">Média · ${esc(m.country ? countryName(m.country) : regionLabel())}</div>
+          <h1 data-no-tr>${esc(name)}</h1>
+          <p class="o-meta">${badge(m)}${m.known ? `<span>Propriété : <b>${esc(m.owner)}</b></span>` : ""}<a class="link" href="https://${esc(domain)}" target="_blank" rel="noopener noreferrer">${esc(domain)} ↗</a></p>
+        </div>
+      </div>
+      <div class="o-actions">
+        <button class="btn${followed ? " ghost" : ""}" type="button" id="oFollow">${followed ? "✓ Suivi" : "★ Suivre ce média"}</button>
+        ${shareBtn({ title: `${name} sur Prisme`, text: `Les articles de ${name}, son orientation et son propriétaire`, url: absUrl(href({ m: domain })) }, true)}
+        <button class="act act-l" type="button" data-domain="${esc(domain)}" data-name="${esc(name)}">${ico("plus")}<span>Fiche complète</span></button>
+      </div>
+      <div class="o-stats">
+        <div><b>${items.length}</b><small>articles en ${data.days > 2 ? "7 jours" : "48 h"}</small></div>
+        <div><b>${Math.round(items.length / (data.days > 2 ? activeDays : 2))}</b><small>par jour en moyenne</small></div>
+        <div><b>${recent48.length ? Math.round((inStories / recent48.length) * 100) : 0} %</b><small>dans une histoire couverte par d'autres</small></div>
+        <div><b>${esc(catCount[0]?.[1] || "—")}</b><small>rubrique principale</small></div>
+      </div>
+      ${data.days > 2 ? `<div class="o-days" role="group" aria-label="Articles par jour">${days.map((d) => `<button type="button" data-day="${d}" aria-pressed="${f.period === d}" title="${esc(dayLabel(d))} : ${plural(perDay[d], "article")}">
+        <span class="od-bar"><i style="height:${(perDay[d] / maxDay) * 100}%"></i></span><span class="od-n">${perDay[d]}</span><span class="od-l">${esc(new Date(d + "T12:00").toLocaleDateString(LOCALE, { weekday: "short" }))}</span></button>`).join("")}</div>` : ""}
+      ${subjects.length ? `<div class="o-subj"><span class="label">Ses sujets</span>${subjects.map(([w, c]) => `<button class="chip" type="button" data-subj="${esc(w)}">${esc(w)} <span class="muted">${c}</span></button>`).join("")}</div>` : ""}
     </header>
-    ${stories.length ? `<section class="sec"><h2 class="block-h">Ses histoires du moment <small>celles que d'autres médias couvrent aussi</small></h2>${stories.map((s) => storyRow(s)).join("")}</section>` : ""}
-    <section class="sec">
-      <h2 class="block-h">Ses derniers articles <small>${plural(items.length, "article")} en 48 h</small></h2>
-      <ul class="arts">${items.map((a) => `<li class="art"><time>${esc(ago(a.published))}</time><div>${langTag(a.lang)} ${artLink(a, "t")} ${transLink(a)}</div></li>`).join("")}</ul>
-    </section>`;
+
+    ${stories.length ? `<section class="sec o-stories-sec"><h2 class="block-h">Dans les grandes histoires <small>ses articles que d'autres médias couvrent aussi</small></h2>
+      <ul class="o-stories">${stories.map((s) => `<li><a href="${href({ h: s.id })}" data-nav><span class="os-t" data-no-tr>${esc(s.title)}</span><span class="os-m">${bar(s.counts)}<small>${plural(s.sources, "média")} en parlent</small></span></a></li>`).join("")}</ul></section>` : ""}
+
+    <section class="o-browse" id="oBrowse">
+      <div class="o-tools" id="oTools">
+        <label class="o-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="search" id="oQ" placeholder="Chercher dans ses articles…" value="${esc(f.q)}" autocomplete="off" enterkeyhint="search">
+          <button type="button" id="oClear" class="o-clear" ${f.q ? "" : "hidden"} aria-label="Effacer">×</button>
+        </label>
+        <div class="o-chips">
+          <div class="seg" role="group" aria-label="Période">${OF_PERIODS.filter(([k]) => data.days > 2 || k !== "all").map(([k, l]) => `<button type="button" data-period="${k}" aria-pressed="${f.period === k}">${l}</button>`).join("")}${data.days <= 2 ? `<button type="button" data-period="all" aria-pressed="${f.period === "all"}">48 h</button>` : ""}</div>
+          ${catCount.length > 1 ? `<select id="oCat" aria-label="Rubrique"><option value="all">Toutes les rubriques</option>${catCount.map(([c, l, n]) => `<option value="${c}" ${f.cat === c ? "selected" : ""}>${esc(l)} (${n})</option>`).join("")}</select>` : ""}
+          ${langCount.size > 1 ? `<select id="oLang" aria-label="Langue"><option value="all">Toutes les langues</option>${[...langCount.entries()].map(([l, n]) => `<option value="${l}" ${f.lang === l ? "selected" : ""}>${esc(LANG_NAME[l] ? LANG_NAME[l][0].toUpperCase() + LANG_NAME[l].slice(1) : l === "fr" ? "Français" : l)} (${n})</option>`).join("")}</select>` : ""}
+          <button type="button" class="tog" id="oStory" aria-pressed="${f.inStory}">Dans une histoire</button>
+          <select id="oSort" aria-label="Ordre"><option value="new" ${f.sort === "new" ? "selected" : ""}>Plus récents</option><option value="old" ${f.sort === "old" ? "selected" : ""}>Plus anciens</option></select>
+          <div class="seg seg-ico" role="group" aria-label="Affichage">
+            <button type="button" data-view="list" aria-pressed="${f.view === "list"}" title="Liste"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+            <button type="button" data-view="cards" aria-pressed="${f.view === "cards"}" title="Cartes"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7"/></svg></button>
+          </div>
+        </div>
+      </div>
+      <div class="o-count" id="oCount" aria-live="polite"></div>
+      <div id="oList"></div>
+    </section></div>`;
+
+  const filtered = () => {
+    const pq = f.q.trim() ? parseQuery(f.q) : null;
+    const now = Date.now();
+    let l = items.filter((a) => {
+      if (pq && !matchQuery(a.fold, pq)) return false;
+      if (f.period === "24" || f.period === "6") { if (!a.published || now - Date.parse(a.published) > Number(f.period) * 36e5) return false; }
+      else if (f.period !== "all" && (!a.published || dayKey(a.published) !== f.period)) return false;
+      if (f.cat !== "all" && !(a.cats & (1 << (CATS.findIndex(([c]) => c === f.cat) - 1)))) return false;
+      if (f.lang !== "all" && (a.lang || "fr") !== f.lang) return false;
+      if (f.inStory && !storyOf.has(a.url)) return false;
+      return true;
+    });
+    if (f.sort === "old") l = [...l].reverse();
+    return { l, marks: pq ? pq.marks : [] };
+  };
+  const item = (a, marks) => {
+    const s = storyOf.get(a.url);
+    const cat = CATS.slice(1).find((c, i) => a.cats & (1 << i));
+    const meta = { u: a.url, d: domain, n: name, k: biasKey(m), o: m.known ? m.owner : null, c: m.country || null, t: a.title };
+    const link = (cls, inner) => `<a class="${cls}${reads.has(a.url) ? " is-read" : ""}" data-no-tr href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener noreferrer" data-read="${esc(JSON.stringify(meta))}">${inner}</a>`;
+    const img = a.image ? `<a class="oa-img" href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(a.image))}" alt="" loading="lazy" referrerpolicy="no-referrer"></a>` : "";
+    return `<article class="oa${a.image ? "" : " noimg"}">
+      ${f.view === "cards" ? img : ""}
+      <div class="oa-body">
+        <div class="oa-meta"><time>${esc(f.view === "cards" ? ago(a.published) : clock(a.published))}</time>${cat ? `<span class="oa-cat">${esc(cat[1])}</span>` : ""}${langTag(a.lang)}</div>
+        ${link("oa-t", markWords(a.title, marks))}
+        ${a.summary ? `<p class="oa-x" data-no-tr>${markWords(a.summary, marks)}</p>` : ""}
+        <div class="oa-foot">
+          ${s ? `<a class="oa-story" href="${href({ h: s.id })}" data-nav>${bar(s.counts)}<span>Dans une histoire · ${plural(s.sources, "média")}</span> →</a>` : ""}
+          ${transLink(a)}
+          <span class="acts">${favBtn(artFav(a))}${shareBtn(artShare(a))}</span>
+        </div>
+      </div>
+      ${f.view === "cards" ? "" : img}
+    </article>`;
+  };
+  const draw = () => {
+    const { l, marks } = filtered();
+    const active = f.q || f.period !== "all" || f.cat !== "all" || f.lang !== "all" || f.inStory;
+    $("#oCount").innerHTML = `<b>${plural(l.length, "article")}</b>${active ? ` sur ${items.length} · <button class="link" type="button" id="oReset">Tout effacer</button>` : ""}`;
+    const list = $("#oList");
+    list.className = f.view === "cards" ? "o-cards" : "o-list";
+    if (!l.length) {
+      list.innerHTML = `<div class="empty"><h3>Aucun article avec ces filtres.</h3><p>Essaie un autre mot, ou élargis la période.</p></div>`;
+    } else {
+      const shown = l.slice(0, f.shown);
+      let html = "", cur = null;
+      for (const a of shown) {
+        const k = a.published ? dayKey(a.published) : "?";
+        if (k !== cur) {
+          if (cur !== null) html += "</div>";
+          const n = l.filter((x) => x.published && dayKey(x.published) === k).length;
+          html += `<h3 class="o-day"><span>${esc(k === "?" ? "Sans date" : dayLabel(k))}</span><small>${plural(n, "article")}</small></h3><div class="o-group">`;
+          cur = k;
+        }
+        html += item(a, marks);
+      }
+      html += "</div>";
+      if (l.length > f.shown) html += `<div class="more-row"><button class="btn ghost" type="button" id="oMore">Voir ${Math.min(40, l.length - f.shown)} articles de plus</button></div>`;
+      list.innerHTML = html;
+    }
+    $$("[data-day]", v).forEach((b) => b.setAttribute("aria-pressed", f.period === b.dataset.day));
+    $$("[data-period]", v).forEach((b) => b.setAttribute("aria-pressed", f.period === b.dataset.period));
+  };
+  const redraw = (scroll = false) => {
+    f.shown = 40;
+    draw();
+    if (scroll) { const t = $("#oBrowse"); if (t && t.getBoundingClientRect().top < 0) t.scrollIntoView({ block: "start" }); }
+  };
+  let timer = null;
+  $("#oQ").oninput = (e) => { f.q = e.target.value; $("#oClear").hidden = !f.q; clearTimeout(timer); timer = setTimeout(() => redraw(), 140); };
+  $("#oClear").onclick = () => { f.q = ""; $("#oQ").value = ""; $("#oClear").hidden = true; redraw(); };
+  $("#oCat") && ($("#oCat").onchange = (e) => { f.cat = e.target.value; redraw(true); });
+  $("#oLang") && ($("#oLang").onchange = (e) => { f.lang = e.target.value; redraw(true); });
+  $("#oSort").onchange = (e) => { f.sort = e.target.value; redraw(true); };
+  $("#oFollow").onclick = (e) => {
+    const on = follows.toggle(domain, name);
+    e.target.textContent = on ? "✓ Suivi" : "★ Suivre ce média";
+    e.target.classList.toggle("ghost", on);
+    toast(on ? `Tu suis ${name} : ses articles apparaissent dans « Favoris ».` : `Tu ne suis plus ${name}.`);
+  };
+  $(".o-page", v).onclick = (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    if (b.dataset.period) { f.period = b.dataset.period; redraw(true); }
+    else if (b.dataset.day) { f.period = f.period === b.dataset.day ? "all" : b.dataset.day; redraw(); $("#oBrowse").scrollIntoView({ behavior: "smooth", block: "start" }); }
+    else if (b.dataset.view) { f.view = b.dataset.view; store.set("ofView", f.view); $$("[data-view]", v).forEach((x) => x.setAttribute("aria-pressed", x === b)); draw(); }
+    else if (b.dataset.subj) { f.q = `"${b.dataset.subj}"`; $("#oQ").value = f.q; $("#oClear").hidden = false; redraw(); $("#oBrowse").scrollIntoView({ behavior: "smooth", block: "start" }); }
+    else if (b.id === "oStory") { f.inStory = !f.inStory; b.setAttribute("aria-pressed", f.inStory); redraw(true); }
+    else if (b.id === "oReset") { Object.assign(f, { q: "", period: "all", cat: "all", lang: "all", inStory: false }); state.of = null; viewOutlet(v, route); }
+    else if (b.id === "oMore") { f.shown += 40; draw(); }
+  };
+  draw();
+}
+
+/* ---------- Favoris : histoires et articles enregistrés, médias suivis ---------- */
+async function viewFavs(v, tab = store.get("favTab", "tout"), q = "") {
+  document.title = "Favoris — Prisme";
+  const all = favs.list();
+  const fl = follows.list();
+  const fq = q.trim() ? parseQuery(q) : null;
+  const keep = (x) => !fq || matchQuery(foldText(`${x.t} ${x.n || ""}`), fq);
+  const st = all.filter((x) => x.type === "s" && keep(x)), ar = all.filter((x) => x.type === "a" && keep(x));
+  const tabs = [["tout", "Tout", st.length + ar.length], ["histoires", "Histoires", st.length], ["articles", "Articles", ar.length], ["medias", "Mes médias", fl.length]];
+  const date = (ts) => new Date(ts).toLocaleDateString(LOCALE, { day: "numeric", month: "short" });
+  const storyFavRow = (x) => `<li class="fv">
+      ${x.img ? `<span class="fv-img"><img src="${esc(safeUrl(x.img))}" alt="" loading="lazy" referrerpolicy="no-referrer"></span>` : ""}
+      <div class="fv-body"><div class="kicker">Histoire · ${plural(x.src || 1, "média")} · enregistrée le ${esc(date(x.at))}</div>
+        <a class="fv-t" data-no-tr href="${href({ h: x.id, region: x.r || state.region })}" data-nav>${esc(x.t)}</a>
+        <div class="fv-foot"><span class="acts">${favBtn(x, true)}${shareBtn({ title: x.t, text: x.t, url: absUrl(href({ h: x.id, region: x.r || state.region })) }, true)}</span></div></div></li>`;
+  const artFavRow = (x) => `<li class="fv">
+      ${x.img ? `<span class="fv-img"><img src="${esc(safeUrl(x.img))}" alt="" loading="lazy" referrerpolicy="no-referrer"></span>` : ""}
+      <div class="fv-body"><div class="kicker">${x.d ? `<a href="${href({ m: x.d })}" data-nav>${esc(x.n || x.d)}</a>` : "Article"} · enregistré le ${esc(date(x.at))}</div>
+        <a class="fv-t" data-no-tr href="${esc(safeUrl(x.u))}" target="_blank" rel="noopener noreferrer">${esc(x.t)}</a>
+        <div class="fv-foot"><span class="acts">${favBtn(x, true)}${shareBtn({ title: x.t, text: x.t, url: x.u }, true)}</span></div></div></li>`;
+
+  v.innerHTML = `<header class="page-h">
+      <div class="kicker">Favoris · gardés sur cet appareil seulement</div>
+      <h1>Mes favoris</h1>
+      <p>Touche ★ sur une histoire ou un article pour l'enregistrer ici, et « Suivre ce média » sur la page d'un média pour voir ses derniers articles.</p>
+    </header>
+    <div class="fv-tools">
+      <nav class="tabs" role="tablist">${tabs.map(([k, l, n]) => `<button type="button" role="tab" data-ftab="${k}" aria-selected="${tab === k}">${l}<sup>${n}</sup></button>`).join("")}</nav>
+      <label class="o-search fv-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" id="fvQ" placeholder="Chercher dans mes favoris…" value="${esc(q)}" autocomplete="off"></label>
+    </div>
+    <div id="fvBody"></div>`;
+  const body = $("#fvBody");
+  if (tab === "medias") {
+    if (!fl.length) body.innerHTML = `<div class="empty"><h3>Tu ne suis aucun média pour l'instant.</h3><p>Cherche un média (par exemple « TVA » ou « Le Devoir »), ouvre sa page et touche « Suivre ce média ».</p></div>`;
+    else {
+      body.innerHTML = `<div class="fv-outlets">${fl.map((x) => `<a class="outlet-hit" href="${href({ m: x.d })}" data-nav>${favicon(x.d, x.n)}<span class="oh-main"><b>${esc(x.n)}</b><small>${esc(x.d)}</small></span><span class="oh-side"><small>Voir ses articles →</small></span></a>`).join("")}</div>
+        <h2 class="block-h" style="margin-top:22px">Le fil de mes médias <small>leurs derniers articles</small></h2><div id="fvFeed"><div class="loader">Chargement…</div></div>`;
+      const set = new Set(fl.map((x) => x.d));
+      const idx = await articlesOf(state.region).catch(() => null);
+      let list = (idx?.items || []).filter((a) => set.has(a.domain));
+      if (state.region !== "monde" && fl.some((x) => !idx?.domains.some((d) => d.domain === x.d))) {
+        const w = await articlesOf("monde").catch(() => null);
+        const seen = new Set(list.map((a) => a.url));
+        list = list.concat((w?.items || []).filter((a) => set.has(a.domain) && !seen.has(a.url)));
+      }
+      list.sort((a, b) => (b.published || "").localeCompare(a.published || ""));
+      if (state.route.view !== "favoris") return;
+      if (fq) list = list.filter((a) => matchQuery(a.fold, fq));
+      $("#fvFeed").innerHTML = list.length ? `<ul class="arts2">${list.slice(0, 80).map((a) => artRow(a, fq ? fq.marks : [])).join("")}</ul>` : `<div class="empty"><p>Rien de neuf de ces médias dans les dernières 48 heures.</p></div>`;
+    }
+  } else {
+    const showS = tab !== "articles" ? st : [], showA = tab !== "histoires" ? ar : [];
+    if (!showS.length && !showA.length) {
+      body.innerHTML = `<div class="empty"><h3>${q ? "Aucun favori ne correspond." : "Aucun favori pour l'instant."}</h3><p>${q ? "Essaie un autre mot." : "Touche l'étoile ★ à côté d'une histoire ou d'un article pour le retrouver ici, même après qu'il soit sorti du fil."}</p><a class="btn" href="${href({})}" data-nav>Aller au fil</a></div>`;
+    } else {
+      body.innerHTML = `${showS.length ? `${tab === "tout" ? `<h2 class="block-h">Histoires <small>${showS.length}</small></h2>` : ""}<ul class="fv-list">${showS.map(storyFavRow).join("")}</ul>` : ""}
+        ${showA.length ? `${tab === "tout" ? `<h2 class="block-h" style="margin-top:22px">Articles <small>${showA.length}</small></h2>` : ""}<ul class="fv-list">${showA.map(artFavRow).join("")}</ul>` : ""}
+        <p class="note" style="margin-top:18px">Une histoire enregistrée reste ici, mais sa page n'est disponible que tant qu'elle est dans l'édition (environ 48 heures).</p>`;
+    }
+  }
+  $(".tabs", v).onclick = (e) => { const b = e.target.closest("[data-ftab]"); if (b) { store.set("favTab", b.dataset.ftab); viewFavs(v, b.dataset.ftab, $("#fvQ").value); } };
+  let t = null;
+  $("#fvQ").oninput = (e) => { clearTimeout(t); t = setTimeout(() => { viewFavs(v, tab, e.target.value).then(() => { const i = $("#fvQ"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }); }, 200); };
+}
+
+// Filtres des résultats : période, côté, langue, rubrique (gardés pendant la session).
+state.wf = { days: 2, hours: 0, side: "all", lang: "all", cat: "all" };
+const WF_PERIODS = [[6, "6 h"], [24, "24 h"], [48, "48 h"], [0, "7 jours"]];
+const WF_SIDES = [["all", "Tous les côtés"], ["left", "Gauche"], ["center", "Centre"], ["right", "Droite"], ["other", "État ou non évalués"]];
+function wideFilter(list) {
+  const f = state.wf, now = Date.now();
+  return list.filter((a) => (!f.hours || (a.published && now - Date.parse(a.published) <= f.hours * 36e5))
+    && (f.side === "all" || (sideOf(a.media) || "other") === f.side)
+    && (f.lang === "all" || (f.lang === "autres" ? a.lang && !["fr", "en"].includes(a.lang) : (a.lang || "fr") === f.lang))
+    && (f.cat === "all" || (a.cats & (1 << (CATS.findIndex(([c]) => c === f.cat) - 1)))));
 }
 
 async function loadWide(q, scroll = true) {
   const el = $("#wide");
   if (!el) return;
-  const key = `${q}|${state.region}`;
+  const key = `${q}|${state.region}|${state.wf.days}`;
   const f = state.feeds.get(feedKey(state.route));
   const intro = f && !f.stories.length && !f.loading ? emptySearch(q) : "";
   if (scroll) el.scrollIntoView({ behavior: "smooth", block: "start" });
   if (!state.wide.has(key)) {
-    el.innerHTML = `${intro}<h2 class="block-h">Tous les articles <small>48 h</small></h2><div class="loader">Recherche dans des milliers de médias…</div>`;
-    try { state.wide.set(key, await api(`/api/search?q=${encodeURIComponent(q)}&region=${state.region}`)); }
+    el.innerHTML = `${intro}<h2 class="block-h">Tous les articles <small>${state.wf.days > 2 ? "7 jours" : "48 h"}</small></h2><div class="loader">Recherche dans des milliers de médias…</div>`;
+    try { state.wide.set(key, await api(`/api/search?q=${encodeURIComponent(q)}&region=${state.region}&days=${state.wf.days}`)); }
     catch (e) { el.innerHTML = `<h2 class="block-h">Tous les articles</h2><div class="empty"><p>${esc(e.message)}</p></div>`; return; }
     if (state.route.view !== "search" || state.route.q !== q) return;
   }
-  state.wideBias.clear();
   drawWide(el, state.wide.get(key), intro);
 }
 
+// Chronologie d'un sujet : combien d'articles par tranche, empilés par côté.
+function timelineChart(list, days) {
+  const now = Date.now(), span = days > 2 ? 7 * 864e5 : 48 * 36e5, n = days > 2 ? 28 : 24, step = span / n;
+  const bins = Array.from({ length: n }, () => ({ left: 0, center: 0, right: 0, other: 0 }));
+  for (const a of list) {
+    if (!a.published) continue;
+    const i = n - 1 - Math.floor((now - Date.parse(a.published)) / step);
+    if (i >= 0 && i < n) bins[i][sideOf(a.media) || "other"]++;
+  }
+  const max = Math.max(1, ...bins.map((b) => b.left + b.center + b.right + b.other));
+  const colors = { left: "var(--b-l2)", center: "var(--b-c)", right: "var(--b-r2)", other: "var(--b-unk)" };
+  const label = (i) => { const d = new Date(now - (n - 1 - i) * step); return days > 2 ? d.toLocaleDateString(LOCALE, { weekday: "short", day: "numeric" }) : d.toLocaleString(LOCALE, { weekday: "short", hour: "2-digit", minute: "2-digit" }); };
+  return `<div class="tl" role="img" aria-label="Nombre d'articles dans le temps">
+    <div class="tl-bars">${bins.map((b, i) => { const t = b.left + b.center + b.right + b.other; return `<span class="tl-col" title="${esc(label(i))} : ${plural(t, "article")}">${["other", "right", "center", "left"].map((k) => b[k] ? `<i style="height:${(b[k] / max) * 100}%;background:${colors[k]}"></i>` : "").join("")}</span>`; }).join("")}</div>
+    <div class="tl-axis"><span>${esc(label(0))}</span><span>${esc(label(Math.floor(n / 2)))}</span><span>maintenant</span></div>
+  </div>`;
+}
+
 function drawWide(el, d, intro = "") {
-  const a = d.articles;
+  const all = d.articles;
+  const a = wideFilter(all);
+  const fd = { ...d, articles: a };
   const doms = new Set(a.map((x) => x.domain)).size;
   const counts = Object.fromEntries(ORDER.map((k) => [k, 0]));
   const seen = new Set();
   for (const x of a) if (!seen.has(x.domain)) { seen.add(x.domain); counts[biasKey(x.media)]++; }
+  const f = state.wf;
+  const langs = new Map();
+  for (const x of all) { const l = !x.lang || x.lang === "fr" ? "fr" : x.lang === "en" ? "en" : "autres"; langs.set(l, (langs.get(l) || 0) + 1); }
+  const cats = CATS.slice(1).filter(([c], i) => all.some((x) => x.cats & (1 << i)));
+  const chip = (attr, val, cur, label, n) => `<button class="chip" type="button" data-${attr}="${val}" aria-pressed="${String(cur) === String(val)}">${label}${n != null ? ` <span class="muted">${n}</span>` : ""}</button>`;
+  const period = f.days > 2 && !f.hours ? 0 : f.hours || 48;
+  const filters = `<div class="wf">
+      <div class="wf-row"><span class="label">Période</span>${WF_PERIODS.map(([h, l]) => chip("hours", h, period, l)).join("")}</div>
+      <div class="wf-row"><span class="label">Côté</span>${WF_SIDES.map(([k, l]) => chip("side", k, f.side, k === "all" ? l : `<span class="sw" style="background:${{ left: "var(--b-l2)", center: "var(--b-c)", right: "var(--b-r2)", other: "var(--b-unk)" }[k]}"></span>${l}`)).join("")}</div>
+      ${langs.size > 1 ? `<div class="wf-row"><span class="label">Langue</span>${chip("lang", "all", f.lang, "Toutes")}${[["fr", "Français"], ["en", "Anglais"], ["autres", "Autres"]].filter(([k]) => langs.has(k)).map(([k, l]) => chip("lang", k, f.lang, l, langs.get(k))).join("")}</div>` : ""}
+      ${cats.length > 1 ? `<div class="wf-row"><span class="label">Rubrique</span>${chip("cat", "all", f.cat, "Toutes")}${cats.map(([k, l]) => chip("cat", k, f.cat, l)).join("")}</div>` : ""}
+    </div>`;
   const tabs = [["articles", "Articles", a.length], ["comparer", "Comparer", null], ["medias", "Médias", doms], ["videos", "Vidéos", null]];
-  if (!a.length) { el.innerHTML = `${intro}<h2 class="block-h">Tous les articles <small>48 h</small></h2><div class="empty"><p>Aucun article des médias lus par Prisme ne contient tous ces mots. Essaie un mot plus court ou une autre édition (Monde entier cherche partout).</p></div>`; return; }
-  el.innerHTML = `${intro}<h2 class="block-h">Tous les articles <small>48 h · ${plural(a.length, "article")} · ${plural(doms, "média")}</small></h2>
-    <p class="note" style="margin:0 0 12px">Ici, Prisme cherche dans chaque article publié par les médias de cette édition depuis 48 heures, même ceux qui ne font pas partie d'une histoire. Aucun tri : du plus récent au plus ancien.</p>
-    ${bigBar(counts)}
+  const head = `<h2 class="block-h">Tous les articles <small>${f.days > 2 ? "7 jours" : "48 h"} · ${plural(a.length, "article")} · ${plural(doms, "média")}</small></h2>
+    <p class="note" style="margin:0 0 12px">Prisme fouille chaque article publié par les médias de cette édition, même ceux qui ne font pas partie d'une histoire. Aucun tri : du plus récent au plus ancien.${d.olderError ? ` ${esc(d.olderError)}` : ""}</p>`;
+  if (!all.length) { el.innerHTML = `${intro}${head}${filters}<div class="empty"><p>Aucun article des médias lus par Prisme ne contient tous ces mots. Essaie un mot plus court, enlève un filtre, ou change d'édition (Monde entier cherche partout).</p></div>`; bindWf(el, d); return; }
+  el.innerHTML = `${intro}${head}${filters}
+    ${a.length ? `${timelineChart(a, f.days)}${bigBar(counts)}` : ""}
     <nav class="tabs" role="tablist">${tabs.map(([k, l, n]) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${state.wideTab === k}">${l}${n != null ? `<sup>${n}</sup>` : ""}</button>`).join("")}</nav>
     <div id="widePanel"></div>`;
   $(".tabs", el).onclick = (e) => {
@@ -1365,13 +1847,42 @@ function drawWide(el, d, intro = "") {
     if (!b) return;
     state.wideTab = b.dataset.tab;
     $$(".tabs button", el).forEach((x) => x.setAttribute("aria-selected", x === b));
-    drawWidePanel(d);
+    drawWidePanel(fd);
   };
-  drawWidePanel(d);
+  bindWf(el, d);
+  drawWidePanel(fd);
+}
+function bindWf(el, d) {
+  $(".wf", el).onclick = (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    const f = state.wf;
+    if (b.dataset.hours != null) {
+      const h = Number(b.dataset.hours);
+      f.hours = h;
+      if (!h && f.days < 7) { f.days = 7; loadWide(d.query, false); return; }
+    }
+    if (b.dataset.side) f.side = b.dataset.side;
+    if (b.dataset.lang) f.lang = b.dataset.lang;
+    if (b.dataset.cat) f.cat = b.dataset.cat;
+    drawWide(el, d, el.querySelector(".empty h3") ? emptySearch(d.query) : "");
+  };
+}
+
+// Une ligne d'article dans une liste : média, heure, titre (mots cherchés en gras), actions.
+function artRow(x, marks = []) {
+  const title = marks.length ? markWords(x.title, marks) : esc(x.title);
+  const meta = { u: x.url, d: x.domain, n: x.sourceName, k: biasKey(x.media), o: x.media?.known ? x.media.owner : null, c: x.media?.country || null, t: x.title };
+  return `<li class="art2">
+    <div class="a2-top"><a class="src" href="${href({ m: x.domain })}" data-nav>${favicon(x.domain, x.sourceName)}<span>${esc(x.sourceName)}</span></a>${tag(x.media)}${langTag(x.lang)}<time>${esc(ago(x.published))}</time>
+      <span class="acts">${favBtn(artFav(x))}${shareBtn(artShare(x))}</span></div>
+    <a class="a2-t${reads.has(x.url) ? " is-read" : ""}" data-no-tr href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener noreferrer" data-read="${esc(JSON.stringify(meta))}">${title}</a> ${transLink(x)}
+  </li>`;
 }
 
 function drawWidePanel(d) {
   const p = $("#widePanel");
+  if (!p) return;
   const a = d.articles;
   if (state.wideTab === "comparer") {
     p.innerHTML = `<div class="cols3" style="margin-top:14px">${SIDES.map((side) => {
@@ -1390,20 +1901,15 @@ function drawWidePanel(d) {
     return;
   }
   if (state.wideTab === "videos") { drawVideos(p, d.query); return; }
-  const list = a.filter((x) => !state.wideBias.size || state.wideBias.has(biasKey(x.media)));
-  const c = Object.fromEntries(ORDER.map((k) => [k, a.filter((x) => biasKey(x.media) === k).length]));
-  p.innerHTML = `<div class="filters">${ORDER.filter((k) => c[k]).map((k) => `<button class="chip" type="button" data-bias="${k}" aria-pressed="${state.wideBias.has(k)}"><span class="sw" style="background:${BIAS[k].color}"></span>${BIAS[k].label} <span class="muted">${c[k]}</span></button>`).join("")}</div>
-    <ul class="arts">${list.slice(0, 80).map((x) => `<li class="art"><time>${esc(ago(x.published))}</time><div>
-      <div class="row"><button class="src" type="button" data-domain="${esc(x.domain)}" data-name="${esc(x.sourceName)}">${favicon(x.domain, x.sourceName)}<span>${esc(x.sourceName)}</span></button>${tag(x.media)}</div>
-      ${artLink(x, "t")}
-      ${x.media.known ? `<div class="own">${esc(x.media.owner)}</div>` : ""}</div></li>`).join("")}</ul>`;
-  $(".filters", p).onclick = (e) => {
-    const b = e.target.closest("[data-bias]");
-    if (!b) return;
-    const k = b.dataset.bias;
-    state.wideBias.has(k) ? state.wideBias.delete(k) : state.wideBias.add(k);
-    drawWidePanel(d);
+  if (!a.length) { p.innerHTML = `<div class="empty"><p>Aucun article avec ces filtres. Essaie « 7 jours » ou « Tous les côtés ».</p></div>`; return; }
+  let shown = 60;
+  const draw = () => {
+    p.innerHTML = `<ul class="arts2">${a.slice(0, shown).map((x) => artRow(x, d.marks || [])).join("")}</ul>
+      ${a.length > shown ? `<div class="more-row"><button class="btn ghost" type="button" id="wideMore">Voir ${Math.min(60, a.length - shown)} articles de plus</button></div>` : ""}`;
+    const m = $("#wideMore", p);
+    if (m) m.onclick = () => { shown += 60; draw(); };
   };
+  draw();
 }
 
 /* ---------- Vidéos (chaînes YouTube des médias, sans clé) ---------- */
@@ -1712,16 +2218,25 @@ async function viewMe(v, period = store.get("mePeriod", "30")) {
         </section>
         <section>
           <h2 class="block-h">Historique <small>${plural(list.length, "lecture")}</small></h2>
-          <ul class="hist">${[...list].reverse().slice(0, 12).map((r) => `<li>
-            <span class="tag"><i style="background:${(BIAS[r.k] || BIAS.unk).color}"></i>${esc(r.n || r.d)}</span>
-            <a href="${esc(safeUrl(r.u))}" target="_blank" rel="noopener noreferrer">${esc(r.t)}</a>
-            <button type="button" class="x" data-forget="${esc(r.u)}" aria-label="Oublier cette lecture" title="Oublier cette lecture">×</button>
-          </li>`).join("")}</ul>
+          <label class="o-search hist-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="search" id="histQ" placeholder="Chercher dans mes lectures…" autocomplete="off"></label>
+          <ul class="hist" id="histList"></ul>
           <button class="btn ghost" type="button" id="forgetAll" style="margin-top:12px">Tout effacer</button>
         </section>
       </div></aside>
     </div>`;
   bindMePeriod(v);
+  const drawHist = (q = "") => {
+    const pq = q.trim() ? parseQuery(q) : null;
+    const l = [...list].reverse().filter((r) => !pq || matchQuery(foldText(`${r.t} ${r.n || ""} ${r.o || ""}`), pq));
+    $("#histList").innerHTML = l.length ? l.slice(0, pq ? 60 : 12).map((r) => `<li>
+      <span class="tag"><i style="background:${(BIAS[r.k] || BIAS.unk).color}"></i>${esc(r.n || r.d)}</span>
+      <a href="${esc(safeUrl(r.u))}" target="_blank" rel="noopener noreferrer" data-no-tr>${pq ? markWords(r.t, pq.marks) : esc(r.t)}</a>
+      <button type="button" class="x" data-forget="${esc(r.u)}" aria-label="Oublier cette lecture" title="Oublier cette lecture">×</button>
+    </li>`).join("") : `<li class="muted">Aucune lecture ne correspond.</li>`;
+  };
+  drawHist();
+  $("#histQ").oninput = (e) => drawHist(e.target.value);
 
   v.querySelector(".hist").onclick = (e) => {
     const b = e.target.closest("[data-forget]");
@@ -2043,7 +2558,7 @@ function mediaSheet(domain, name, info) {
   const siblings = (w?.siblings || []).slice(0, 14);
   const pos = c && c.bias != null ? c.bias + 2 : -1;
 
-  return `<div class="dr-head">
+  return `<a class="btn dr-go" href="${href({ m: domain })}" data-nav data-close-drawer>Voir et fouiller ses articles →</a><div class="dr-head">
     ${w?.logo ? `<div class="dr-logo"><img src="${esc(safeUrl(w.logo))}" alt="" referrerpolicy="no-referrer"></div>` : `<div class="dr-logo fallback">${esc(title[0].toUpperCase())}</div>`}
     <h2 id="drawerTitle">${esc(title)}</h2>
     <a class="dom" href="https://${esc(domain)}" target="_blank" rel="noopener noreferrer">${esc(domain)} ↗</a>

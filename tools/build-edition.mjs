@@ -54,6 +54,21 @@ for (const region of REGIONS) {
   log(`édition ${region} : ${file.stories.length} histoires publiées sur ${file.totals.stories}, ${file.totals.outlets} médias`);
 }
 
+// 3 b) L'archive de 7 jours : page de chaque média et recherche sur 7 jours.
+{
+  const { loadArchive, mergeArchive, saveArchive, outletFiles, outletFileName, olderFile } = await import("../lib/archive.mjs");
+  mkdirSync(STATE, { recursive: true });
+  const ARCH = join(STATE, "archive.json");
+  const arch = mergeArchive(loadArchive(ARCH), index);
+  saveArchive(ARCH, arch);
+  mkdirSync(join(DATA, "m"), { recursive: true });
+  const files = outletFiles(arch);
+  for (const [domain, file] of files) writeFileSync(join(DATA, "m", outletFileName(domain)), JSON.stringify(file));
+  const current = new Set(index.articles.map((a) => a.url));
+  for (const region of REGIONS) writeFileSync(join(DATA, `older-${region}.json`), JSON.stringify(olderFile(arch, region, current)));
+  log(`archive : ${Object.keys(arch.items).length} articles sur 7 jours, ${files.length} pages de médias`);
+}
+
 // 4) Vidéos des chaînes de médias, et annuaire.
 const videos = await allVideos();
 writeFileSync(join(DATA, "videos.json"), JSON.stringify({ builtAt: new Date().toISOString(), videos }));

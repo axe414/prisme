@@ -18,6 +18,7 @@ const { getIndex } = await import("./lib/ingest.mjs");
 const { buildStories, editionFile, articlesFile, mondeLookup, REGIONS } = await import("./lib/edition.mjs");
 const { allVideos } = await import("./lib/videos.mjs");
 const { directory } = await import("./lib/media-db.mjs");
+const { loadArchive, mergeArchive, archiveFromIndex, outletFile, olderFile } = await import("./lib/archive.mjs");
 
 const types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon", ".webmanifest": "application/manifest+json", ".json": "application/json; charset=utf-8" };
 const port = Number(process.env.PORT) || 8888;
@@ -63,11 +64,25 @@ setTimeout(warmUp, 3000);
 setInterval(warmUp, 60e3).unref();
 
 let videosCache = { at: 0, body: null };
+let archCache = { stamp: null, arch: null };
 async function dataFile(name) {
   const m = name.match(/^edition-([a-z]+)\.json$/);
   if (m && REGIONS.includes(m[1])) return editionJson(m[1]);
   const a = name.match(/^articles-([a-z]+)\.json$/);
   if (a && REGIONS.includes(a[1])) return JSON.stringify(articlesFile(await getIndex(), a[1]));
+  // Archive : celle du robot si elle existe en local (.data/archive.json), sinon l'édition en cours seulement.
+  const o = name.match(/^older-([a-z]+)\.json$/);
+  const om = name.match(/^m\/([a-z0-9._-]+)\.json$/);
+  if ((o && REGIONS.includes(o[1])) || om) {
+    const index = await getIndex();
+    if (archCache.stamp !== index.fetchedAt) {
+      const f = join(root, ".data", "archive.json");
+      archCache = { stamp: index.fetchedAt, arch: existsSync(f) ? mergeArchive(loadArchive(f), index) : archiveFromIndex(index) };
+    }
+    const arch = archCache.arch;
+    if (om) { const f = outletFile(arch, om[1]); return f ? JSON.stringify(f) : null; }
+    return JSON.stringify(olderFile(arch, o[1], new Set(index.articles.map((x) => x.url))));
+  }
   if (name === "videos.json") {
     if (!videosCache.body || Date.now() - videosCache.at > 30 * 60e3) videosCache = { at: Date.now(), body: JSON.stringify({ builtAt: new Date().toISOString(), videos: await allVideos() }) };
     return videosCache.body;
