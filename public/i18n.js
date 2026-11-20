@@ -201,7 +201,8 @@ const EXACT = {
   "Prisme lit directement les flux publics de ses médias et choisit ses histoires avec des règles visibles. Orientations indicatives, propriété selon la base Prisme et Wikidata.": "Prisme reads its outlets' public feeds directly and picks stories with visible rules. Indicative leanings, ownership from Prisme's database and Wikidata.",
   "L'orientation est une estimation indicative inspirée des évaluations publiques (AllSides, Media Bias/Fact Check, Ad Fontes). La propriété vient de la base Prisme et de Wikidata, une source collaborative qui peut être incomplète ou en retard.": "The leaning is an indicative estimate inspired by public ratings (AllSides, Media Bias/Fact Check, Ad Fontes). Ownership comes from Prisme's database and Wikidata, a collaborative source that may be incomplete or out of date.",
   // Fil épuré
-  "En bref": "Quick read", "une nouvelle par écran": "one story per screen", "glisse vers le haut": "swipe up",
+  "C'est tout pour": "That's all for", "Rien de neuf à": "Nothing new in", "cette semaine": "this week",
+  "En bref": "Quick read", "▶ En bref": "▶ Quick read", "Lire l'article →": "Read the article →", "Glisse vers le haut ↑": "Swipe up ↑", "Tu as fait le tour": "You're all caught up", "Ville voisine": "Nearby town", "Choisis d'abord ta ville.": "Pick your town first.", "Maintenant :": "Now:", "une nouvelle par écran": "one story per screen", "glisse vers le haut": "swipe up",
   "Tout voir →": "See all →", "Toute l'histoire →": "The whole story →", "personne": "nobody", "Angle mort": "Blindspot", "Shorts": "Shorts",
   "Expliquer cette lentille": "Explain this lens", "1 nouvelle cette semaine": "1 story this week", "Voir tout →": "See all →",
   "Voir tout, du plus récent": "See all, newest first", "Fermer": "Close",

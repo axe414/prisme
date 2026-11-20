@@ -1100,7 +1100,7 @@ async function fillCityRow() {
   const d = await cityWeek(city).catch(() => null);
   if (!d?.n || !el.isConnected) return;
   el.dataset.done = "1";
-  el.innerHTML = `<div class="row-h"><h2>${pin}${esc(city.n)} <small>${d.n > 1 ? `${d.n} nouvelles cette semaine` : "1 nouvelle cette semaine"}</small></h2><a class="link" href="${href({ ville: city.s })}" data-nav>Tout voir →</a></div>
+  el.innerHTML = `<div class="row-h"><h2>${pin}${esc(city.n)} <small>${d.n > 1 ? `${d.n} nouvelles cette semaine` : "1 nouvelle cette semaine"}</small></h2><span class="row-acts"><button class="row-bref" type="button" data-city-bref="${esc(city.s)}">▶ En bref</button><a class="link" href="${href({ ville: city.s })}" data-nav>Tout voir →</a></span></div>
     <div class="row-sc">${d.top.map((x) => `<article class="mini mini-art${x.image ? "" : " mini-txt"}">
       ${x.image ? `<a class="mini-img" href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(x.image))}" alt="" loading="lazy" referrerpolicy="no-referrer"></a>` : ""}
       <span class="mini-src">${favicon(x.domain, x.sourceName)}<span data-no-tr>${esc(x.sourceName)}</span></span>
@@ -1138,8 +1138,9 @@ function openShorts() {
   closeShorts();
   const o = document.createElement("div");
   o.id = "shorts";
-  o.innerHTML = `<div class="sh-bar"><span class="sh-pos"><b>En bref</b> · <span id="shPos">1 / ${f.stories.length}</span> · glisse vers le haut</span><button class="icon-btn sh-x" type="button" aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  o.innerHTML = `${shBar("une", prefs.city ? prefs.cityLabel || "Ma ville" : "")}
     <div class="sh-sc" id="shSc">${f.stories.map(shortSlide).join("")}</div>`;
+  $("#shPos", o).textContent = `1 / ${f.stories.length} · glisse vers le haut`;
   document.body.appendChild(o);
   document.body.classList.add("shorts-open");
   requestAnimationFrame(() => o.classList.add("on"));
@@ -1161,11 +1162,113 @@ function openShorts() {
   }, { root: sc, threshold: 0.6 });
   for (const el of sc.children) io.observe(el);
   o._io = io;
-  o.onclick = (e) => {
-    if (e.target.closest(".sh-x")) { closeShorts(); return; }
-    const op = e.target.closest("[data-sh-open]");
-    if (op) { e.preventDefault(); closeShorts(); go(op.getAttribute("href")); }
-  };
+  o.onclick = shClick;
+}
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-city-bref]");
+  if (!b) return;
+  e.preventDefault();
+  const V = await villesData().catch(() => null);
+  openCityBref(V?.bySlug.get(b.dataset.cityBref) || null);
+});
+// Le haut de « En bref » : À la une ou ta ville, la position, et fermer.
+const shBar = (mode, cityName) => `<div class="sh-bar">
+    <div class="sh-modes"><button type="button" data-shmode="une" aria-pressed="${mode === "une"}">À la une</button>${cityName ? `<button type="button" data-shmode="ville" aria-pressed="${mode === "ville"}">📍 <span data-no-tr>${esc(cityName)}</span></button>` : ""}</div>
+    <button class="icon-btn sh-x" type="button" aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <span class="sh-pos" id="shPos"></span>
+  </div>`;
+function shClick(e) {
+  if (e.target.closest(".sh-x, [data-sh-close]")) { closeShorts(); return; }
+  const m = e.target.closest("[data-shmode]");
+  if (m && m.getAttribute("aria-pressed") !== "true") { if (m.dataset.shmode === "ville") openCityBref(); else { closeShorts(); openEnBref(); } return; }
+  const op = e.target.closest("[data-sh-open]");
+  if (op) { e.preventDefault(); closeShorts(); go(op.getAttribute("href")); }
+}
+
+/* « En bref » de ta ville : ses nouvelles de la semaine, puis celles des villes voisines (même MRC, puis même région). */
+function nearVilles(V, city) {
+  const pop = (a, b) => (b.p || 0) - (a.p || 0);
+  const mrc = city.m ? V.list.filter((x) => x !== city && x.pr === city.pr && x.m === city.m).sort(pop) : [];
+  const reg = V.list.filter((x) => x !== city && x.pr === city.pr && x.r === city.r && !mrc.includes(x)).sort(pop);
+  return [...mrc.slice(0, 10), ...reg].slice(0, 16);
+}
+async function placeIds(c, loc) {
+  const r = await indexSearch(c.s === "quebec" ? `"ville de Québec"` : `"${c.n}"`).catch(() => null);
+  if (!r) return [];
+  const m = r.meta;
+  const own = new Set(Object.entries(loc).filter(([, [, , cities]]) => (cities || []).some((x) => foldText(x) === c.f)).map(([d]) => d));
+  const ids = new Set(r.ids.filter((id) => m.D[m.dom[id]].country === "CA"));
+  if (own.size) {
+    const idx = new Set(m.D.map((d, i) => (own.has(d.domain) ? i : -1)).filter((i) => i >= 0));
+    for (let id = 0; id < m.dom.length; id++) if (idx.has(m.dom[id])) ids.add(id);
+  }
+  return [...ids].sort((a, b) => m.age[a] - m.age[b]);
+}
+const artSlide = (x, c) => `<section class="sh${x.image ? "" : " sh-noimg"}" data-city="${esc(c.n)}">
+    ${x.image ? `<img class="sh-bg" src="${esc(safeUrl(x.image))}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="sh-logo">${favicon(x.domain, x.sourceName)}<span data-no-tr>${esc(x.sourceName)}</span></div>`}
+    <div class="sh-in">
+      <div class="sh-k">📍 <span data-no-tr>${esc(c.n)}</span> · <span data-no-tr>${esc(x.sourceName)}</span> · ${esc(ago(x.published))}</div>
+      <h2 data-no-tr>${esc(x.title)}</h2>
+      ${x.summary ? `<p class="sh-dek" data-no-tr>${esc(x.summary.length > 280 ? `${x.summary.slice(0, 277)}…` : x.summary)}</p>` : ""}
+      <a class="sh-read" href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener noreferrer" data-read="${readAttr(x)}">Lire l'article →</a>
+    </div>
+  </section>`;
+const nextCitySlide = (prev, c, n, none = false) => `<section class="sh sh-div" data-city="${esc(c.n)}"><div class="sh-in">
+    <div class="sh-k">${none ? "Rien de neuf à" : "C'est tout pour"} <span data-no-tr>${esc(prev.n)}</span> cette semaine</div>
+    <h2>Maintenant : <span data-no-tr>${esc(c.n)}</span></h2>
+    <p class="sh-dek">Ville voisine · ${esc(villeWhere(c))} · ${plural(n, "nouvelle")}</p>
+    <p class="sh-hint">Glisse vers le haut ↑</p></div></section>`;
+async function openCityBref(city = null) {
+  city = city || await myVille();
+  if (!city) { toast("Choisis d'abord ta ville."); go(href({ v: "villes" })); return; }
+  closeShorts();
+  const o = document.createElement("div");
+  o.id = "shorts";
+  o.innerHTML = `${shBar("ville", city.n)}<div class="sh-sc" id="shSc"><section class="sh sh-div"><div class="sh-in"><h2>Les nouvelles de <span data-no-tr>${esc(city.n)}</span>…</h2></div></section></div>`;
+  document.body.appendChild(o);
+  document.body.classList.add("shorts-open");
+  requestAnimationFrame(() => o.classList.add("on"));
+  o.onclick = shClick;
+  const sc = $("#shSc", o);
+  const [V, loc] = await Promise.all([villesData(), localMedia()]);
+  const queue = [city, ...nearVilles(V, city)];
+  const seen = new Set();
+  let qi = 0, pend = [], cur = null, shown = null, busy = false, done = false;
+  const io = new IntersectionObserver((entries) => {
+    for (const en of entries) {
+      if (!en.isIntersecting) continue;
+      const i = [...sc.children].indexOf(en.target);
+      $("#shPos", o).textContent = `📍 ${en.target.dataset.city || city.n} · glisse vers le haut`;
+      if (i >= sc.children.length - 3) more();
+    }
+  }, { root: sc, threshold: 0.6 });
+  o._io = io;
+  async function more() {
+    if (busy || done) return;
+    busy = true;
+    let html = "";
+    while (!html) {
+      if (!pend.length) {
+        if (qi >= queue.length) { done = true; html = `<section class="sh sh-div"><div class="sh-in"><h2>Tu as fait le tour</h2><p class="sh-dek">Les nouvelles de <span data-no-tr>${esc(city.n)}</span> et des villes voisines, cette semaine.</p><button class="btn" type="button" data-sh-close>Fermer</button></div></section>`; break; }
+        cur = queue[qi++];
+        pend = (await placeIds(cur, loc)).filter((id) => !seen.has(id));
+        if (!pend.length) continue;
+        // Passage à une ville voisine : une page l'annonce.
+        if (cur !== city) html += nextCitySlide(shown || city, cur, pend.length, !shown);
+      }
+      const take = pend.splice(0, 10);
+      take.forEach((id) => seen.add(id));
+      html += (await docsFor(take)).map((x) => artSlide(x, cur)).join("");
+      shown = cur;
+    }
+    if (!o.isConnected) return;
+    if (sc.children.length === 1 && !sc.children[0].dataset.city) sc.innerHTML = "";
+    const before = sc.children.length;
+    sc.insertAdjacentHTML("beforeend", html);
+    for (const el of [...sc.children].slice(before)) io.observe(el);
+    busy = false;
+  }
+  more();
 }
 // L'onglet « En bref » : depuis le fil, tout de suite ; d'ailleurs, on revient au fil puis on l'ouvre dès qu'il est chargé.
 function openEnBref() {
@@ -1734,6 +1837,7 @@ async function viewVille(v, route) {
       <div class="vt-row"><h1>${esc(villeLabel(city))}</h1>
         <div class="vt-acts">
           <button class="vt-btn" type="button" id="vFollow" aria-pressed="${followed}" title="${followed ? "Ville suivie" : "Suivre cette ville"}">${ico("star")}<span>${followed ? "Suivie" : "Suivre"}</span></button>
+          <button class="vt-btn vt-bref" type="button" data-city-bref="${esc(city.s)}" title="Une nouvelle par écran">▶<span>En bref</span></button>
           <button class="vt-btn" type="button" id="vMine" aria-pressed="${mine}" title="C'est ma ville">${pin}<span>${mine ? "Ma ville" : "C'est ma ville"}</span></button>
           ${shareBtn({ title: `${city.n} sur Prisme`, text: `Les nouvelles de ${city.n}`, url: absUrl(href({ ville: city.s })) })}
         </div></div>

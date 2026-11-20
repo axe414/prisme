@@ -1621,3 +1621,21 @@ body.shorts-open { overflow: hidden; }
 }
 /* Là où la barre du bas existe, le gros bouton du fil n'est plus utile */
 @media (max-width: 760px), (pointer: coarse) { .feed-top .sh-btn { display: none; } }
+/* « En bref » : À la une ou ma ville */
+.sh-bar { flex-wrap: wrap; row-gap: 6px; }
+.sh-modes { display: inline-flex; padding: 3px; gap: 2px; border-radius: 999px; background: rgba(0, 0, 0, .45); }
+.sh-modes button { height: 32px; padding: 0 14px; border: 0; border-radius: 999px; background: none; color: #f2efe8; font: 600 13.5px var(--sans); cursor: pointer; white-space: nowrap; max-width: 52vw; overflow: hidden; text-overflow: ellipsis; }
+.sh-modes button[aria-pressed="true"] { background: #f2efe8; color: #111; }
+.sh-pos { flex-basis: 100%; font: 600 11.5px var(--sans); letter-spacing: .02em; opacity: .7; text-shadow: 0 1px 4px rgba(0, 0, 0, .6); }
+.sh-read { display: inline-flex; align-items: center; margin-top: 16px; height: 46px; padding: 0 20px; border-radius: 12px; background: #f2efe8; color: #111; font: 700 15px var(--sans); text-decoration: none; }
+.sh-div .sh-in { padding-bottom: calc(env(safe-area-inset-bottom) + 30vh); }
+.sh-div h2 { font-size: clamp(30px, 8vw, 44px); }
+.sh-hint { margin-top: 18px; font: 600 14px var(--sans); opacity: .7; }
+.sh-div .btn { margin-top: 18px; }
+.row-acts { display: inline-flex; align-items: center; gap: 12px; }
+.row-bref { height: 30px; padding: 0 12px; border-radius: 999px; border: 0; background: var(--ink); color: var(--paper); font: 600 12.5px var(--sans); cursor: pointer; white-space: nowrap; }
+.vt-bref { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+/* Article sans photo : le logo du média en grand, sur un fond doux */
+.sh-noimg { background: radial-gradient(circle at 50% 30%, #2b3a40 0%, #141414 70%); }
+.sh-logo { position: absolute; top: 26%; left: 0; right: 0; display: grid; justify-items: center; gap: 12px; z-index: 1; font: 700 18px var(--sans); color: #e9e5dc; opacity: .9; }
+.sh-logo .fav, .sh-logo .fav-fallback { width: 72px; height: 72px; border-radius: 18px; background: #fff; padding: 10px; box-sizing: border-box; font-size: 34px; display: grid; place-items: center; color: #111; }
