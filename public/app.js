@@ -714,6 +714,7 @@ const ICON = {
   reglages: '<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>',
   comparer: '<rect x="3" y="5" width="7" height="14" rx="1"/><rect x="14" y="5" width="7" height="14" rx="1"/>',
   favoris: '<path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z"/>',
+  bref: '<rect x="6" y="3" width="12" height="18" rx="3"/><path d="m10.5 9.5 4 2.5-4 2.5Z"/>',
   install: '<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M12 7v7M9 11l3 3 3-3M10.5 18.5h3"/>',
 };
 const svg = (name) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[name]}</svg>`;
@@ -732,11 +733,13 @@ function renderChrome(route) {
   const alerts = alertCount();
   $("#tabbar").innerHTML = `
     <a href="${href({})}" data-nav ${onUne ? 'aria-current="page"' : ""}>${svg("une")}À la une${alerts ? `<span class="dot">${alerts}</span>` : ""}</a>
+    <button type="button" id="enBrefTab">${svg("bref")}En bref</button>
     <a href="${href({ v: "matin" })}" data-nav ${page === "matin" ? 'aria-current="page"' : ""}>${svg("matin")}Le matin</a>
     <a href="${href({ v: "videos" })}" data-nav ${page === "videos" ? 'aria-current="page"' : ""}>${svg("videos")}Vidéos</a>
     <a href="${href({ v: "moi" })}" data-nav ${page === "moi" ? 'aria-current="page"' : ""}>${svg("moi")}Mon prisme</a>
     <button type="button" id="moreBtnTab" ${["proprietaires", "quiz", "favoris"].includes(page) ? 'aria-current="page"' : ""}>${svg("plus")}Plus</button>`;
   $("#moreBtnTab").onclick = openMoreSheet;
+  $("#enBrefTab").onclick = openEnBref;
   // Garde visible la rubrique choisie dans la barre défilante (téléphone).
   const el = $("#cats [aria-current]");
   if (el) {
@@ -1163,6 +1166,15 @@ function openShorts() {
     const op = e.target.closest("[data-sh-open]");
     if (op) { e.preventDefault(); closeShorts(); go(op.getAttribute("href")); }
   };
+}
+// L'onglet « En bref » : depuis le fil, tout de suite ; d'ailleurs, on revient au fil puis on l'ouvre dès qu'il est chargé.
+function openEnBref() {
+  const f = state.route?.view === "feed" ? state.feeds.get(feedKey(state.route)) : null;
+  if (f?.stories.length && !state.panel) { openShorts(); return; }
+  state.enBrefPending = true;
+  go(href({}));
+  const f2 = state.feeds.get(feedKey(state.route));
+  if (f2?.stories.length) { state.enBrefPending = false; openShorts(); }
 }
 function closeShorts() {
   const o = $("#shorts");
@@ -2766,6 +2778,7 @@ async function loadMore(key) {
     const s = $("#sentinel");
     if (f.hasMore && s && s.getBoundingClientRect().top < innerHeight + 1200) loadMore(key);
     tryResume(f, key);
+    if (state.enBrefPending && f.stories.length) { state.enBrefPending = false; openShorts(); }
   }
 }
 

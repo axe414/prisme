@@ -1612,3 +1612,12 @@ body.shorts-open { overflow: hidden; }
 .feed-top .sh-lbl { grid-auto-flow: row; }
 .feed-top .sh-lbl b { font-size: 15.5px; }
 .feed-top .sh-lbl small { font-size: 12.5px; }
+/* « En bref » dans la barre du bas, à côté de « À la une » (6 onglets) */
+@media (max-width: 760px), (max-width: 1100px) and (pointer: coarse) {
+  .tabbar { grid-template-columns: repeat(6, 1fr) !important; }
+}
+@media (max-width: 760px) {
+  .tabbar a, .tabbar button { font-size: 10px; letter-spacing: -.01em; white-space: nowrap; }
+}
+/* Là où la barre du bas existe, le gros bouton du fil n'est plus utile */
+@media (max-width: 760px), (pointer: coarse) { .feed-top .sh-btn { display: none; } }
