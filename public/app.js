@@ -1635,30 +1635,65 @@ function openOnboarding() {
 
 /* ---------- Écouter (voix du téléphone, gratuite) ---------- */
 const canSpeak = "speechSynthesis" in window;
+// iPhone : la voix est coupée en mode silencieux. On demande à l'iPhone de traiter Prisme comme un lecteur
+// (comme un balado), en jouant un son muet d'une fraction de seconde au moment du toucher.
+let audioUnlocked = false;
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch { /* Safari plus ancien */ }
+  try {
+    // Un dixième de seconde de silence (WAV fabriqué ici, rien à télécharger).
+    const n = 800, buf = new ArrayBuffer(44 + n), v = new DataView(buf);
+    const w = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+    w(0, "RIFF"); v.setUint32(4, 36 + n, true); w(8, "WAVE"); w(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, 8000, true); v.setUint32(28, 8000, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true); w(36, "data"); v.setUint32(40, n, true);
+    for (let i = 0; i < n; i++) v.setUint8(44 + i, 128);
+    const a = new Audio(URL.createObjectURL(new Blob([buf], { type: "audio/wav" })));
+    a.setAttribute("playsinline", "");
+    a.play().catch(() => {});
+  } catch { /* sans audio */ }
+}
+let speakBtn = null;
 function speak(parts, btn) {
   if (!canSpeak) { toast("La lecture à voix haute n'est pas offerte sur cet appareil."); return; }
-  const setBtn = (on) => { if (!btn) return; btn.setAttribute("aria-pressed", on); const sp = $("span", btn); if (sp) sp.textContent = on ? "Arrêter" : "Écouter"; };
-  if (speechSynthesis.speaking || speechSynthesis.pending) { speechSynthesis.cancel(); setBtn(false); return; }
+  const setBtn = (b, on) => { if (!b) return; b.setAttribute("aria-pressed", on); const sp = $("span", b); if (sp) sp.textContent = on ? "Arrêter" : "Écouter"; };
+  // Toucher « Arrêter » arrête ; toucher un autre « Écouter » passe à cette histoire-là.
+  const wasMine = speakBtn === btn;
+  if (speakBtn) { speechSynthesis.cancel(); setBtn(speakBtn, false); speakBtn = null; if (wasMine) return; }
+  unlockAudio();
+  speechSynthesis.cancel(); // iPhone : vide une lecture restée coincée
   const want = LANG === "en" ? "en" : "fr";
   const voices = speechSynthesis.getVoices();
-  const voice = voices.find((x) => x.lang.toLowerCase() === (want === "fr" ? "fr-ca" : "en-ca")) || voices.find((x) => x.lang.toLowerCase().startsWith(want));
-  const list = parts.filter(Boolean).map((t) => String(t).replace(/\s+/g, " ").trim()).filter(Boolean);
+  const voice = voices.find((x) => x.lang.toLowerCase().replace("_", "-") === (want === "fr" ? "fr-ca" : "en-ca")) || voices.find((x) => x.lang.toLowerCase().startsWith(want));
+  // Des phrases courtes : l'iPhone coupe parfois les longs textes en plein milieu.
+  const list = parts.filter(Boolean).map((t) => String(t).replace(/\s+/g, " ").trim()).filter(Boolean)
+    .flatMap((t) => t.match(/[^.!?…]+[.!?…]*\s*/g) || [t]).map((t) => t.trim()).filter(Boolean);
+  if (!list.length) return;
+  let started = false;
+  speakBtn = btn;
   list.forEach((t, i) => {
     const u = new SpeechSynthesisUtterance(t);
     u.lang = voice?.lang || (want === "fr" ? "fr-CA" : "en-CA");
     if (voice) u.voice = voice;
     u.rate = 1;
-    if (i === list.length - 1) { u.onend = () => setBtn(false); u.onerror = () => setBtn(false); }
+    u.onstart = () => { started = true; };
+    if (i === list.length - 1) u.onend = () => { if (speakBtn === btn) { setBtn(btn, false); speakBtn = null; } };
+    u.onerror = (ev) => { if (ev.error !== "interrupted" && ev.error !== "canceled" && speakBtn === btn) { setBtn(btn, false); speakBtn = null; } };
     speechSynthesis.speak(u);
   });
-  setBtn(true);
+  speechSynthesis.resume();
+  setBtn(btn, true);
+  toast("Lecture à voix haute… Touche « Arrêter » pour couper.");
+  // Rien ne joue après 3 secondes : on le dit, avec la cause la plus fréquente.
+  setTimeout(() => { if (!started && speakBtn === btn) toast("Tu n'entends rien ? Monte le volume, et sur iPhone vérifie que le mode silencieux est désactivé."); }, 3000);
 }
 if (canSpeak) { speechSynthesis.getVoices(); addEventListener("pagehide", () => speechSynthesis.cancel()); }
 const listenBtn = (id) => `<button class="act act-l" type="button" data-listen="${esc(id)}" aria-pressed="false" title="Écouter">${'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9Z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>'}<span>Écouter</span></button>`;
 function storySpeech(s) {
   const sd = sides(s.counts);
   const parts = [s.titleFr || s.title];
-  const ai = state.summaries?.[s.id];
+  const ai = s.ai || state.summaries?.[s.id];
   parts.push(ai?.summary || s.summary || "");
   parts.push(`${plural(s.sources, "média")} en parlent : ${sd.left} à gauche, ${sd.center} au centre, ${sd.right} à droite.`);
   if (ai?.left) parts.push(`À gauche : ${ai.left}`);

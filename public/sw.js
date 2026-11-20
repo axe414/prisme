@@ -1,5 +1,5 @@
 // Service worker de Prisme : réseau d'abord (toujours la version fraîche), cache en secours (hors ligne).
-const CACHE = "prisme-v32";
+const CACHE = "prisme-v33";
 const SHELL = ["./", "index.html", "app.js", "i18n.js", "styles.css", "favicon.svg", "manifest.webmanifest", "icons/icon-192.png"];
 
 self.addEventListener("install", (e) => {
