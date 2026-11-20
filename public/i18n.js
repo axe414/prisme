@@ -200,6 +200,17 @@ const EXACT = {
   "Langue": "Language", "Signaler une erreur ↗": "Report an error ↗", "Code source (libre, MIT)": "Source code (free, MIT)",
   "Prisme lit directement les flux publics de ses médias et choisit ses histoires avec des règles visibles. Orientations indicatives, propriété selon la base Prisme et Wikidata.": "Prisme reads its outlets' public feeds directly and picks stories with visible rules. Indicative leanings, ownership from Prisme's database and Wikidata.",
   "L'orientation est une estimation indicative inspirée des évaluations publiques (AllSides, Media Bias/Fact Check, Ad Fontes). La propriété vient de la base Prisme et de Wikidata, une source collaborative qui peut être incomplète ou en retard.": "The leaning is an indicative estimate inspired by public ratings (AllSides, Media Bias/Fact Check, Ad Fontes). Ownership comes from Prisme's database and Wikidata, a collaborative source that may be incomplete or out of date.",
+  // Petites touches (2)
+  "Ton matin en 5 histoires": "Your morning in 5 stories", "De gauche, du centre et de droite · environ 3 minutes": "From the left, center and right · about 3 minutes",
+  "Ranger pour aujourd'hui": "Hide for today", "1 nouvelle depuis 24 heures": "1 story in the last 24 hours", "tout voir →": "see all →",
+  "Lire plus tard": "Read later", "Plus tard": "Later", "Retirer": "Remove", "Retirer de « À lire »": "Remove from “To read”", "À lire": "To read",
+  "Ajouté à « À lire »": "Added to “To read”", "Retiré de « À lire »": "Removed from “To read”", "Rien à lire plus tard.": "Nothing to read later.",
+  "Ce que tu as mis de côté. Chaque histoire ou article disparaît d'ici une fois lu.": "What you set aside. Each story or article leaves this list once read.",
+  "Appuie longtemps sur une histoire et choisis « Lire plus tard », ou touche l'horloge à côté d'un article.": "Long-press a story and choose “Read later”, or tap the clock next to an article.",
+  "Rien ne correspond.": "Nothing matches.", "Effacer cette recherche": "Delete this search",
+  "Lecture simple": "Simple reading", "sans barres de couleur ni étiquettes": "no color bars or labels",
+  "Sélectionner plusieurs": "Select several", "Touche les histoires à partager": "Tap the stories to share", "Partager": "Share",
+  "Copié : colle-le dans ton message.": "Copied: paste it in your message.", "1 histoire choisie": "1 story selected",
   // Petites touches
   "Nouveau": "New", "Tu t'étais arrêté ici": "You stopped here", "Annuler": "Undo", "Marquer comme lu": "Mark as read", "Marquer comme non lu": "Mark as unread",
   "Comparer les côtés": "Compare the sides", "Retirer des favoris": "Remove from saved", "Actions": "Actions", "Revenir en haut": "Back to top",
@@ -216,6 +227,10 @@ const EXACT = {
 
 // Textes avec un nombre ou un nom à l'intérieur.
 const PATTERNS = [
+  [/^(.+) aujourd'hui$/, (m, x) => `${x} today`],
+  [/^(\d+) nouvelles depuis 24 heures$/, (m, n) => `${n} stories in the last 24 hours`],
+  [/^(\d+) histoires choisies$/, (m, n) => `${n} stories selected`],
+  [/^Taille du texte : (.+)$/, (m, x) => `Text size: ${tr(x)}`],
   [/^(\d+) nouvelles depuis ta dernière visite$/, (m, n) => `${n} new stories since your last visit`],
   [/^\+(\d+) depuis ta lecture$/, (m, n) => `+${n} since you read it`],
   [/^Moins de « (.+) » dans ton fil$/, (m, x) => `Less “${tr(x)}” in your feed`],

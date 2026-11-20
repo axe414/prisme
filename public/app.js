@@ -180,7 +180,7 @@ function artLink(a, cls = "", marks = null) {
 const noteRead = (e) => {
   const a = e.target.closest("a[data-read]");
   if (!a || (e.type === "auxclick" && e.button !== 1)) return;
-  try { reads.add(JSON.parse(a.dataset.read)); a.classList.add("is-read"); } catch { /* lien sans données */ }
+  try { reads.add(JSON.parse(a.dataset.read)); a.classList.add("is-read"); later.remove(`a:${JSON.parse(a.dataset.read).u}`); } catch { /* lien sans données */ }
 };
 document.addEventListener("click", noteRead);
 document.addEventListener("auxclick", noteRead);
@@ -255,6 +255,7 @@ document.addEventListener("click", (e) => {
       const sp = $("span", b); if (sp) sp.textContent = on ? "Enregistré" : "Enregistrer";
     }
     toast(on ? "Enregistré dans tes favoris ★" : "Retiré de tes favoris");
+    buzz();
     return;
   }
   const s = e.target.closest("[data-share]");
@@ -645,6 +646,8 @@ addEventListener("popstate", () => render({ scroll: history.state?.y || 0 }));
 
 function render({ scroll = 0 } = {}) {
   const route = parseRoute();
+  exitSelect();
+  document.body.classList.toggle("in-story", route.view === "story");
   // L'histoire s'ouvre en panneau (téléphone) ou à droite (iPad) : la page d'en dessous reste en place.
   if (route.view === "story" && panelMode() && (state.panel || (state.route && PANEL_BASES.includes(state.route.view)))) {
     if (!state.panel) state.panel = { base: state.lastSearch ?? "", baseRoute: state.route, title: document.title };
@@ -808,6 +811,7 @@ const recent = {
   list() { try { return JSON.parse(store.get("recent", "[]")); } catch { return []; } },
   add(q) { store.set("recent", JSON.stringify([q, ...this.list().filter((x) => x.toLowerCase() !== q.toLowerCase())].slice(0, 8))); },
   clear() { store.set("recent", "[]"); },
+  remove(q) { store.set("recent", JSON.stringify(this.list().filter((x) => x !== q))); },
 };
 const SG_ICON = {
   search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
@@ -856,7 +860,7 @@ function markWords(text, words) {
     const trending = ed?.trending || [];
     if (fq.length < 2) {
       const rec = recent.list(), mine = topics.list(), fol = follows.list();
-      open(`${rec.length ? `<div class="sg-h">Recherches récentes <button type="button" data-clear>Effacer</button></div>${rec.slice(0, 5).map((t) => sgSearch(t, "clock")).join("")}` : ""}
+      open(`${rec.length ? `<div class="sg-h">Recherches récentes <button type="button" data-clear>Effacer</button></div>${rec.slice(0, 5).map((t) => sgSearch(t, "clock").replace(/<\/a>$/, `<button type="button" class="sg-del" data-del="${esc(t)}" aria-label="Effacer cette recherche">✕</button></a>`)).join("")}` : ""}
         ${fol.length ? `<div class="sg-h">Mes médias</div>${fol.slice(0, 4).map((x) => item(`href="${href({ m: x.d })}" data-nav`, `${favicon(x.d, x.n)}<span class="sg-main" data-no-tr><b>${esc(x.n)}</b><small>${esc(x.d)}</small></span>`)).join("")}` : ""}
         ${mine.length ? `<div class="sg-h">Mes sujets</div>${mine.slice(0, 5).map((t) => sgSearch(t, "star")).join("")}` : ""}
         ${trending.length ? `<div class="sg-h">En ce moment</div>${trending.slice(0, 7).map((t) => sgSearch(t, "trend")).join("")}` : ""}
@@ -901,6 +905,8 @@ function markWords(text, words) {
   box.addEventListener("mousedown", (e) => e.preventDefault());
   box.addEventListener("click", (e) => {
     if (e.target.closest("[data-clear]")) { recent.clear(); suggest(); return; }
+    const del = e.target.closest("[data-del]");
+    if (del) { e.preventDefault(); e.stopPropagation(); recent.remove(del.dataset.del); suggest(); return; }
     const a = e.target.closest(".sg");
     if (!a) return;
     if (a.dataset.q) { e.preventDefault(); e.stopPropagation(); searchFor(a.dataset.q, a.hasAttribute("data-wide")); return; }
@@ -1136,7 +1142,7 @@ function openSettings() {
   };
   $("#setRegion").onchange = (e) => { state.region = e.target.value; store.set("region", state.region); closeLayer("#modal"); go(href({})); };
   villesData().then((V) => {
-    $("#villesList").innerHTML = V.list.map((x) => `<option value="${esc(villeLabel(x))}">`).join("");
+    cityAuto($("#setCity"), V);
     const cur = V.bySlug.get(prefs.city);
     if (cur) { $("#setCity").value = villeLabel(cur); $("#setCityNote").textContent = villeWhere(cur); }
     $("#setCity").onchange = (e) => {
@@ -1194,7 +1200,7 @@ function openOnboarding() {
     // Choisir n'importe quelle ville en tapant son nom.
     const oc = $("#obCity");
     if (oc) villesData().then((V) => {
-      $("#obVilles").innerHTML = V.list.map((x) => `<option value="${esc(villeLabel(x))}">`).join("");
+      cityAuto(oc, V);
       oc.onchange = () => {
         const f = foldText(oc.value).trim();
         const hit = V.list.find((x) => foldText(villeLabel(x)) === f) || matchVilles(V, oc.value, 1)[0];
@@ -1293,7 +1299,7 @@ document.addEventListener("click", (e) => {
   ptr.className = "ptr";
   ptr.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/></svg>';
   document.body.appendChild(ptr);
-  const NOSWIPE = "#feed .story, .sides-swipe, #smenu, .lenses, .topics, .cats, .wf-row, .o-chips, .o-days, .tl, .vgrid, .pack-wrap, input, select, textarea, .modal, .drawer, .tabs, .seg";
+  const NOSWIPE = "#feed .story, .sides-swipe, #smenu, .hcard, #selBar, .lenses, .topics, .cats, .wf-row, .o-chips, .o-days, .tl, .vgrid, .pack-wrap, input, select, textarea, .modal, .drawer, .tabs, .seg";
   addEventListener("touchstart", (e) => {
     if (e.touches.length !== 1) return;
     sx = e.touches[0].clientX; sy = e.touches[0].clientY; t0 = Date.now();
@@ -1312,7 +1318,7 @@ document.addEventListener("click", (e) => {
       const ready = ptr.classList.contains("ready");
       ptr.style.opacity = ""; ptr.style.transform = ""; ptr.classList.remove("ready");
       pulling = false;
-      if (ready) { dataCache.clear(); state.feeds.clear(); toast("Fil mis à jour"); render(); return; }
+      if (ready) { buzz(15); dataCache.clear(); state.feeds.clear(); toast("Fil mis à jour"); render(); return; }
     }
     // Glisser à gauche ou à droite : rubrique suivante ou précédente (fil seulement). Depuis le bord gauche : c'est « Retour ».
     if (sx < 24) return;
@@ -1499,15 +1505,50 @@ function villesData() {
   }).catch((e) => { villesP = null; throw e; });
   return villesP;
 }
-// Les villes dont le nom commence par (ou est) ce qu'on tape, les plus peuplées d'abord.
+// Les villes qui correspondent à ce qu'on tape, dès 2 lettres : le nom exact, puis les noms qui commencent ainsi,
+// puis ceux dont un mot commence ainsi (« rivi » → Trois-Rivières). « St- » et « Ste- » valent « Saint- » et « Sainte- ».
 function matchVilles(V, q, n = 5) {
-  const f = foldText(q).trim().replace(/\s+/g, " ");
-  if (f.length < 3) return [];
-  const exact = V.list.filter((v) => v.f === f);
-  // Au Québec, les municipalités québécoises passent devant (Victoriaville avant Victoria).
+  let f = foldText(q).trim().replace(/\s+/g, " ");
+  f = f.replace(/^st(e)?[ .-]+/, (m, e) => (e ? "sainte-" : "saint-"));
+  if (f.length < 2) return [];
+  const g = f.replace(/ /g, "-");
+  // Au Québec, les municipalités québécoises passent devant (Victoriaville avant Victoria), puis les plus peuplées.
   const qc = state.region === "qc" ? (v) => (v.pr === "QC" ? 0 : 1) : () => 0;
-  const starts = V.list.filter((v) => v.f !== f && (v.f.startsWith(f) || v.f.replace(/-/g, " ").startsWith(f))).sort((a, b) => qc(a) - qc(b) || b.p - a.p);
-  return [...exact, ...starts].slice(0, n);
+  const order = (a, b) => qc(a) - qc(b) || (b.p || 0) - (a.p || 0);
+  const exact = (v) => v.f === f || v.f === g;
+  const hit = (v) => exact(v) || v.f.startsWith(f) || v.f.startsWith(g) || v.short.startsWith(f)
+    || (f.length >= 3 && v.f.split(/[-' ]+/).some((w) => w.startsWith(f)));
+  // Le Québec d'abord (dans l'édition Québec), le nom exact ensuite, puis les plus peuplées.
+  return V.list.filter(hit).sort((a, b) => qc(a) - qc(b) || exact(b) - exact(a) || order(a, b)).slice(0, n);
+}
+// Une case « ta ville » avec des suggestions sous le doigt (la liste du navigateur marche mal sur iPhone).
+// Choisir une suggestion remplit la case et déclenche son « change » habituel.
+function cityAuto(input, V) {
+  if (!input || input.dataset.auto) return;
+  input.dataset.auto = "1";
+  input.removeAttribute("list");
+  const box = document.createElement("div");
+  box.className = "city-sg"; box.setAttribute("role", "listbox"); box.hidden = true;
+  input.insertAdjacentElement("afterend", box);
+  const draw = () => {
+    const hits = matchVilles(V, input.value, 6);
+    box.innerHTML = hits.map((x) => `<button type="button" role="option" data-cs="${esc(x.s)}">${pin}<span><b>${esc(villeLabel(x))}</b><small>${esc(villeWhere(x))}${x.p ? ` · ${x.p.toLocaleString(LOCALE)} hab.` : ""}</small></span></button>`).join("");
+    box.hidden = !hits.length || foldText(input.value).trim() === foldText(villeLabel(hits[0])) && hits.length === 1;
+  };
+  input.addEventListener("input", draw);
+  input.addEventListener("focus", () => { if (input.value) draw(); });
+  input.addEventListener("blur", () => setTimeout(() => { box.hidden = true; }, 150));
+  box.addEventListener("mousedown", (e) => e.preventDefault());
+  box.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-cs]");
+    if (!b) return;
+    e.preventDefault(); e.stopPropagation();
+    const hit = V.bySlug.get(b.dataset.cs);
+    input.value = villeLabel(hit);
+    box.hidden = true;
+    input.dispatchEvent(new Event("change"));
+    input.blur();
+  });
 }
 const mrcName = (m) => (!m ? "" : /^(MRC|Communauté|Agglomération|Ville|TÉ|Territoire)/i.test(m) ? m : `MRC ${m}`);
 const villeWhere = (v) => (v.pr === "QC" ? `${v.r.replace(/--/g, "–")}${v.m && v.m !== v.n ? ` · ${mrcName(v.m)}` : ""}` : `${PROV_NAME[v.pr] || v.pr}`);
@@ -1912,7 +1953,7 @@ function toggleStoryFav(s) {
   return on;
 }
 function setSeen(s, on) {
-  if (on) readS.mark(s); else readS.unmark(s.id);
+  if (on) { readS.mark(s); later.remove(`s:${s.id}`); } else readS.unmark(s.id);
   for (const c of cardsOf(s.id)) {
     c.classList.toggle("is-seen", on);
     $(".new-tag", c)?.remove();
@@ -1955,7 +1996,9 @@ function openStoryMenu(s) {
         <div><b data-no-tr>${titleOf(s)}</b>${bar(s.counts)}<small>${plural(s.sources, "média")}</small></div></div>
       <div class="smenu-list">
         <button type="button" role="menuitem" data-sm="fav">${ico("star")}<span>${on ? "Retirer des favoris" : "Enregistrer"}</span></button>
+        <button type="button" role="menuitem" data-sm="later"><svg viewBox="0 0 24 24" aria-hidden="true">${CLOCK}</svg><span>${later.has(`s:${s.id}`) ? "Retirer de « À lire »" : "Lire plus tard"}</span></button>
         <button type="button" role="menuitem" data-sm="share">${ico("share")}<span>Partager</span></button>
+        <button type="button" role="menuitem" data-sm="select"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg><span>Sélectionner plusieurs</span></button>
         ${canSpeak ? `<button type="button" role="menuitem" data-sm="listen"><svg viewBox="0 0 24 24" aria-hidden="true">${MI.listen}</svg><span>Écouter</span></button>` : ""}
         <button type="button" role="menuitem" data-sm="open"><svg viewBox="0 0 24 24" aria-hidden="true">${MI.sides}</svg><span>Comparer les côtés</span></button>
         <button type="button" role="menuitem" data-sm="read"><svg viewBox="0 0 24 24" aria-hidden="true">${MI.read}</svg><span>${st?.seen ? "Marquer comme non lu" : "Marquer comme lu"}</span></button>
@@ -1972,6 +2015,8 @@ function openStoryMenu(s) {
     closeStoryMenu();
     if (k === "fav") { const now = toggleStoryFav(s); toast(now ? "Enregistré dans tes favoris ★" : "Retiré de tes favoris"); }
     else if (k === "share") shareIt(storyShare(s));
+    else if (k === "later") toggleLater(storyFav(s));
+    else if (k === "select") enterSelect(s);
     else if (k === "listen") speak(storySpeech(s), null);
     else if (k === "open") go(href({ h: s.id }));
     else if (k === "read") { const was = !!seenState(s)?.seen; setSeen(s, !was); }
@@ -2000,7 +2045,7 @@ addEventListener("keydown", (e) => { if (e.key === "Escape") closeStoryMenu(); }
     stop();
     if (e.touches.length !== 1) return;
     const card = e.target.closest("#view .story, #view .lead, #panel .story");
-    if (!card || e.target.closest(".sides-swipe, .acts, button, input, .covered a")) return;
+    if (!card || state.sel || e.target.closest(".sides-swipe, .acts, button, input, .covered a")) return;
     x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
     if (x0 < 24) return;
     timer = setTimeout(() => {
@@ -2031,7 +2076,7 @@ addEventListener("keydown", (e) => { if (e.key === "Escape") closeStoryMenu(); }
   let card = null, x0 = 0, y0 = 0, dx = 0, mode = null;
   addEventListener("touchstart", (e) => {
     card = null; mode = null; dx = 0;
-    if (e.touches.length !== 1 || innerWidth > 1100) return;
+    if (e.touches.length !== 1 || innerWidth > 1100 || state.sel) return;
     const c = e.target.closest("#feed .story");
     if (!c || e.target.closest(".sides-swipe")) return;
     x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
@@ -2082,7 +2127,7 @@ for (const sel of ["#tabbar", "#cats"]) {
     if (new URL(a.getAttribute("href"), location.href).search !== location.search) return;
     e.preventDefault(); e.stopPropagation();
     if (scrollY > 30) { scrollTo({ top: 0, behavior: reduceMotion() ? "auto" : "smooth" }); return; }
-    if (state.route?.view === "feed") { dataCache.clear(); state.feeds.clear(); toast("Fil mis à jour"); render(); }
+    if (state.route?.view === "feed") { buzz(15); dataCache.clear(); state.feeds.clear(); toast("Fil mis à jour"); render(); }
   });
 }
 
@@ -2236,7 +2281,9 @@ function settingsExtra() {
   const L = less.get();
   const items = [...L.c.map((c) => `<button class="chip on" type="button" data-unless-cat="${esc(c)}">${esc(CAT_LABEL[c] || c)} <span aria-hidden="true">✕</span></button>`),
     ...L.m.map((x) => `<button class="chip on" type="button" data-unless-med="${esc(x.d)}"><span data-no-tr>${esc(x.n)}</span> <span aria-hidden="true">✕</span></button>`)];
-  return `<section id="setLess"><h3>Moins de ça <small>baissé dans ton fil, jamais caché</small></h3>
+  return `<section><h3>Lecture simple <small>sans barres de couleur ni étiquettes</small></h3>
+      <div class="seg seg-big" role="group"><button type="button" data-simple-set="0" aria-pressed="${store.get("simple") !== "1"}">Non</button><button type="button" data-simple-set="1" aria-pressed="${store.get("simple") === "1"}">Oui</button></div></section>
+    <section id="setLess"><h3>Moins de ça <small>baissé dans ton fil, jamais caché</small></h3>
       ${items.length ? `<div class="chips">${items.join("")}</div><p class="note" style="margin:6px 0 0">Touche un élément pour le remettre comme avant.</p>`
         : `<p class="note" style="margin:0">Rien pour l'instant. Appuie longtemps sur une histoire, puis choisis « Moins de… ».</p>`}</section>
     ${"setAppBadge" in navigator ? `<section><h3>Pastille sur l'icône</h3>
@@ -2252,6 +2299,8 @@ document.addEventListener("click", async (e) => {
     if (sec) sec.outerHTML = settingsExtra().split("</section>")[0] + "</section>";
     return;
   }
+  const sm = e.target.closest("[data-simple-set]");
+  if (sm) { store.set("simple", sm.dataset.simpleSet); applySimple(); $$("[data-simple-set]").forEach((x) => x.setAttribute("aria-pressed", x === sm)); return; }
   const b = e.target.closest("[data-badge-set]");
   if (b) {
     const want = b.dataset.badgeSet === "1";
@@ -2263,6 +2312,197 @@ document.addEventListener("click", async (e) => {
     if (want && !topics.list().length) toast("Suis un sujet pour voir la pastille bouger.");
   }
 });
+
+/* ---------- Encore des touches : cartes d'accueil, à lire plus tard, pincer, lecture simple, sélection ---------- */
+// Petite vibration (Android ; l'iPhone ne la permet pas aux apps web).
+const buzz = (ms = 10) => { try { navigator.vibrate?.(ms); } catch { /* sans vibreur */ } };
+const todayKey = () => dayKey(new Date().toISOString());
+
+// À lire plus tard : une file à part des favoris, qui se vide d'elle-même une fois lu.
+const later = Object.assign(listStore("later", 200), {
+  has(k) { return this.list().some((x) => x.k === k); },
+  toggle(item) { const l = this.list(); const on = !l.some((x) => x.k === item.k); this.save(on ? [{ ...item, at: Date.now() }, ...l] : l.filter((x) => x.k !== item.k)); return on; },
+  remove(k) { const l = this.list(); if (l.some((x) => x.k === k)) { this.save(l.filter((x) => x.k !== k)); syncLater(k, false); } },
+});
+const CLOCK = '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>';
+function laterBtn(item, label = false) {
+  const on = later.has(item.k);
+  return `<button class="act act-later${label ? " act-l" : ""}" type="button" data-later="${esc(JSON.stringify(item))}" data-later-key="${esc(item.k)}" aria-pressed="${on}" title="${on ? "Retirer de « À lire »" : "Lire plus tard"}"><svg viewBox="0 0 24 24" aria-hidden="true">${CLOCK}</svg>${label ? `<span>${on ? "Retirer" : "Plus tard"}</span>` : ""}</button>`;
+}
+function syncLater(k, on) {
+  for (const b of $$(`[data-later-key="${CSS.escape(k)}"]`)) {
+    b.setAttribute("aria-pressed", on);
+    b.title = on ? "Retirer de « À lire »" : "Lire plus tard";
+    const sp = $("span", b); if (sp) sp.textContent = on ? "Retirer" : "Plus tard";
+  }
+}
+function toggleLater(item) {
+  const on = later.toggle(item);
+  syncLater(item.k, on);
+  buzz();
+  if (item.type === "s" && on) { const st = state.stories.get(item.id); if (st) saveFavStory(st); }
+  toastUndo(on ? "Ajouté à « À lire »" : "Retiré de « À lire »", () => { later.toggle(item); syncLater(item.k, !on); });
+  return on;
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-later]");
+  if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  toggleLater(JSON.parse(b.dataset.later));
+  if (state.route?.view === "favoris" && store.get("favTab") === "plustard") setTimeout(() => viewFavs($("#view"), "plustard"), 900);
+}, true);
+
+// Cartes en haut du fil : « Ton matin » (avant 10 h) et « Ma ville aujourd'hui ». Un ✕ ou un glisser les range pour la journée.
+function homeCards(route) {
+  if (route.cat !== "une" || route.lens === "local") return "";
+  const h = new Date().getHours();
+  const matin = h >= 5 && h < 10 && store.get("hcMatin") !== todayKey();
+  const ville = !!prefs.city && store.get("hcVille") !== todayKey();
+  return `${matin ? `<aside class="hcard hc-matin" data-hc="hcMatin">
+      <span class="hc-ico" aria-hidden="true"><svg viewBox="0 0 24 24">${ICON.matin}</svg></span>
+      <a class="hc-body" href="${href({ v: "matin" })}" data-nav><b>Ton matin en 5 histoires</b><span>De gauche, du centre et de droite · environ 3 minutes</span></a>
+      <button class="icon-btn hc-x" type="button" data-hc-x aria-label="Ranger pour aujourd'hui"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </aside>` : ""}
+    ${ville ? `<aside class="hcard hc-ville" data-hc="hcVille" id="hcVille" hidden></aside>` : ""}`;
+}
+let cityCache = null;
+async function cityToday(city) {
+  if (cityCache && cityCache.s === city.s && Date.now() - cityCache.at < 10 * 60e3) return cityCache;
+  const q = city.s === "quebec" ? `"ville de Québec"` : `"${city.n}"`;
+  const [r, loc] = await Promise.all([indexSearch(q).catch(() => null), localMedia()]);
+  if (!r) return null;
+  const m = r.meta;
+  const own = new Set(Object.entries(loc).filter(([, [, , cities]]) => (cities || []).some((c) => foldText(c) === city.f)).map(([d]) => d));
+  const ids = new Set(r.ids.filter((id) => m.D[m.dom[id]].country === "CA"));
+  if (own.size) {
+    const idx = new Set(m.D.map((d, i) => (own.has(d.domain) ? i : -1)).filter((i) => i >= 0));
+    for (let id = 0; id < m.dom.length; id++) if (idx.has(m.dom[id])) ids.add(id);
+  }
+  const today = [...ids].filter((id) => m.age[id] * 10 <= 24 * 60).sort((a, b) => m.age[a] - m.age[b]);
+  cityCache = { s: city.s, at: Date.now(), n: today.length, top: await docsFor(today.slice(0, 3)) };
+  return cityCache;
+}
+async function fillCityCard() {
+  const el = $("#hcVille");
+  if (!el) return;
+  const city = await myVille();
+  if (!city) return;
+  const d = await cityToday(city).catch(() => null);
+  if (!d?.n || !el.isConnected) return;
+  el.innerHTML = `<span class="hc-ico" aria-hidden="true">${pin}</span>
+    <div class="hc-body"><a href="${href({ ville: city.s })}" data-nav><b>${esc(city.n)} aujourd'hui</b><span>${d.n > 1 ? `${d.n} nouvelles depuis 24 heures` : "1 nouvelle depuis 24 heures"} · tout voir →</span></a>
+      <ul class="hc-list">${d.top.slice(0, 2).map((x) => `<li>${artLink(x, "hc-t")}<small data-no-tr>${esc(x.sourceName)} · ${esc(ago(x.published))}</small></li>`).join("")}</ul></div>
+    <button class="icon-btn hc-x" type="button" data-hc-x aria-label="Ranger pour aujourd'hui"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
+  el.hidden = false;
+}
+function dismissCard(c) {
+  store.set(c.dataset.hc, todayKey());
+  c.style.height = `${c.offsetHeight}px`;
+  requestAnimationFrame(() => { c.classList.add("gone"); c.style.height = "0px"; c.style.marginTop = "0px"; });
+  setTimeout(() => c.remove(), 320);
+}
+document.addEventListener("click", (e) => { const x = e.target.closest("[data-hc-x]"); if (x) dismissCard(x.closest(".hcard")); });
+{
+  let c = null, x0 = 0, y0 = 0;
+  addEventListener("touchstart", (e) => { c = e.touches.length === 1 ? e.target.closest(".hcard") : null; if (c) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; } }, { passive: true });
+  addEventListener("touchmove", (e) => {
+    if (!c) return;
+    const dx = e.touches[0].clientX - x0;
+    if (Math.abs(e.touches[0].clientY - y0) > 30) { c.style.transform = ""; c = null; return; }
+    c.style.transform = `translateX(${dx}px)`; c.style.opacity = String(Math.max(0.3, 1 - Math.abs(dx) / 300));
+  }, { passive: true });
+  addEventListener("touchend", (e) => {
+    if (!c) return;
+    const dx = e.changedTouches[0].clientX - x0, card = c; c = null;
+    if (Math.abs(dx) > 90) dismissCard(card); else { card.style.transform = ""; card.style.opacity = ""; }
+  }, { passive: true });
+}
+
+// Pincer dans une histoire pour grossir ou réduire le texte (comme dans Photos).
+{
+  let d0 = 0, s0 = 1, on = false;
+  const inStory = (t) => !!t?.closest && (!!t.closest("#panelBody") || (state.route?.view === "story" && !!t.closest("#view")));
+  const dist = (e) => Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+  const clamp = (x) => Math.max(SCALES[0][0], Math.min(SCALES[SCALES.length - 1][0], x));
+  addEventListener("touchstart", (e) => { if (e.touches.length === 2 && inStory(e.target)) { d0 = dist(e) || 1; s0 = prefs.scale; on = true; } }, { passive: true });
+  addEventListener("touchmove", (e) => {
+    if (!on || e.touches.length !== 2) return;
+    document.documentElement.style.setProperty("--scale", String(clamp(s0 * (dist(e) / d0))));
+  }, { passive: true });
+  addEventListener("touchend", (e) => {
+    if (!on || e.touches.length >= 2) return;
+    on = false;
+    const cur = Number(getComputedStyle(document.documentElement).getPropertyValue("--scale")) || s0;
+    const [v, label] = SCALES.reduce((best, x) => (Math.abs(x[0] - cur) < Math.abs(best[0] - cur) ? x : best));
+    store.set("scale", String(v)); applyScale();
+    if (v !== s0) { buzz(); toast(`Taille du texte : ${label}`); }
+  }, { passive: true });
+  // iPhone : pas de zoom de la page pendant qu'on pince dans une histoire.
+  for (const t of ["gesturestart", "gesturechange"]) document.addEventListener(t, (e) => { if (inStory(e.target)) e.preventDefault(); });
+}
+
+// Lecture simple : sans barres de couleur ni étiquettes, juste les titres et les résumés.
+const applySimple = () => document.documentElement.classList.toggle("simple", store.get("simple") === "1");
+applySimple();
+
+// Sélectionner plusieurs histoires et les partager d'un coup (par exemple à la famille).
+function enterSelect(first) {
+  state.sel = new Map();
+  document.body.classList.add("selecting");
+  let bar = $("#selBar");
+  if (!bar) {
+    bar = document.createElement("div");
+    bar.id = "selBar"; bar.className = "sel-bar"; bar.setAttribute("role", "toolbar");
+    document.body.appendChild(bar);
+    bar.onclick = (e) => {
+      const b = e.target.closest("[data-selb]");
+      if (!b) return;
+      if (b.dataset.selb === "share") shareSelected();
+      else exitSelect();
+    };
+  }
+  if (first) toggleSel(first);
+  drawSelBar();
+}
+function exitSelect() {
+  if (!state.sel) return;
+  state.sel = null;
+  document.body.classList.remove("selecting");
+  $$(".picked").forEach((c) => c.classList.remove("picked"));
+  $("#selBar")?.remove();
+}
+function toggleSel(s) {
+  if (state.sel.has(s.id)) state.sel.delete(s.id); else state.sel.set(s.id, s);
+  for (const c of cardsOf(s.id)) c.classList.toggle("picked", state.sel.has(s.id));
+  buzz(6);
+  drawSelBar();
+}
+function drawSelBar() {
+  const bar = $("#selBar");
+  if (!bar) return;
+  const n = state.sel?.size || 0;
+  bar.innerHTML = `<span class="sel-n">${n ? `${n} ${n > 1 ? "histoires choisies" : "histoire choisie"}` : "Touche les histoires à partager"}</span>
+    <button class="btn ghost" type="button" data-selb="cancel">Annuler</button>
+    <button class="btn" type="button" data-selb="share"${n ? "" : " disabled"}>Partager</button>`;
+}
+async function shareSelected() {
+  const list = [...(state.sel?.values() || [])];
+  if (!list.length) return;
+  const text = `${list.length > 1 ? `${list.length} nouvelles` : "Une nouvelle"} à lire sur Prisme, vues de gauche, du centre et de droite :\n\n`
+    + list.map((s) => `• ${s.titleFr || s.title}\n${absUrl(href({ h: s.id }))}`).join("\n\n");
+  exitSelect();
+  if (navigator.share) { try { await navigator.share({ title: "Prisme", text }); return; } catch (e) { if (e.name === "AbortError") return; } }
+  try { await navigator.clipboard.writeText(text); toast("Copié : colle-le dans ton message."); } catch { prompt("Copie ce texte :", text); }
+}
+document.addEventListener("click", (e) => {
+  if (!state.sel || e.target.closest("#selBar")) return;
+  const card = e.target.closest("#view .story, #view .lead");
+  if (!card) return;
+  e.preventDefault(); e.stopPropagation();
+  const s = state.stories.get(cardId(card));
+  if (s) toggleSel(s);
+}, true);
+addEventListener("keydown", (e) => { if (e.key === "Escape") exitSelect(); });
 
 /* ---------- Le fil ---------- */
 // Montrée une seule fois : comment lire un bloc du fil.
@@ -2292,7 +2532,7 @@ function viewFeed(v, route) {
     ${route.lens === "local" ? `<div class="city-bar" id="cityBar"></div>` : ""}
     <div class="topics" id="topics"></div>
     <div class="layout">
-      <div class="main-col"><button class="new-pill" id="newPill" type="button" hidden></button><div class="feed-top"><p class="fresh" id="fresh" hidden></p></div>${installCard()}${store.get("howto") ? "" : HOWTO}<div id="feed"></div><div id="sentinel"></div><div id="feedStatus"></div></div>
+      <div class="main-col"><button class="new-pill" id="newPill" type="button" hidden></button><div class="feed-top"><p class="fresh" id="fresh" hidden></p></div>${homeCards(route)}${installCard()}${store.get("howto") ? "" : HOWTO}<div id="feed"></div><div id="sentinel"></div><div id="feedStatus"></div></div>
       <aside class="rail" aria-label="Autour du fil"><div class="rail-in" id="rail"></div></aside>
     </div>`;
   const ht = $("#howtoOk", v);
@@ -2303,6 +2543,7 @@ function viewFeed(v, route) {
     if (b) go(href({ cat: route.cat, lens: b.dataset.lens }));
   };
   mountFeed(key, { cat: route.cat, lens: route.lens });
+  if ($("#hcVille", v)) setTimeout(fillCityCard, 800);
 }
 
 // La barre « Ma ville » : la ville choisie, et une case pour en choisir une autre en tapant son nom.
@@ -2316,7 +2557,7 @@ function drawCityBar(el, route) {
   const ch = $("#cbChange", el);
   if (ch) ch.onclick = () => { $("#cbPick", el).classList.remove("cb-closed"); ch.remove(); $("#cbInput", el).focus(); };
   villesData().then((V) => {
-    $("#cbVilles", el).innerHTML = V.list.map((x) => `<option value="${esc(villeLabel(x))}">`).join("");
+    cityAuto($("#cbInput", el), V);
     $("#cbInput", el).onchange = (e) => {
       const f = foldText(e.target.value).trim();
       const hit = V.list.find((x) => foldText(villeLabel(x)) === f) || matchVilles(V, e.target.value, 1)[0];
@@ -2518,7 +2759,7 @@ async function viewStory(v, route) {
   const words = loadedWords(s);
   const marksFor = (a) => { const sd = sideOf(a.media); return sd === "left" ? words.leftSet : sd === "right" ? words.rightSet : null; };
   const hlItem = (a) => `<li>
-    <div class="row"><button class="src" type="button" data-domain="${esc(a.domain)}" data-name="${esc(a.sourceName)}">${favicon(a.domain, a.sourceName)}<span>${esc(a.sourceName)}</span></button>${badge(a.media)}${langTag(a.lang)}<time>${esc(ago(a.published))}</time><span class="acts">${favBtn(artFav(a))}${shareBtn(artShare(a))}</span></div>
+    <div class="row"><button class="src" type="button" data-domain="${esc(a.domain)}" data-name="${esc(a.sourceName)}">${favicon(a.domain, a.sourceName)}<span>${esc(a.sourceName)}</span></button>${badge(a.media)}${langTag(a.lang)}<time>${esc(ago(a.published))}</time><span class="acts">${laterBtn(artFav(a))}${favBtn(artFav(a))}${shareBtn(artShare(a))}</span></div>
     ${artLink(a, "t", marksFor(a))} ${transLink(a)}
     ${a.prevTitle ? `<div class="was">Titre modifié · avant : <s>${esc(a.prevTitle)}</s></div>` : ""}
     ${a.media.known ? `<div class="own">${esc(a.media.owner)}</div>` : ""}
@@ -3096,7 +3337,8 @@ async function viewFavs(v, tab = store.get("favTab", "tout"), q = "") {
   const fq = q.trim() ? parseQuery(q) : null;
   const keep = (x) => !fq || matchQuery(foldText(`${x.t} ${x.n || ""}`), fq);
   const st = all.filter((x) => x.type === "s" && keep(x)), ar = all.filter((x) => x.type === "a" && keep(x));
-  const tabs = [["tout", "Tout", st.length + ar.length], ["histoires", "Histoires", st.length], ["articles", "Articles", ar.length], ["medias", "Mes médias", fl.length]];
+  const lt = later.list().filter(keep);
+  const tabs = [["plustard", "À lire", lt.length], ["tout", "Tout", st.length + ar.length], ["histoires", "Histoires", st.length], ["articles", "Articles", ar.length], ["medias", "Mes médias", fl.length]];
   const date = (ts) => new Date(ts).toLocaleDateString(LOCALE, { day: "numeric", month: "short" });
   const storyFavRow = (x) => `<li class="fv">
       ${x.img ? `<span class="fv-img"><img src="${esc(safeUrl(x.img))}" alt="" loading="lazy" referrerpolicy="no-referrer"></span>` : ""}
@@ -3121,7 +3363,11 @@ async function viewFavs(v, tab = store.get("favTab", "tout"), q = "") {
     </div>
     <div id="fvBody"></div>`;
   const body = $("#fvBody");
-  if (tab === "medias") {
+  if (tab === "plustard") {
+    const row = (x) => (x.type === "s" ? storyFavRow(x) : artFavRow(x)).replace('<span class="acts">', `<span class="acts">${laterBtn(x, true)}`).replace(/enregistrée? le/, "ajouté le");
+    body.innerHTML = lt.length ? `<p class="note" style="margin:4px 0 12px">Ce que tu as mis de côté. Chaque histoire ou article disparaît d'ici une fois lu.</p><ul class="fv-list">${lt.map(row).join("")}</ul>`
+      : `<div class="empty"><h3>${q ? "Rien ne correspond." : "Rien à lire plus tard."}</h3><p>Appuie longtemps sur une histoire et choisis « Lire plus tard », ou touche l'horloge à côté d'un article.</p><a class="btn" href="${href({})}" data-nav>Aller au fil</a></div>`;
+  } else if (tab === "medias") {
     if (!fl.length) body.innerHTML = `<div class="empty"><h3>Tu ne suis aucun média pour l'instant.</h3><p>Cherche un média (par exemple « TVA » ou « Le Devoir »), ouvre sa page et touche « Suivre ce média ».</p></div>`;
     else {
       body.innerHTML = `<div class="fv-outlets">${fl.map((x) => `<a class="outlet-hit" href="${href({ m: x.d })}" data-nav>${favicon(x.d, x.n)}<span class="oh-main"><b>${esc(x.n)}</b><small>${esc(x.d)}</small></span><span class="oh-side"><small>Voir ses articles →</small></span></a>`).join("")}</div>
@@ -3411,7 +3657,7 @@ function artRow(x, marks = []) {
       <div class="a2-top"><a class="src" href="${href({ m: x.domain })}" data-nav>${favicon(x.domain, x.sourceName)}<span>${esc(x.sourceName)}</span></a>${tag(x.media)}${langTag(x.lang)}<time>${esc(ago(x.published))}</time></div>
       <a class="a2-t${reads.has(x.url) ? " is-read" : ""}" data-no-tr href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener noreferrer" data-read="${esc(JSON.stringify(meta))}">${title}</a>
       ${x.summary ? `<p class="a2-x" data-no-tr>${marks.length ? markWords(x.summary, marks) : esc(x.summary)}</p>` : ""}
-      <div class="a2-foot">${transLink(x)}<span class="acts">${favBtn(artFav(x))}${shareBtn(artShare(x))}</span></div>
+      <div class="a2-foot">${transLink(x)}<span class="acts">${laterBtn(artFav(x))}${favBtn(artFav(x))}${shareBtn(artShare(x))}</span></div>
     </div>
     ${x.image ? `<a class="a2-img" href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(x.image))}" alt="" loading="lazy" referrerpolicy="no-referrer"></a>` : ""}
   </li>`;
