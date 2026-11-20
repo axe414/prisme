@@ -1,0 +1,65 @@
+# Publication rapide de l'app (1 à 2 minutes) : quand seuls les fichiers de l'app (public/) changent,
+# on reprend le site déjà publié par le dernier passage du robot (avec toutes ses données),
+# on y met la nouvelle version de l'app, et on publie. Le robot n'a pas besoin de relire les médias.
+name: App (publication rapide)
+
+on:
+  push:
+    branches: [main]
+    paths: ["public/**"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  actions: read
+
+concurrency:
+  group: app-rapide
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dernier passage réussi du robot
+        id: last
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          id=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow edition.yml --status success --limit 1 --json databaseId -q '.[0].databaseId')
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+
+      - name: Site déjà publié (avec ses données)
+        uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          run-id: ${{ steps.last.outputs.id }}
+          github-token: ${{ github.token }}
+          path: prev
+
+      - name: Nouvelle version de l'app par-dessus
+        run: |
+          mkdir -p site
+          tar -xf prev/artifact.tar -C site
+          cp -r public/. site/
+          ls site | head
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

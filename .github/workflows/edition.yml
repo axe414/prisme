@@ -8,6 +8,8 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    # Les changements de l'app seule passent par la publication rapide (app.yml).
+    paths-ignore: ["public/**", "docs/**", "**.md"]
 
 permissions:
   contents: read

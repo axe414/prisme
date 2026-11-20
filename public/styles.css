@@ -1173,3 +1173,15 @@ html, body { overflow-x: clip; }
 .mchip .chip[disabled] { opacity: .45; cursor: default; }
 .mchip-go { display: inline-grid; place-items: center; padding: 0 8px; border: 1px solid var(--hair); border-left: 0; border-radius: 0 2px 2px 0; font: 600 12px var(--sans); color: var(--ink-3); text-decoration: none; }
 .mchip-go:hover { color: var(--ink); border-color: var(--ink); }
+
+/* Barre « Ma ville » */
+.city-bar { display: grid; gap: 10px; margin: 14px 0 4px; padding: 14px 16px; background: var(--card); border: 1px solid var(--hair); border-left: 4px solid var(--b-l2); }
+.cb-main { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font: 17px var(--serif); }
+.cb-main .sg-ico { width: 20px; height: 20px; fill: none; stroke: var(--ink); stroke-width: 1.8; flex: none; }
+.cb-main span { flex: 1; min-width: 200px; }
+.cb-pick { display: grid; gap: 4px; }
+.cb-pick input { height: 42px; padding: 0 12px; font: 16px var(--sans); color: var(--ink); background: var(--paper); border: 1px solid var(--hair); border-radius: 2px; }
+.cb-pick input:focus { border-color: var(--ink); outline: none; }
+.cb-closed { display: none; }
+.cb-change { justify-self: start; font: 600 13px var(--sans); }
+.cats .cat-ville { color: var(--b-l2); }

@@ -683,7 +683,8 @@ function renderChrome(route) {
   const page = routePage(route);
   $("#mastLinks").innerHTML = PAGES.map(([v, l]) => `<a href="${href({ v })}" data-nav ${page === v ? 'aria-current="page"' : ""}>${l}</a>`).join("");
   $("#editionSel").innerHTML = REGIONS.map(([v, l]) => `<option value="${v}" ${v === state.region ? "selected" : ""}>${l}</option>`).join("");
-  $("#cats").innerHTML = CATS.map(([v, l]) => `<a href="${href({ cat: v, lens: route.view === "feed" ? route.lens : undefined })}" data-nav ${route.view === "feed" && route.cat === v ? 'aria-current="page"' : ""}>${l}</a>`).join("");
+  $("#cats").innerHTML = CATS.map(([v, l]) => `<a href="${href({ cat: v, lens: route.view === "feed" ? route.lens : undefined })}" data-nav ${route.view === "feed" && route.cat === v ? 'aria-current="page"' : ""}>${l}</a>`).join("")
+    + `<span class="sep"></span><a class="cat-ville" href="${prefs.city ? href({ ville: prefs.city }) : href({ v: "villes" })}" data-nav ${["ville", "villes"].includes(route.view) ? 'aria-current="page"' : ""}>📍 ${esc(prefs.cityLabel || "Ma ville")}</a>`;
   const onUne = ["feed", "story", "search", "outlet", "ville", "villes"].includes(route.view);
   const alerts = alertCount();
   $("#tabbar").innerHTML = `
@@ -1010,6 +1011,7 @@ const SCALES = [[0.92, "Petit"], [1, "Normal"], [1.12, "Grand"], [1.25, "Très g
 const prefs = {
   get scale() { return Number(store.get("scale", "1")) || 1; },
   get city() { return store.get("city", ""); },
+  get cityLabel() { return store.get("city") ? store.get("cityLabel", "") || CITIES[store.get("city")]?.label || "" : ""; },
   get cats() { try { return JSON.parse(store.get("prefCats", "[]")); } catch { return []; } },
 };
 const applyScale = () => document.documentElement.style.setProperty("--scale", String(prefs.scale));
@@ -1109,7 +1111,7 @@ function openSettings() {
       const f = foldText(e.target.value).trim();
       const hit = V.list.find((x) => foldText(villeLabel(x)) === f) || matchVilles(V, e.target.value, 1)[0];
       if (!hit) { $("#setCityNote").textContent = "Ville introuvable : choisis-la dans la liste."; return; }
-      store.set("city", hit.s); state.feeds.clear();
+      store.set("city", hit.s); store.set("cityLabel", hit.n); state.feeds.clear();
       e.target.value = villeLabel(hit); $("#setCityNote").textContent = `✓ ${villeWhere(hit)}`;
       if (state.route.view === "feed") render();
     };
@@ -1171,6 +1173,7 @@ function openOnboarding() {
   const finish = () => {
     store.set("onboarded", "1");
     store.set("city", choice.city);
+    store.set("cityLabel", choice.cityLabel || "");
     store.set("prefCats", JSON.stringify([...choice.cats]));
     store.set("scale", String(choice.scale));
     applyScale();
@@ -1483,7 +1486,8 @@ const pin = '<svg viewBox="0 0 24 24" aria-hidden="true" class="sg-ico"><path d=
 // La ville choisie pour « Ma ville » : une municipalité (nouveau) ou une région (ancien réglage).
 async function myVille() {
   const key = prefs.city;
-  if (!key || CITIES[key]) return null;
+  if (!key) return null;
+  // Une vraie municipalité d'abord (« montreal », « quebec »…), sinon l'ancienne région.
   return (await villesData().catch(() => null))?.bySlug.get(key) || null;
 }
 const localMedia = () => dataJson("local-media.json", 864e5).catch(() => ({}));
@@ -1525,6 +1529,7 @@ async function viewVille(v, route) {
   };
   $("#vMine", v).onclick = (e) => {
     store.set("city", city.s);
+    store.set("cityLabel", city.n);
     state.feeds.clear();
     e.target.textContent = "✓ C'est ma ville";
     toast(`${city.n} est ta ville : le fil « Ma ville » montre ses nouvelles.`);
@@ -1644,11 +1649,12 @@ function viewFeed(v, route) {
   const lensHtml = `<div class="lensbar">
       <span class="label">Voir par</span>
       <div class="lenses" role="group" aria-label="Lentille">${Object.entries(LENSES).filter(([k, l]) => !l.qc || ["qc", "ca"].includes(state.region)).map(([k, l]) =>
-        `<button type="button" data-lens="${k}" aria-pressed="${route.lens === k}">${l.sw ? `<span class="sw" style="background:${l.sw}"></span>` : ""}${l.label}</button>`).join("")}</div>
+        `<button type="button" data-lens="${k}" aria-pressed="${route.lens === k}">${l.sw ? `<span class="sw" style="background:${l.sw}"></span>` : ""}${k === "local" ? `📍 ${esc(prefs.cityLabel || "Ma ville")}` : l.label}</button>`).join("")}</div>
       <p class="lens-desc">${esc(LENSES[route.lens].desc)}</p>
       <div class="legend-row"><span class="label">Orientation des médias</span>${legend()}</div>
     </div>`;
   v.innerHTML = `${folio(esc(CAT_LABEL[route.cat]), regionLabel())}${lensHtml}
+    ${route.lens === "local" ? `<div class="city-bar" id="cityBar"></div>` : ""}
     <div class="topics" id="topics"></div>
     <div class="layout">
       <div class="main-col">${store.get("howto") ? "" : HOWTO}<div id="feed"></div><div id="sentinel"></div><div id="feedStatus"></div></div>
@@ -1656,11 +1662,36 @@ function viewFeed(v, route) {
     </div>`;
   const ht = $("#howtoOk", v);
   if (ht) ht.onclick = () => { store.set("howto", "1"); $(".howto", v)?.remove(); };
+  if (route.lens === "local") drawCityBar($("#cityBar", v), route);
   $(".lenses", v).onclick = (e) => {
     const b = e.target.closest("[data-lens]");
     if (b) go(href({ cat: route.cat, lens: b.dataset.lens }));
   };
   mountFeed(key, { cat: route.cat, lens: route.lens });
+}
+
+// La barre « Ma ville » : la ville choisie, et une case pour en choisir une autre en tapant son nom.
+function drawCityBar(el, route) {
+  const has = !!prefs.city;
+  el.innerHTML = `<div class="cb-main">${pin}<span>${has ? `Les nouvelles de <b>${esc(prefs.cityLabel || "ta ville")}</b> et de sa région` : "<b>Choisis ta ville</b> pour voir ses nouvelles"}</span>
+      ${has ? `<a class="btn ghost" href="${href({ ville: prefs.city })}" data-nav>Page de la ville →</a>` : ""}</div>
+    <label class="cb-pick${has ? " cb-closed" : ""}" id="cbPick"><span class="label">${has ? "Changer de ville" : "Ta ville"}</span>
+      <input type="search" id="cbInput" list="cbVilles" placeholder="Tape le nom de ta ville (ex. Victoriaville)…" autocomplete="off"><datalist id="cbVilles"></datalist></label>
+    ${has ? `<button class="link cb-change" type="button" id="cbChange">Changer de ville</button>` : ""}`;
+  const ch = $("#cbChange", el);
+  if (ch) ch.onclick = () => { $("#cbPick", el).classList.remove("cb-closed"); ch.remove(); $("#cbInput", el).focus(); };
+  villesData().then((V) => {
+    $("#cbVilles", el).innerHTML = V.list.map((x) => `<option value="${esc(villeLabel(x))}">`).join("");
+    $("#cbInput", el).onchange = (e) => {
+      const f = foldText(e.target.value).trim();
+      const hit = V.list.find((x) => foldText(villeLabel(x)) === f) || matchVilles(V, e.target.value, 1)[0];
+      if (!hit) return;
+      store.set("city", hit.s); store.set("cityLabel", hit.n);
+      state.feeds.clear();
+      toast(`${hit.n} est ta ville.`);
+      render();
+    };
+  }).catch(() => {});
 }
 
 function mountFeed(key, params) {
