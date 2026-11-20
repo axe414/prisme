@@ -2230,3 +2230,7 @@ html.soir img { filter: brightness(.92); }
 .coach-tip { position: fixed; left: 16px; right: 16px; max-width: 420px; margin: 0 auto; padding: 14px 16px; border-radius: 14px; background: var(--paper); color: var(--ink); box-shadow: 0 14px 40px -10px rgba(0, 0, 0, .6); animation: rise .25s ease both; }
 .coach-tip p { margin: 0 0 10px; font: 600 16px/1.4 var(--sans); }
 .coach-acts { display: flex; align-items: center; justify-content: space-between; font: 13px var(--sans); color: var(--ink-3); }
+
+/* En bref · Vidéos : un seul bouton « Son » de Prisme */
+.sh-sound { position: absolute; z-index: 4; right: 10px; bottom: 10px; height: 34px; padding: 0 12px; border-radius: 999px; border: 0; background: rgba(0, 0, 0, .62); color: #fff; font: 600 13.5px var(--sans); cursor: pointer; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.sh-sound[aria-pressed="true"] { background: rgba(255, 255, 255, .9); color: #111; }

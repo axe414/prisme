@@ -564,7 +564,9 @@ async function videosLocal(p) {
   const all = (await dataJson("videos.json", 30 * 60e3)).videos;
   const region = p.get("region") || "monde";
   const countries = region === "monde" ? null : (await edition(region)).countries;
-  let list = all.filter((v) => !countries || countries.includes(v.media.country));
+  // Les capsules commerciales (idées cadeaux, commandité…) ne sont pas des nouvelles (même règle que le robot).
+  const PROMO = /(gift ideas?|gifts? (for|guide|under)|must[- ]have gifts|holiday gifts|stocking stuffers|everyday finds|id[ée]es?[- ](de )?cadeaux|guide (des |de )?cadeaux|cadeaux (de no[eë]l|pour)|deals? (of|du) (the )?(day|jour|week|semaine)|sponsored|sponsoris|commandit|pr[ée]sent[ée]e? par|presented by|brought to you by|paid partnership|partenariat (pay|r[ée]mun)|#ad\b|#sponsored|unboxing|giveaway|product picks|shopping (picks|guide|list))/i;
+  let list = all.filter((v) => (!countries || countries.includes(v.media.country)) && !PROMO.test(v.title || ""));
   const q = p.get("q");
   if (q) {
     const qw = vwords(q);
@@ -3223,20 +3225,41 @@ addEventListener("keydown", (e) => { if (e.key === "Escape") exitSelect(); });
 // En bref · Vidéos : les vidéos des médias, une par écran, qui démarrent seules (sans le son, comme Instagram).
 const vidSlide = (v) => `<section class="sh sh-v" data-vid="${esc(v.id)}">
     <img class="sh-blur" src="${esc(safeUrl(v.thumb))}" alt="" loading="lazy" referrerpolicy="no-referrer">
-    <div class="sh-player"><img src="${esc(safeUrl(v.thumb))}" alt="" loading="lazy" referrerpolicy="no-referrer"><span class="sh-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg></span></div>
+    <div class="sh-player"><img src="${esc(safeUrl(v.thumb))}" alt="" loading="lazy" referrerpolicy="no-referrer"><span class="sh-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg></span>
+      <button class="sh-sound" type="button" data-sound aria-pressed="${state.vidSound ? "true" : "false"}">${state.vidSound ? "🔊 Son" : "🔇 Son"}</button></div>
     <div class="sh-in">
       <div class="sh-k">${badge(v.media)} <span class="sh-ch" data-no-tr>${esc(v.channel)}</span> · ${esc(ago(v.published))}</div>
       <h2 data-no-tr>${esc(v.title)}</h2>
-      <p class="sh-hint">Touche la vidéo pour le son · glisse vers le haut</p>
+      <p class="sh-hint">Touche « Son » pour entendre · glisse vers le haut</p>
     </div>
   </section>`;
+// Le lecteur YouTube, sans ses commandes (titre, réglages, liens) : Prisme garde un seul bouton « Son ».
+// (Les avis obligatoires de YouTube, comme « promotion payée », restent affichés par YouTube.)
+const ytSend = (f, func) => { try { f.contentWindow.postMessage(JSON.stringify({ event: "command", func, args: [] }), "*"); } catch { /* lecteur pas prêt */ } };
 function playSlide(sec, on) {
   const box = $(".sh-player", sec);
   if (!box) return;
   const f = $("iframe", box);
-  if (on && !f) box.insertAdjacentHTML("beforeend", `<iframe src="https://www.youtube-nocookie.com/embed/${sec.dataset.vid}?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1" title="Vidéo" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`);
+  if (on && !f) {
+    box.insertAdjacentHTML("beforeend", `<iframe src="https://www.youtube-nocookie.com/embed/${sec.dataset.vid}?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1&controls=0&iv_load_policy=3&disablekb=1&fs=0&enablejsapi=1&origin=${encodeURIComponent(location.origin)}" title="Vidéo" allow="autoplay; encrypted-media; picture-in-picture"></iframe>`);
+    const nf = $("iframe", box);
+    // Le son déjà ouvert sur la vidéo d'avant : on le garde.
+    nf.addEventListener("load", () => { if (state.vidSound) [600, 1500].forEach((t) => setTimeout(() => ytSend(nf, "unMute"), t)); });
+    const sb = $("[data-sound]", sec);
+    if (sb) { sb.setAttribute("aria-pressed", String(!!state.vidSound)); sb.textContent = state.vidSound ? "🔊 Son" : "🔇 Son"; }
+  }
   if (!on && f) f.remove();
 }
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-sound]");
+  if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  state.vidSound = !state.vidSound;
+  const f = $("iframe", b.closest(".sh-player"));
+  if (f) { ytSend(f, state.vidSound ? "unMute" : "mute"); ytSend(f, "playVideo"); }
+  b.setAttribute("aria-pressed", String(state.vidSound));
+  b.textContent = state.vidSound ? "🔊 Son" : "🔇 Son";
+}, true);
 async function openVideoBref() {
   closeShorts();
   const o = document.createElement("div");
