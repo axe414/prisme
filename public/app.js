@@ -758,7 +758,8 @@ const routePage = (r) => ({ me: "moi", owners: "proprietaires", matin: "matin", 
 
 function renderChrome(route) {
   const page = routePage(route);
-  $("#mastLinks").innerHTML = PAGES.map(([v, l]) => `<a href="${href({ v })}" data-nav ${page === v ? 'aria-current="page"' : ""}>${l}</a>`).join("");
+  // Ordinateur : « En bref » est un vrai bouton dans le bandeau, à côté des pages (au téléphone, il est dans la barre du bas).
+  $("#mastLinks").innerHTML = `<button type="button" class="mast-bref" id="mastBref" title="Une nouvelle par écran"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="3"/><path d="m10.5 9.5 4 2.5-4 2.5Z"/></svg>En bref</button>` + PAGES.map(([v, l]) => `<a href="${href({ v })}" data-nav ${page === v ? 'aria-current="page"' : ""}>${l}</a>`).join("");
   $("#editionSel").innerHTML = REGIONS.map(([v, l]) => `<option value="${v}" ${v === state.region ? "selected" : ""}>${l}</option>`).join("");
   // « Ma ville » juste après « À la une » : visible tout de suite, sans glisser la barre.
   const catLink = ([v, l]) => `<a class="cc-${v}" href="${href({ cat: v, lens: route.view === "feed" ? route.lens : undefined })}" data-nav ${route.view === "feed" && route.cat === v ? 'aria-current="page"' : ""}>${CAT_EMOJI[v] ? `<span class="ce" aria-hidden="true">${CAT_EMOJI[v]}</span>` : ""}${l}</a>`;
@@ -778,6 +779,7 @@ function renderChrome(route) {
   $("#moreBtnTab").onclick = openMoreSheet;
   drawCatWx();
   $("#enBrefTab").onclick = openEnBref;
+  $("#mastBref").onclick = openEnBref;
   // Garde visible la rubrique choisie dans la barre défilante (téléphone).
   const el = $("#cats [aria-current]");
   if (el) {
@@ -3676,10 +3678,9 @@ function viewFeed(v, route) {
     ${route.lens === "local" ? `<div class="city-bar" id="cityBar"></div>` : ""}
     <div class="topics" id="topics"></div>
     <div class="layout">
-      <div class="main-col"><button class="new-pill" id="newPill" type="button" hidden></button><div class="feed-top"><p class="fresh" id="fresh" hidden></p><button class="sort-btn" type="button" id="sortBtn" aria-haspopup="dialog">Trier : <b>${esc(LENS_SHORT[route.lens] || LENSES[route.lens]?.label || "")}</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><button class="sh-btn" type="button" id="shortsBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="3"/><path d="m10.5 9.5 4 2.5-4 2.5Z"/></svg><span class="sh-lbl"><b>En bref</b><small>une nouvelle par écran</small></span></button></div>${homeCards(route)}${installCard()}${store.get("howto") ? "" : HOWTO}<div id="feed"></div><div id="sentinel"></div><div id="feedStatus"></div></div>
+      <div class="main-col"><button class="new-pill" id="newPill" type="button" hidden></button><div class="feed-top"><p class="fresh" id="fresh" hidden></p><button class="sort-btn" type="button" id="sortBtn" aria-haspopup="dialog">Trier : <b>${esc(LENS_SHORT[route.lens] || LENSES[route.lens]?.label || "")}</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button></div>${homeCards(route)}${installCard()}${store.get("howto") ? "" : HOWTO}<div id="feed"></div><div id="sentinel"></div><div id="feedStatus"></div></div>
       <aside class="rail" aria-label="Autour du fil"><div class="rail-in" id="rail"></div></aside>
     </div>`;
-  $("#shortsBtn", v).onclick = openShorts;
   $("#sortBtn", v).onclick = () => openSortSheet(route);
   $(".lens-help", v).onclick = (e) => { const d = $(".lens-desc", v); d.hidden = !d.hidden; e.currentTarget.setAttribute("aria-expanded", String(!d.hidden)); };
   const ht = $("#howtoOk", v);

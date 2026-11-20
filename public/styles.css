@@ -2119,3 +2119,11 @@ html.soir img { filter: brightness(.92); }
 .s-fold > summary small { white-space: nowrap; }
 .s-more.s-fold > summary { font: 700 16px var(--sans); padding: 14px 2px; border: 0; background: none; }
 .s-more.s-fold > summary::before { content: none; }
+
+/* « En bref » dans le bandeau (ordinateur) : un petit bouton aux couleurs du spectre */
+.mast-links { align-items: center; }
+.mast-bref { display: inline-flex; align-items: center; gap: 6px; height: 30px; margin-right: 8px; padding: 0 13px 0 9px; border: 0; border-radius: 999px; cursor: pointer; white-space: nowrap; font: 600 13px var(--sans); color: #fff; background: linear-gradient(90deg, var(--b-l2), #6A5A9E 55%, var(--b-r2)); box-shadow: 0 4px 14px -6px rgba(0, 0, 0, .6); transition: transform .12s ease, filter .15s ease; }
+.mast-bref svg { width: 16px; height: 16px; fill: none; stroke: #fff; stroke-width: 1.9; stroke-linejoin: round; }
+.mast-bref svg path { fill: #fff; stroke: none; }
+.mast-bref:hover { filter: brightness(1.12); }
+.mast-bref:active { transform: scale(.96); }
