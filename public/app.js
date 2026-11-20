@@ -1067,10 +1067,9 @@ function sideStrip(s) {
 }
 // « Radio-Canada, Le Devoir +11 » : deux médias nommés (les connus d'abord), puis le reste en nombre.
 function sourcesLine(s, max = 2) {
-  const seen = new Set(), list = [];
-  for (const a of s.articles || []) if (!seen.has(a.domain)) { seen.add(a.domain); list.push(a); }
-  const named = [...list].sort((a, b) => (b.media?.known ? 1 : 0) - (a.media?.known ? 1 : 0)).slice(0, max);
-  const rest = Math.max(0, (s.sources || list.length) - named.length);
+  // Le premier nommé est celui que « Lire ↗ » ouvre.
+  const named = rankArticles(s).slice(0, max);
+  const rest = Math.max(0, (s.sources || named.length) - named.length);
   return `<span data-no-tr>${named.map((a) => esc(a.sourceName)).join(", ")}</span>${rest ? ` +${rest}` : ""}`;
 }
 // Les logos des 3 premiers médias d'une histoire, l'un sur l'autre (les connus d'abord).
@@ -1082,8 +1081,39 @@ function logoStack(s, max = 3) {
 }
 // « 12 min », « 3 h », « 2 j » : l'heure courte des cartes (tient sur une ligne).
 const agoShort = (iso) => { const m = (Date.now() - Date.parse(iso || 0)) / 60e3; return !iso || !Number.isFinite(m) ? "" : m < 60 ? `${Math.max(1, Math.round(m))} min` : m < 1440 ? `${Math.round(m / 60)} h` : `${Math.round(m / 1440)} j`; };
+// Le meilleur article à lire d'une histoire : dans ta langue, d'un média connu, et d'abord chez les médias
+// que tu suis ou que tu lis le plus souvent (compté sur cet appareil seulement).
+let favDomCache = null;
+function favDomains() {
+  if (favDomCache && Date.now() - favDomCache.at < 60e3) return favDomCache.m;
+  const m = new Map();
+  for (const r of reads.list().slice(-300)) if (r.d) m.set(r.d, (m.get(r.d) || 0) + 1);
+  try { for (const x of follows.list()) m.set(x.d, (m.get(x.d) || 0) + 6); } catch { /* pas de médias suivis */ }
+  favDomCache = { at: Date.now(), m };
+  return m;
+}
+function rankArticles(s) {
+  const seen = new Set();
+  const one = (s.articles || []).filter((a) => a.url && !seen.has(a.domain) && seen.add(a.domain));
+  const want = LANG === "en" ? "en" : "fr";
+  const fav = favDomains();
+  const score = (a) => ((a.lang || "fr") === want ? 4 : 0) + (a.media?.known ? 2 : 0) + (a.domain === s.leadDomain ? 1 : 0) + Math.min(3, (fav.get(a.domain) || 0) * 0.6);
+  return one.sort((a, b) => score(b) - score(a));
+}
+const bestArticle = (s) => rankArticles(s)[0] || null;
+// « Lire ↗ » : ouvre directement le meilleur article, en un toucher, depuis la carte.
+function readBtn(s) {
+  const a = bestArticle(s);
+  return a ? `<a class="c2-read" href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener noreferrer" data-read="${readAttr(a)}" data-card-read="${esc(s.id)}" title="Lire l'article chez ${esc(a.sourceName)}">Lire<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16 16 8M9 8h7v7"/></svg></a>` : "";
+}
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("[data-card-read]");
+  if (!a) return;
+  const s = state.stories.get(a.dataset.cardRead);
+  if (s) setTimeout(() => setSeen(s, true), 400);
+});
 const peekBtn = `<button class="c2-peek" type="button" data-peek aria-expanded="false" aria-label="Aperçu ici" title="Aperçu ici"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>`;
-const metaLine = (s, st) => `<p class="c2-meta">${newTag(s)}${logoStack(s)}${sourcesLine(s, 1)} · <time title="${esc(ago(s.lastSeen || s.firstSeen))}">${agoShort(s.lastSeen || s.firstSeen)}</time>${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}${peekBtn}</p>`;
+const metaLine = (s, st) => `<p class="c2-meta">${newTag(s)}${logoStack(s)}${sourcesLine(s, 1)} · <time title="${esc(ago(s.lastSeen || s.firstSeen))}">${agoShort(s.lastSeen || s.firstSeen)}</time>${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}<span class="c2-acts">${readBtn(s)}${peekBtn}</span></p>`;
 
 // La rubrique d'une histoire, en couleur, et l'angle mort : en haut de chaque carte. La rubrique mène à son fil.
 const catOf = (s, cat) => s.categories?.find((x) => x !== cat && x !== "une" && CAT_LABEL[x]) || null;
@@ -1137,7 +1167,7 @@ function heroStory(s, cat) {
     <div class="hero-why"><b><span data-count="${s.sources}">${s.sources}</span> ${s.sources > 1 ? "médias en parlent" : "média en parle"}</b><span>${all3 ? "La gauche, le centre et la droite" : "L'histoire la plus couverte"} · ${esc(ago(s.lastSeen || s.firstSeen))}</span></div>
     ${sideStrip(s)}
     ${dek ? `<p class="dek" data-no-tr>${esc(dek)}</p>` : ""}
-    <p class="c2-meta">${newTag(s)}${logoStack(s, 5)}${sourcesLine(s, 2)}${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}${peekBtn}</p>
+    <p class="c2-meta">${newTag(s)}${logoStack(s, 5)}${sourcesLine(s, 2)}${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}<span class="c2-acts">${readBtn(s)}${peekBtn}</span></p>
   </article>`;
 }
 // Les grandes cartes du haut du fil (places 2 à 5) : la photo en large, le titre en blanc par-dessus.
@@ -1578,16 +1608,14 @@ function openOnboarding() {
           <span class="ob-demo-l"><span><i class="l"></i>Gauche 4</span><span><i class="c"></i>Centre 5</span><span><i class="r"></i>Droite 3</span></span>
           <span class="ob-demo-t">Quand un côté n'en parle presque pas, c'est un <b class="ck-blind r">Angle mort</b>.</span>
         </div></div>`,
-    () => `<h2>Tes nouvelles viennent d'où ?</h2><p class="ob-sub">Tu pourras changer en tout temps.</p>
-      <div class="ob-grid">${REGIONS.map(([v, l]) => `<button type="button" data-ob-region="${v}" aria-pressed="${choice.region === v}">${esc(l)}</button>`).join("")}</div>
-      ${["qc", "ca"].includes(choice.region) ? `<h3 class="ob-h3">Ta ville <small>(facultatif)</small></h3>
-        <input class="set-select" id="obCity" list="obVilles" placeholder="Tape le nom de ta ville…" autocomplete="off" value="${esc(choice.cityLabel || "")}"><datalist id="obVilles"></datalist>
-        <div class="ob-grid ob-small" style="margin-top:8px">${[["montreal", "Montréal"], ["quebec", "Québec"], ["laval", "Laval"], ["gatineau", "Gatineau"], ["longueuil", "Longueuil"], ["sherbrooke", "Sherbrooke"], ["saguenay", "Saguenay"], ["levis", "Lévis"]].map(([k, l]) => `<button type="button" data-ob-city="${k}" data-label="${l}" aria-pressed="${choice.city === k}">${l}</button>`).join("")}</div>` : ""}`,
-    () => `<h2>Qu'est-ce qui t'intéresse ?</h2><p class="ob-sub">Ça sert au fil « Pour toi ». Choisis-en autant que tu veux.</p>
-      <div class="ob-grid">${CATS.slice(1).map(([c, l]) => `<button type="button" data-ob-cat="${c}" aria-pressed="${choice.cats.has(c)}">${esc(l)}</button>`).join("")}</div>`,
-    () => `<h2>La taille du texte</h2><p class="ob-sub">Choisis ce qui est le plus confortable à lire.</p>
-      <div class="ob-grid ob-sizes">${SCALES.map(([v, l]) => `<button type="button" data-ob-scale="${v}" aria-pressed="${choice.scale === v}"><span style="font-size:${Math.round(20 * v)}px">Aa</span>${l}</button>`).join("")}</div>
-      <p class="ob-preview" style="font-size:${Math.round(17 * choice.scale)}px">Les histoires du jour, vues de tous les côtés.</p>`,
+    // Deux écrans seulement : bienvenue, puis ta ville (en un toucher avec ta position). Le reste se règle plus tard.
+    () => `<h2>Ta ville</h2><p class="ob-sub">Pour ses nouvelles, même celles des petits médias locaux, et sa météo. Facultatif.</p>
+        <button class="btn ob-geo" type="button" data-ob="geo">📍 Utiliser ma position</button>
+        <p class="ob-geo-msg" id="obGeoMsg" hidden></p>
+        <h3 class="ob-h3">Ou tape son nom</h3>
+        <input class="set-select" id="obCity" list="obVilles" placeholder="ex. Victoriaville" autocomplete="off" value="${esc(choice.cityLabel || "")}"><datalist id="obVilles"></datalist>
+        <div class="ob-grid ob-small" style="margin-top:8px">${[["montreal", "Montréal"], ["quebec", "Québec"], ["laval", "Laval"], ["gatineau", "Gatineau"], ["longueuil", "Longueuil"], ["sherbrooke", "Sherbrooke"], ["saguenay", "Saguenay"], ["levis", "Lévis"]].map(([k, l]) => `<button type="button" data-ob-city="${k}" data-label="${l}" aria-pressed="${choice.city === k}">${l}</button>`).join("")}</div>
+        <p class="note ob-geo-note">Ta position sert seulement à trouver ta ville (arrondie à environ 1 km, envoyée à BigDataCloud) ; elle n'est jamais gardée.</p>`,
   ];
   const draw = () => {
     openModal(`<div class="modal-pad ob">
@@ -1603,6 +1631,7 @@ function openOnboarding() {
       else if (b.dataset.obCity) { choice.city = choice.city === b.dataset.obCity ? "" : b.dataset.obCity; choice.cityLabel = choice.city ? b.dataset.label : ""; draw(); }
       else if (b.dataset.obCat) { choice.cats.has(b.dataset.obCat) ? choice.cats.delete(b.dataset.obCat) : choice.cats.add(b.dataset.obCat); b.setAttribute("aria-pressed", choice.cats.has(b.dataset.obCat)); }
       else if (b.dataset.obScale) { choice.scale = Number(b.dataset.obScale); draw(); }
+      else if (b.dataset.ob === "geo") findMyCity(b, (hit) => { choice.city = hit.s; choice.cityLabel = villeLabel(hit); choice.pr = hit.pr; const oc = $("#obCity"); if (oc) oc.value = choice.cityLabel; $$("[data-ob-city]").forEach((x) => x.setAttribute("aria-pressed", x.dataset.obCity === hit.s)); });
       else if (b.dataset.ob === "back") { step--; draw(); }
       else if (b.dataset.ob === "skip") finish();
       else if (b.dataset.ob === "next") { if (step < steps.length - 1) { step++; draw(); } else finish(); }
@@ -1614,7 +1643,7 @@ function openOnboarding() {
       oc.onchange = () => {
         const f = foldText(oc.value).trim();
         const hit = V.list.find((x) => foldText(villeLabel(x)) === f) || matchVilles(V, oc.value, 1)[0];
-        if (hit) { choice.city = hit.s; choice.cityLabel = villeLabel(hit); oc.value = choice.cityLabel; $$("[data-ob-city]").forEach((x) => x.setAttribute("aria-pressed", x.dataset.obCity === hit.s)); }
+        if (hit) { choice.city = hit.s; choice.cityLabel = villeLabel(hit); choice.pr = hit.pr; oc.value = choice.cityLabel; $$("[data-ob-city]").forEach((x) => x.setAttribute("aria-pressed", x.dataset.obCity === hit.s)); }
       };
     }).catch(() => {});
   };
@@ -1622,13 +1651,12 @@ function openOnboarding() {
     store.set("onboarded", "1");
     store.set("city", choice.city);
     store.set("cityLabel", choice.cityLabel || "");
-    store.set("prefCats", JSON.stringify([...choice.cats]));
-    store.set("scale", String(choice.scale));
-    applyScale();
     state.feeds.clear();
     closeLayer("#modal");
+    // L'édition suit la ville : Québec pour une ville du Québec, Canada pour une ville d'une autre province.
+    if (choice.pr && choice.pr !== "QC" && state.region === "qc") choice.region = "ca";
     if (choice.region !== state.region) { state.region = choice.region; store.set("region", choice.region); }
-    go(href({ lens: choice.cats.size || choice.city ? "pourtoi" : "essentiel" }));
+    go(href({}));
   };
   draw();
 }
@@ -2640,8 +2668,11 @@ function saveResume() {
   if (state.route?.view !== "feed" && !state.panel) { store.set("resume", "null"); return; }
   const c = state.panel ? null : topCard();
   const top = $("#topbar")?.getBoundingClientRect().bottom || 0;
-  store.set("resume", JSON.stringify({ u: state.panel ? state.panel.base : location.search, y: scrollY, id: c ? cardId(c) : null, off: c ? c.getBoundingClientRect().top - top : 0, at: Date.now() }));
+  // Une histoire ouverte par-dessus le fil : on la rouvrira aussi.
+  const h = state.panel && state.route?.view === "story" ? state.route.id : null;
+  store.set("resume", JSON.stringify({ u: state.panel ? state.panel.base : location.search, y: scrollY, id: c ? cardId(c) : null, off: c ? c.getBoundingClientRect().top - top : 0, h, at: Date.now() }));
 }
+const reopenStory = (h) => { if (h && state.route?.view === "feed") setTimeout(() => go(href({ h })), 120); };
 // Appelée quand le fil a des histoires : on retrouve l'histoire du haut (en chargeant les pages qu'il faut), sinon la hauteur.
 function tryResume(f, key) {
   const r = state.resume;
@@ -2652,17 +2683,19 @@ function tryResume(f, key) {
     requestAnimationFrame(() => {
       const top = $("#topbar")?.getBoundingClientRect().bottom || 0;
       scrollTo(0, Math.max(0, card.getBoundingClientRect().top + scrollY - top - r.off));
+      reopenStory(r.h);
     });
     return;
   }
   if (f.hasMore && f.page < 6) { setTimeout(() => loadMore(key), 0); return; }
   state.resume = null;
   if (r.y) requestAnimationFrame(() => scrollTo(0, Math.min(r.y, document.documentElement.scrollHeight - innerHeight)));
+  reopenStory(r.h);
 }
 {
   let r = null;
   try { r = JSON.parse(store.get("resume", "null")); } catch { r = null; }
-  if (r && Date.now() - r.at < RESUME_MS && (!location.search || location.search === "?source=app") && (r.u || r.y)) {
+  if (r && Date.now() - r.at < RESUME_MS && (!location.search || location.search === "?source=app") && (r.u || r.y || r.h)) {
     if (r.u) history.replaceState({ y: 0, d: 0 }, "", r.u);
     state.resume = r;
   }
@@ -3294,36 +3327,49 @@ async function fillWeather(el, city) {
 }
 
 // La pastille météo en haut, à côté de ta ville : toujours visible, même en descendant.
+// La ville de la météo : ta ville, ou une autre choisie dans la feuille météo (chalet, parents…).
+const wxSaved = () => { try { return JSON.parse(store.get("wxCities", "[]")); } catch { return []; } };
+const wxSlug = () => { const s = store.get("wxSel", ""); return s && (s === prefs.city || wxSaved().includes(s)) ? s : prefs.city; };
 async function drawCatWx() {
   const b = $("#catWx");
   if (!b || !prefs.city || !navigator.onLine) return;
-  const city = await myVille();
+  const city = (await villesData().catch(() => null))?.bySlug.get(wxSlug());
   if (!city || !b.isConnected) return;
+  b.dataset.other = city.s !== prefs.city ? city.n : "";
   // D'abord ce qu'on a en mémoire (instantané), puis à jour si c'est vieux.
   let w = null;
   try { w = JSON.parse(store.get(`wx.${city.s}`, "null")); } catch { /* rien */ }
-  const paint = (x) => { if (!x?.hours || !b.isConnected) return; b.innerHTML = `<span aria-hidden="true">${wxIco(x.code, x.day)}</span>${x.t}°`; b.title = `Météo à ${city.n} : ${WMO(x.code)[1]}, ${x.t}°`; b.hidden = false; };
+  const paint = (x) => { if (!x?.hours || !b.isConnected) return; b.innerHTML = `<span aria-hidden="true">${wxIco(x.code, x.day)}</span>${x.t}°${b.dataset.other ? `<small data-no-tr>${esc(b.dataset.other)}</small>` : ""}`; b.title = `Météo à ${city.n} : ${WMO(x.code)[1]}, ${x.t}°`; b.hidden = false; };
   paint(w);
   if (!w?.hours || Date.now() - w.at > 30 * 60e3) paint(await weather(city).catch(() => null));
 }
 setInterval(drawCatWx, 15 * 60e3);
 
 // La feuille météo : maintenant, les prochaines heures, les 5 prochains jours.
-async function openWeather(slug) {
+async function openWeather(slug, { add = false } = {}) {
   const V = await villesData().catch(() => null);
-  const city = V?.bySlug.get(slug || prefs.city);
+  const city = V?.bySlug.get(slug || wxSlug());
   if (!city) return;
-  openModal(`<div class="modal-pad wx-sheet"><div class="loader">Météo de ${esc(city.n)}…</div></div>`, true);
+  // Les villes de la météo : ta ville, puis celles ajoutées (jusqu'à 4).
+  const list = [...new Set([prefs.city, ...wxSaved()].filter(Boolean))].map((x) => V.bySlug.get(x)).filter(Boolean);
+  const chips = `<div class="wx-cities">${list.map((c) => `<span class="wx-city${c.s === city.s ? " on" : ""}"><button type="button" data-wx-pick="${esc(c.s)}">${c.s === prefs.city ? "📍 " : ""}${esc(c.n)}</button>${c.s !== prefs.city ? `<button class="wx-del" type="button" data-wx-del="${esc(c.s)}" aria-label="Retirer ${esc(c.n)}">✕</button>` : ""}</span>`).join("")}
+      ${wxSaved().length < 4 ? `<button class="wx-add" type="button" data-wx-add>+ Ajouter une ville</button>` : ""}</div>
+    <div class="wx-addbox" id="wxAddBox"${add ? "" : " hidden"}><input class="set-select" id="wxAddIn" placeholder="Chalet, parents… tape le nom de la ville" autocomplete="off"></div>`;
+  openModal(`<div class="modal-pad wx-sheet">${chips}<div class="loader">Météo de ${esc(city.n)}…</div></div>`, true);
+  bindWxSheet(V);
+  if (add) setTimeout(() => $("#wxAddIn")?.focus(), 250);
   const w = await weather(city).catch(() => null);
   const body = $("#modalBody");
-  if (!body) return;
-  if (!w?.hours) { body.innerHTML = `<div class="modal-pad"><h2>Météo</h2><p class="note">La météo n'a pas pu se charger. Vérifie ta connexion et réessaie.</p></div>`; return; }
+  if (!body || !$(".wx-sheet", body)) return;
+  if (!w?.hours) { $(".wx-sheet .loader", body)?.replaceWith(Object.assign(document.createElement("p"), { className: "note", textContent: "La météo n'a pas pu se charger. Vérifie ta connexion et réessaie." })); return; }
   const [, lbl] = WMO(w.code);
   const hm = (iso) => iso.slice(11, 16).replace(":", " h ").replace(/ h 00$/, " h");
   const dayName = (iso, i) => (i === 0 ? "Aujourd'hui" : i === 1 ? "Demain" : new Date(`${iso}T12:00`).toLocaleDateString(LOCALE, { weekday: "long" }));
   const lo = Math.min(...w.days.map((d) => d.min)), hi = Math.max(...w.days.map((d) => d.max)), span = Math.max(1, hi - lo);
   const hours = w.hours.filter((_, i) => i % 3 === 0).slice(0, 8);
-  body.innerHTML = `<div class="modal-pad wx-sheet">
+  const ld = $(".wx-sheet .loader", body);
+  if (!ld) return;
+  ld.outerHTML = `<div class="wx-body">
     <div class="kicker">${pin} ${esc(city.n)}</div>
     <div class="wx-now">
       <span class="wx-big" aria-hidden="true">${wxIco(w.code, w.day)}</span>
@@ -3340,12 +3386,49 @@ async function openWeather(slug) {
     <p class="note wx-src">Données Open-Meteo, mises à jour aux 30 minutes. <a class="link" href="${href({ ville: city.s })}" data-nav data-close-modal>Les nouvelles de ${esc(city.n)} →</a></p>
   </div>`;
 }
-document.addEventListener("click", (e) => {
-  const x = e.target.closest("#catWx, [data-wx-city]");
-  if (!x) return;
-  e.preventDefault(); e.stopPropagation();
-  openWeather(x.dataset.wxCity || prefs.city);
-}, true);
+// Les gestes de la feuille météo : changer de ville, en ajouter une, en retirer une.
+function bindWxSheet(V) {
+  const box = $("#modalBody .wx-sheet");
+  if (!box) return;
+  box.addEventListener("click", (e) => {
+    const p = e.target.closest("[data-wx-pick]"), d = e.target.closest("[data-wx-del]"), a = e.target.closest("[data-wx-add]");
+    if (p) { store.set("wxSel", p.dataset.wxPick); drawCatWx(); openWeather(p.dataset.wxPick); }
+    else if (d) {
+      store.set("wxCities", JSON.stringify(wxSaved().filter((x) => x !== d.dataset.wxDel)));
+      drawCatWx(); openWeather(wxSlug());
+    } else if (a) { const ab = $("#wxAddBox"); ab.hidden = false; $("#wxAddIn").focus(); }
+  });
+  const inp = $("#wxAddIn");
+  if (!inp) return;
+  cityAuto(inp, V);
+  inp.addEventListener("change", () => {
+    const f = foldText(inp.value).trim();
+    const hit = V.list.find((x) => foldText(villeLabel(x)) === f) || matchVilles(V, inp.value, 1)[0];
+    if (!hit) return;
+    if (hit.s !== prefs.city) store.set("wxCities", JSON.stringify([...new Set([...wxSaved(), hit.s])].slice(-4)));
+    store.set("wxSel", hit.s);
+    drawCatWx();
+    openWeather(hit.s);
+  });
+}
+// Toucher la météo : la feuille. Toucher longtemps la pastille : ajouter une autre ville.
+{
+  let timer = null, longDone = false;
+  document.addEventListener("pointerdown", (e) => {
+    if (!e.target.closest("#catWx")) return;
+    longDone = false;
+    timer = setTimeout(() => { longDone = true; buzz(15); openWeather(wxSlug(), { add: true }); }, 550);
+  });
+  for (const ev of ["pointerup", "pointercancel", "pointerleave"]) document.addEventListener(ev, () => clearTimeout(timer));
+  document.addEventListener("contextmenu", (e) => { if (e.target.closest("#catWx")) e.preventDefault(); });
+  document.addEventListener("click", (e) => {
+    const x = e.target.closest("#catWx, [data-wx-city]");
+    if (!x) return;
+    e.preventDefault(); e.stopPropagation();
+    if (longDone) { longDone = false; return; }
+    openWeather(x.id === "catWx" ? wxSlug() : x.dataset.wxCity);
+  }, true);
+}
 document.addEventListener("keydown", (e) => { if ((e.key === "Enter" || e.key === " ") && e.target.matches?.("[data-wx-city]")) { e.preventDefault(); openWeather(e.target.dataset.wxCity); } });
 
 // Trier le fil (téléphone) : un seul bouton « Trier : L'essentiel ▾ » au lieu de deux rangées de boutons.
@@ -3377,6 +3460,104 @@ function catsStick() {
   document.documentElement.style.setProperty("--cats-h", `${shown ? bar.offsetHeight - tuck : 0}px`);
 }
 addEventListener("resize", catsStick);
+
+/* ================= Moins de gestes : lire, passer à la suivante, retrouver sa ville ================= */
+// « Utiliser ma position » : la position (arrondie à ~1 km) donne le nom de la ville, puis on la trouve dans la liste.
+function findMyCity(btn, cb) {
+  const msg = $("#obGeoMsg");
+  const say = (t) => { if (msg) { msg.hidden = false; msg.textContent = t; } else toast(t); };
+  if (!navigator.geolocation) { say("Ton appareil ne donne pas sa position. Tape le nom de ta ville."); return; }
+  const old = btn.innerHTML;
+  btn.disabled = true; btn.textContent = "📍 Recherche de ta ville…";
+  const done = () => { btn.disabled = false; btn.innerHTML = old; };
+  navigator.geolocation.getCurrentPosition(async (p) => {
+    try {
+      const lat = p.coords.latitude.toFixed(2), lon = p.coords.longitude.toFixed(2);
+      const [r, V] = await Promise.all([
+        fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=fr`).then((x) => x.json()),
+        villesData(),
+      ]);
+      const pr = String(r.principalSubdivisionCode || "").replace(/^CA-/, "");
+      // La localité d'abord (« Victoriaville »), puis les noms plus larges (« city » est parfois la MRC).
+      const names = [r.locality, ...(r.localityInfo?.administrative || []).map((a) => a.name).reverse(), r.city].filter(Boolean);
+      let hit = null;
+      for (const n of names) { const f = foldText(n).trim(); hit = V.list.find((x) => x.f === f && (!pr || x.pr === pr)); if (hit) break; }
+      if (!hit && names[0]) hit = matchVilles(V, names[0], 1)[0] || null;
+      if (hit) { cb(hit); say(`Trouvée : ${villeLabel(hit)}. Tu peux en choisir une autre plus bas.`); } else say("Ville introuvable. Tape son nom plus bas.");
+    } catch { say("Ta position n'a pas pu être lue. Tape le nom de ta ville plus bas."); }
+    done();
+  }, () => { done(); say("Position refusée. Tape le nom de ta ville plus bas."); }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 });
+}
+
+// L'histoire suivante du fil d'où l'on vient.
+function nextStory(id) {
+  const list = state.feeds.get(state.lastFeedKey)?.stories || [];
+  const i = list.findIndex((x) => x.id === id);
+  return i >= 0 ? list[i + 1] || null : null;
+}
+function goNext(id) {
+  const nx = nextStory(id);
+  if (!nx) { toast("C'est la dernière histoire de ce fil."); return; }
+  buzz(8);
+  const host = state.panel ? $("#panelBody") : $("#view");
+  go(href({ h: nx.id }), { replace: true });
+  if (!reduceMotion()) host?.animate([{ transform: "translateX(40px)", opacity: 0.25 }, { transform: "none", opacity: 1 }], { duration: 260, easing: "cubic-bezier(.2,.8,.2,1)" });
+}
+// La barre collée en bas de l'histoire : « Lire l'article » (le meilleur pour toi) et « Suivante ».
+function storyReadBar(v, s) {
+  $(".s-readbar", v)?.remove();
+  const a = bestArticle(s), nx = nextStory(s.id);
+  const col = $(".main-col", v);
+  if (!col || (!a && !nx)) return;
+  col.insertAdjacentHTML("beforeend", `<div class="s-readbar">
+    ${a ? `<a class="rb-read" href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener noreferrer" data-read="${readAttr(a)}"><b>Lire l'article</b><small>chez <span data-no-tr>${esc(a.sourceName)}</span> ↗</small></a>` : ""}
+    ${nx ? `<button class="rb-next" type="button" data-next title="Histoire suivante"><span>Suivante</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>` : ""}
+  </div>`);
+  if (nx && matchMedia("(pointer: coarse)").matches && !store.get("hintNext")) {
+    store.set("hintNext", "1");
+    setTimeout(() => toast("Astuce : glisse vers la gauche pour passer à l'histoire suivante."), 1400);
+  }
+}
+document.addEventListener("click", (e) => { if (e.target.closest("[data-next]")) { e.preventDefault(); goNext(state.route?.id); } });
+// Glisser vers la gauche dans une histoire : la suivante.
+{
+  let x0 = null, y0 = 0, t0 = 0;
+  const NOSW = ".s-read-alt, .chips, .cols3, .ff-g, .zones, .words, .vgrid, input, textarea, select, .s-readbar, .modal";
+  addEventListener("touchstart", (e) => {
+    x0 = null;
+    if (e.touches.length !== 1 || state.route?.view !== "story") return;
+    const t = e.touches[0];
+    if (t.clientX < 30 || !e.target.closest("#panelBody, #view") || e.target.closest(NOSW)) return;
+    x0 = t.clientX; y0 = t.clientY; t0 = Date.now();
+  }, { passive: true });
+  addEventListener("touchend", (e) => {
+    if (x0 == null) return;
+    const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
+    x0 = null;
+    if (dx < -80 && Math.abs(dy) < Math.abs(dx) * 0.5 && Date.now() - t0 < 700) goNext(state.route.id);
+  }, { passive: true });
+}
+// De retour d'un article (Safari) : les cartes lues passent en gris tout de suite.
+addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") return;
+  for (const c of storyCards()) { const s = state.stories.get(cardId(c)); if (s) c.classList.toggle("is-seen", !!seenState(s)?.seen); }
+});
+
+// Recherche : les articles les plus récents tout en haut, à lire en un toucher.
+async function searchTopArticles(q) {
+  const el = $("#topArts");
+  if (!el) return;
+  const r = await indexSearch(q).catch(() => null);
+  if (!r?.ids?.length || state.route?.view !== "search" || state.route.q !== q) return;
+  const ids = [...r.ids].sort((a, b) => r.meta.age[a] - r.meta.age[b]).slice(0, 5);
+  const docs = await docsFor(ids).catch(() => []);
+  if (!docs.length || !el.isConnected) return;
+  el.hidden = false;
+  el.innerHTML = `<h2 class="block-h">Les plus récents <small>${plural(r.ids.length, "article")} en 7 jours</small></h2>
+    <ul class="ta-list">${docs.map((x) => `<li><span class="vc-src">${favicon(x.domain, x.sourceName)}<span data-no-tr>${esc(cleanName(x.sourceName))}</span> · ${esc(agoShort(x.published))}</span>${artLink(x, "vc-a")}</li>`).join("")}</ul>
+    <a class="link ta-all" href="#wide">Tous les articles ↓</a>`;
+  $(".ta-all", el).onclick = (e) => { e.preventDefault(); $("#wide")?.scrollIntoView({ behavior: "smooth" }); };
+}
 
 // Raccourcis de l'icône (Android) et liens directs : ?bref=une|ville|video, ?focus=search.
 function bootShortcut() {
@@ -3463,6 +3644,7 @@ function drawCityBar(el, route) {
 function mountFeed(key, params) {
   let f = state.feeds.get(key);
   if (!f) { f = { stories: [], page: -1, hasMore: true, loading: false, params }; state.feeds.set(key, f); }
+  state.lastFeedKey = key; // pour « Histoire suivante »
   drawFeed(f);
   if (f.page < 0) loadMore(key); else tryResume(f, key);
   const sentinel = $("#sentinel");
@@ -3744,6 +3926,7 @@ async function viewStory(v, route) {
   setSeen(s, true);
   runFlip(v);
   countUp(v);
+  storyReadBar(v, s);
   storyExtras(s, hlItem);
 }
 
@@ -3751,14 +3934,12 @@ const still = (id) => state.route.view === "story" && state.route.id === id;
 
 // Lire l'histoire : le meilleur article (dans ta langue, d'un média connu), puis le choix du média.
 function readBox(s) {
-  const seen = new Set();
-  const one = s.articles.filter((a) => !seen.has(a.domain) && seen.add(a.domain));
   const want = LANG === "en" ? "en" : "fr";
-  const score = (a) => ((a.lang || "fr") === want ? 4 : 0) + (a.media?.known ? 2 : 0) + (a.domain === s.leadDomain ? 1 : 0);
-  const best = [...one].sort((a, b) => score(b) - score(a))[0];
+  const ranked = rankArticles(s);
+  const best = ranked[0];
   if (!best) return "";
   const meta = (a) => esc(JSON.stringify({ u: a.url, d: a.domain, n: a.sourceName, k: biasKey(a.media), o: a.media?.known ? a.media.owner : null, c: a.media?.country || null, t: a.title }));
-  const rest = one.filter((a) => a !== best).sort((a, b) => score(b) - score(a));
+  const rest = ranked.slice(1);
   return `<div class="s-read">
     <a class="btn btn-read" href="${esc(safeUrl(best.url))}" target="_blank" rel="noopener noreferrer" data-read="${meta(best)}">Lire l'article <span>chez ${esc(best.sourceName)}</span> ↗</a>
     ${best.lang && best.lang !== want ? `<a class="link" href="${esc(transUrl(best.url))}" target="_blank" rel="noopener noreferrer">Lire traduit en français</a>` : ""}
@@ -3918,7 +4099,6 @@ function viewSearch(v, route) {
   v.innerHTML = `<header class="page-h">
       <div class="kicker">Sujet · ${esc(REGIONS.find(([r]) => r === state.region)[1])}</div>
       <h1>« ${esc(route.q)} »</h1>
-      <p>D'abord les histoires de l'édition (48 h), puis tous les articles des 7 derniers jours, de partout.</p>
       ${pq.also.length ? `<p class="q-also">Prisme cherche aussi : ${pq.also.map((w) => `<b>${esc(w)}</b>`).join(", ")}</p>` : ""}
       <div class="actions">
         <button class="btn${followed ? " ghost" : ""}" type="button" id="follow">${followed ? "✓ Suivi" : "★ Suivre ce sujet"}</button>
@@ -3935,6 +4115,7 @@ function viewSearch(v, route) {
       </details>
     </header>
     <section id="outletHits" hidden></section>
+    <section id="topArts" class="top-arts" hidden></section>
     <div class="layout">
       <div class="main-col"><div id="feed"></div><div id="sentinel"></div><div id="feedStatus"></div>
         <section id="worldStories" class="sec" hidden></section>
@@ -3972,6 +4153,7 @@ function viewSearch(v, route) {
   const goWide = state.pendingWide === route.q;
   state.pendingWide = null;
   loadWide(route.q, goWide);
+  searchTopArticles(route.q);
   // La recherche nomme peut-être un média : on le propose en premier.
   villesData().then((V) => {
     const f = foldText(route.q).trim();

@@ -2000,3 +2000,48 @@ html.soir img { filter: brightness(.92); }
 .ic-key { display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 5px; border-radius: 6px; background: var(--paper-2); font: 700 15px/1 var(--sans); vertical-align: middle; }
 .install-steps ol, .install-card ol { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 7px; }
 .install-steps li, .install-card li { line-height: 1.45; }
+
+/* ================= Moins de gestes ================= */
+/* « Lire ↗ » et l'aperçu au bout de la ligne de la carte */
+.c2-acts { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; vertical-align: middle; }
+.c2-acts .c2-peek { margin-left: 0; }
+.c2-read { display: inline-flex; align-items: center; gap: 3px; height: 26px; padding: 0 9px 0 11px; border-radius: 999px; background: var(--ink); color: var(--paper); font: 600 12.5px/1 var(--sans); text-decoration: none; white-space: nowrap; }
+.c2-read svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+.c2-read:active { transform: scale(.95); }
+.lead.hero .c2-meta, .story.big .c2-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 0; }
+.lead.hero .c2-acts, .story.big .c2-acts { margin-left: auto; }
+
+/* La barre collée en bas de l'histoire */
+.s-readbar { position: sticky; z-index: 6; bottom: calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 8px; margin: 26px 0 6px; padding: 8px; border-radius: 18px; background: color-mix(in srgb, var(--paper) 80%, transparent); -webkit-backdrop-filter: saturate(180%) blur(16px); backdrop-filter: saturate(180%) blur(16px); box-shadow: 0 10px 30px -12px rgba(0, 0, 0, .55); border: 1px solid var(--hair); }
+@media (max-width: 760px) { body:not(.panel-open) .s-readbar { bottom: calc(68px + env(safe-area-inset-bottom)); } }
+.rb-read { flex: 1; min-width: 0; display: grid; align-content: center; gap: 1px; min-height: 48px; padding: 6px 16px; border-radius: 12px; background: var(--ink); color: var(--paper); text-decoration: none; }
+.rb-read b { font: 700 15.5px/1.15 var(--sans); }
+.rb-read small { font: 12.5px/1.2 var(--sans); opacity: .78; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rb-next { flex: none; display: inline-flex; align-items: center; gap: 2px; min-height: 48px; padding: 0 10px 0 14px; border-radius: 12px; border: 1px solid var(--hair); background: var(--card); color: var(--ink); font: 600 14px var(--sans); cursor: pointer; }
+.rb-next svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* L'accueil : « Utiliser ma position » */
+.ob-geo { width: 100%; justify-content: center; min-height: 48px; font-size: 15.5px; margin-top: 4px; }
+.ob-geo-msg { margin: 8px 0 0; font: 600 14px var(--sans); color: var(--b-l1); }
+.ob-geo-note { margin-top: 12px; font-size: 12px; }
+
+/* La météo : les villes en haut de la feuille, et le nom d'une autre ville dans la pastille */
+.cat-wx small { font: 600 11.5px var(--sans); color: var(--ink-3); margin-left: 2px; max-width: 80px; overflow: hidden; text-overflow: ellipsis; }
+.wx-cities { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 34px 12px 0; }
+.wx-city { display: inline-flex; align-items: center; border-radius: 999px; border: 1px solid var(--hair); background: var(--card); overflow: hidden; }
+.wx-city.on { background: var(--ink); border-color: var(--ink); }
+.wx-city button { border: 0; background: none; color: var(--ink); font: 600 13.5px var(--sans); padding: 7px 12px; cursor: pointer; }
+.wx-city.on button { color: var(--paper); }
+.wx-city .wx-del { padding: 7px 10px 7px 2px; font-size: 12px; opacity: .7; }
+.wx-add { border: 1px dashed var(--ink-3); background: none; border-radius: 999px; padding: 7px 12px; font: 600 13.5px var(--sans); color: var(--ink-2); cursor: pointer; }
+.wx-addbox { margin: 0 0 14px; position: relative; }
+.wx-addbox[hidden] { display: none; }
+
+/* Recherche : les plus récents tout en haut */
+.top-arts { margin: 14px 0 6px; }
+.top-arts[hidden] { display: none; }
+.ta-list { list-style: none; margin: 0; padding: 0; }
+.ta-list li { padding: 10px 0; border-bottom: 1px solid var(--hair-2); display: grid; gap: 3px; }
+.ta-all { display: inline-block; margin-top: 10px; font: 600 13.5px var(--sans); }
+@media (max-width: 760px) { .q-help { display: none; } }
+@media (max-width: 760px) { #panelBody:has(.s-readbar) .s-sticky .ss-acts, #view:has(.s-readbar) .s-sticky .ss-acts { display: none !important; } }
