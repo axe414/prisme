@@ -1243,7 +1243,8 @@ async function openCityBref(city = null) {
       const here = en.target.dataset.city || city.n, pos = $("#shPos", o);
       if (pos.dataset.city !== here) {
         pos.dataset.city = here;
-        pos.innerHTML = `📍 <b data-no-tr>${esc(here)}</b>${here !== city.n ? " · ville voisine" : ""}`;
+        // Le bouton du haut reste ta ville ; cette ligne dit seulement d'où vient la nouvelle affichée.
+        pos.innerHTML = here !== city.n ? `Nouvelle de <b data-no-tr>${esc(here)}</b>, ville voisine` : `Nouvelles de <b data-no-tr>${esc(here)}</b>`;
         pos.classList.remove("flash"); void pos.offsetWidth; pos.classList.add("flash");
       }
       if (i >= sc.children.length - 3) more();
