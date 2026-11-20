@@ -202,6 +202,7 @@ const EXACT = {
   "L'orientation est une estimation indicative inspirée des évaluations publiques (AllSides, Media Bias/Fact Check, Ad Fontes). La propriété vient de la base Prisme et de Wikidata, une source collaborative qui peut être incomplète ou en retard.": "The leaning is an indicative estimate inspired by public ratings (AllSides, Media Bias/Fact Check, Ad Fontes). Ownership comes from Prisme's database and Wikidata, a collaborative source that may be incomplete or out of date.",
   // Fil épuré
   "C'est tout pour": "That's all for", "Rien de neuf à": "Nothing new in", "cette semaine": "this week",
+  "ville voisine": "nearby town",
   "En bref": "Quick read", "▶ En bref": "▶ Quick read", "Lire l'article →": "Read the article →", "Glisse vers le haut ↑": "Swipe up ↑", "Tu as fait le tour": "You're all caught up", "Ville voisine": "Nearby town", "Choisis d'abord ta ville.": "Pick your town first.", "Maintenant :": "Now:", "une nouvelle par écran": "one story per screen", "glisse vers le haut": "swipe up",
   "Tout voir →": "See all →", "Toute l'histoire →": "The whole story →", "personne": "nobody", "Angle mort": "Blindspot", "Shorts": "Shorts",
   "Expliquer cette lentille": "Explain this lens", "1 nouvelle cette semaine": "1 story this week", "Voir tout →": "See all →",

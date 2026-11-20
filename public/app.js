@@ -1204,10 +1204,11 @@ async function placeIds(c, loc) {
   }
   return [...ids].sort((a, b) => m.age[a] - m.age[b]);
 }
-const artSlide = (x, c) => `<section class="sh${x.image ? "" : " sh-noimg"}" data-city="${esc(c.n)}">
+const artSlide = (x, c, near = false) => `<section class="sh${x.image ? "" : " sh-noimg"}" data-city="${esc(c.n)}">
     ${x.image ? `<img class="sh-bg" src="${esc(safeUrl(x.image))}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="sh-logo">${favicon(x.domain, x.sourceName)}<span data-no-tr>${esc(x.sourceName)}</span></div>`}
     <div class="sh-in">
-      <div class="sh-k">📍 <span data-no-tr>${esc(c.n)}</span> · <span data-no-tr>${esc(x.sourceName)}</span> · ${esc(ago(x.published))}</div>
+      <div class="sh-place${near ? " near" : ""}">📍 <b data-no-tr>${esc(c.n)}</b>${near ? "<small>ville voisine</small>" : ""}</div>
+      <div class="sh-k"><span data-no-tr>${esc(x.sourceName)}</span> · ${esc(ago(x.published))}</div>
       <h2 data-no-tr>${esc(x.title)}</h2>
       ${x.summary ? `<p class="sh-dek" data-no-tr>${esc(x.summary.length > 280 ? `${x.summary.slice(0, 277)}…` : x.summary)}</p>` : ""}
       <a class="sh-read" href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener noreferrer" data-read="${readAttr(x)}">Lire l'article →</a>
@@ -1238,7 +1239,13 @@ async function openCityBref(city = null) {
     for (const en of entries) {
       if (!en.isIntersecting) continue;
       const i = [...sc.children].indexOf(en.target);
-      $("#shPos", o).textContent = `📍 ${en.target.dataset.city || city.n} · glisse vers le haut`;
+      // La ville de la nouvelle affichée, en haut ; elle s'illumine quand on passe à une autre ville.
+      const here = en.target.dataset.city || city.n, pos = $("#shPos", o);
+      if (pos.dataset.city !== here) {
+        pos.dataset.city = here;
+        pos.innerHTML = `📍 <b data-no-tr>${esc(here)}</b>${here !== city.n ? " · ville voisine" : ""}`;
+        pos.classList.remove("flash"); void pos.offsetWidth; pos.classList.add("flash");
+      }
       if (i >= sc.children.length - 3) more();
     }
   }, { root: sc, threshold: 0.6 });
@@ -1258,7 +1265,7 @@ async function openCityBref(city = null) {
       }
       const take = pend.splice(0, 10);
       take.forEach((id) => seen.add(id));
-      html += (await docsFor(take)).map((x) => artSlide(x, cur)).join("");
+      html += (await docsFor(take)).map((x) => artSlide(x, cur, cur !== city)).join("");
       shown = cur;
     }
     if (!o.isConnected) return;
