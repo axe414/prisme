@@ -1101,9 +1101,12 @@ function rankArticles(s) {
   const want = LANG === "en" ? "en" : "fr";
   const fav = favDomains();
   const pref = prefMed.set();
-  const score = (a) => (pref.has(a.domain) ? 20 : 0) + ((a.lang || "fr") === want ? 4 : 0) + (a.media?.known ? 2 : 0) + (a.domain === s.leadDomain ? 1 : 0) + Math.min(3, (fav.get(a.domain) || 0) * 0.6);
+  // Un lien qui passe par Google News (petits hebdos sans fil lisible) vient après les liens directs :
+  // Google bloque parfois ces redirections (« automated queries »).
+  const score = (a) => (pref.has(a.domain) ? 20 : 0) - (viaGoogle(a.url) ? 12 : 0) + ((a.lang || "fr") === want ? 4 : 0) + (a.media?.known ? 2 : 0) + (a.domain === s.leadDomain ? 1 : 0) + Math.min(3, (fav.get(a.domain) || 0) * 0.6);
   return one.sort((a, b) => score(b) - score(a));
 }
+const viaGoogle = (u) => /^https?:\/\/news\.google\.com\//.test(String(u || ""));
 // Tes médias préférés (⭐) : quand ils couvrent une nouvelle, le titre s'ouvre chez eux. Sur cet appareil seulement.
 const prefMed = {
   list() { try { return JSON.parse(store.get("prefMed", "[]")); } catch { return []; } },
@@ -1119,7 +1122,7 @@ function openPicker(s) {
   const counts = { left: 0, center: 0, right: 0, other: 0 };
   for (const a of all) counts[side(a)]++;
   const row = (a) => `<li data-side="${side(a)}"><a class="pk-go" href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener noreferrer" data-read="${readAttr(a)}" data-card-read="${esc(s.id)}" data-close-modal>
-      <span class="pk-src">${favicon(a.domain, a.sourceName)}<b data-no-tr>${esc(a.sourceName)}</b>${badge(a.media)}${langTag(a.lang)}<time>${esc(agoShort(a.published))}</time></span>
+      <span class="pk-src">${favicon(a.domain, a.sourceName)}<b data-no-tr>${esc(a.sourceName)}</b>${badge(a.media)}${langTag(a.lang)}${viaGoogle(a.url) ? `<small class="pk-via" title="Ce média n'a pas de fil lisible directement : le lien passe par Google News">via Google</small>` : ""}<time>${esc(agoShort(a.published))}</time></span>
       <span class="pk-tt" data-no-tr>${esc(a.title)}</span></a>
     <button class="pk-star" type="button" data-pref-med="${esc(a.domain)}" data-name="${esc(a.sourceName)}" aria-pressed="${pref.has(a.domain)}" aria-label="Média préféré">${ico("star")}</button></li>`;
   const tabs = all.length >= 6 ? `<div class="seg pk-tabs" role="group">${[["all", "Tous", all.length], ["left", "Gauche", counts.left], ["center", "Centre", counts.center], ["right", "Droite", counts.right]]
