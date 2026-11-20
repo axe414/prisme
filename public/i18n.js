@@ -200,6 +200,10 @@ const EXACT = {
   "Langue": "Language", "Signaler une erreur ↗": "Report an error ↗", "Code source (libre, MIT)": "Source code (free, MIT)",
   "Prisme lit directement les flux publics de ses médias et choisit ses histoires avec des règles visibles. Orientations indicatives, propriété selon la base Prisme et Wikidata.": "Prisme reads its outlets' public feeds directly and picks stories with visible rules. Indicative leanings, ownership from Prisme's database and Wikidata.",
   "L'orientation est une estimation indicative inspirée des évaluations publiques (AllSides, Media Bias/Fact Check, Ad Fontes). La propriété vient de la base Prisme et de Wikidata, une source collaborative qui peut être incomplète ou en retard.": "The leaning is an indicative estimate inspired by public ratings (AllSides, Media Bias/Fact Check, Ad Fontes). Ownership comes from Prisme's database and Wikidata, a collaborative source that may be incomplete or out of date.",
+  // Fil épuré
+  "Tout voir →": "See all →", "Toute l'histoire →": "The whole story →", "personne": "nobody", "Angle mort": "Blindspot", "Shorts": "Shorts",
+  "Expliquer cette lentille": "Explain this lens", "1 nouvelle cette semaine": "1 story this week", "Voir tout →": "See all →",
+  "Voir tout, du plus récent": "See all, newest first", "Fermer": "Close",
   // Petites touches (2)
   "Ton matin en 5 histoires": "Your morning in 5 stories", "De gauche, du centre et de droite · environ 3 minutes": "From the left, center and right · about 3 minutes",
   "Ranger pour aujourd'hui": "Hide for today", "1 nouvelle depuis 24 heures": "1 story in the last 24 hours", "tout voir →": "see all →",
@@ -227,6 +231,8 @@ const EXACT = {
 
 // Textes avec un nombre ou un nom à l'intérieur.
 const PATTERNS = [
+  [/^(\d+) nouvelles cette semaine$/, (m, n) => `${n} stories this week`],
+  [/^Voir tout, du plus récent \((\d+) articles?\)$/, (m, n) => `See all, newest first (${n} article${s(n)})`],
   [/^(.+) aujourd'hui$/, (m, x) => `${x} today`],
   [/^(\d+) nouvelles depuis 24 heures$/, (m, n) => `${n} stories in the last 24 hours`],
   [/^(\d+) histoires choisies$/, (m, n) => `${n} stories selected`],
