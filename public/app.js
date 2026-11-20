@@ -807,7 +807,7 @@ const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.
 function installBlock() {
   if (isStandalone()) return "";
   if (installEvt) return `<li><button type="button" id="installBtn">${svg("install")}<span>Installer Prisme sur l'écran d'accueil<small>Une icône comme une vraie app, en plein écran.</small></span></button></li>`;
-  if (isIOS()) return `<li><div class="install-hint"><b>Installer sur l'iPhone :</b> dans Safari, touche le bouton <b>Partager</b> (le carré avec la flèche), puis <b>« Sur l'écran d'accueil »</b>.</div></li>`;
+  if (isIOS()) return `<li><div class="install-hint install-steps"><b>Installer Prisme sur l'iPhone :</b>${iosInstallSteps()}</div></li>`;
   return `<li><div class="install-hint"><b>Installer sur Android :</b> dans Chrome, ouvre le menu <b>⋮</b>, puis <b>« Ajouter à l'écran d'accueil »</b> ou <b>« Installer l'application »</b>.</div></li>`;
 }
 
@@ -2316,13 +2316,33 @@ document.addEventListener("keydown", (e) => {
 
 // Guide d'installation sur iPhone/iPad (Safari, pas encore installée), après quelques visites.
 store.set("visits", String(Number(store.get("visits", "0")) + 1));
+// Les étapes exactes pour l'iPhone : iOS 26 cache « Partager » derrière le menu ≡ ; avant, le bouton était en bas.
+// Ouvert dans Messenger, Facebook ou Instagram : il faut d'abord passer à Safari.
+const SHARE_ICO = `<span class="ic-share" aria-label="Partager"><svg viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 12v6.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V12"/></svg></span>`;
+function iosInstallSteps() {
+  const ua = navigator.userAgent;
+  if (/FBAN|FBAV|FB_IAB|Messenger|Instagram|Line\/|Snapchat|TikTok/i.test(ua)) return `<ol>
+      <li>Touche <b>⋯</b> ou <b>⋮</b> en haut à droite</li>
+      <li>Choisis <b>« Ouvrir dans Safari »</b> (ou « Ouvrir dans le navigateur »)</li>
+      <li>Dans Safari, reviens ici : les étapes s'afficheront</li></ol>`;
+  if (/CriOS|FxiOS|EdgiOS/.test(ua)) return `<ol>
+      <li>Touche ${SHARE_ICO} <b>Partager</b>, en haut à droite de l'adresse</li>
+      <li>Choisis <b>« Sur l'écran d'accueil »</b></li><li>Touche <b>Ajouter</b></li></ol>`;
+  const v = Number((ua.match(/Version\/(\d+)/) || [])[1] || 0);
+  if (v >= 26) return `<ol>
+      <li>En bas, touche <b class="ic-key">≡</b> (les 3 lignes, à gauche de l'adresse)</li>
+      <li>Touche ${SHARE_ICO} <b>Partager</b></li>
+      <li>Glisse vers le bas, touche <b>« Sur l'écran d'accueil »</b></li>
+      <li>Laisse <b>« Ouvrir comme app Web »</b> activé, puis touche <b>Ajouter</b></li></ol>`;
+  return `<ol><li>Touche ${SHARE_ICO} <b>Partager</b>, en bas de Safari</li>
+      <li>Glisse vers le bas, touche <b>« Sur l'écran d'accueil »</b></li><li>Touche <b>Ajouter</b></li></ol>`;
+}
 function installCard() {
   if (isStandalone() || !isIOS() || store.get("installDone") || Number(store.get("visits", "0")) < 2) return "";
   return `<aside class="install-card" id="installCard">
     <div class="ic-icon"><img src="icons/apple-touch-icon.png" alt=""></div>
     <div class="ic-body"><b>Ajoute Prisme à ton écran d'accueil</b>
-      <ol><li>Touche <span class="ic-share" aria-label="Partager"><svg viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 12v6.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V12"/></svg></span> en bas de Safari</li>
-        <li>Choisis <b>« Sur l'écran d'accueil »</b></li><li>Touche <b>Ajouter</b></li></ol>
+      ${iosInstallSteps()}
       <small>Prisme s'ouvrira en plein écran, comme une vraie app.</small></div>
     <button class="icon-btn" type="button" id="installX" aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   </aside>`;
