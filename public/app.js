@@ -780,6 +780,7 @@ function renderChrome(route) {
   drawCatWx();
   $("#enBrefTab").onclick = openEnBref;
   $("#mastBref").onclick = openEnBref;
+  hScroll($("#cats"));
   // Garde visible la rubrique choisie dans la barre défilante (téléphone).
   const el = $("#cats [aria-current]");
   if (el) {
@@ -3733,6 +3734,54 @@ async function searchTopArticles(q) {
   $(".ta-all", el).onclick = (e) => { e.preventDefault(); $("#wide")?.scrollIntoView({ behavior: "smooth" }); };
 }
 
+/* Les rangées qui défilent de côté (rubriques, tendances) : faciles à la souris et au doigt.
+   Des flèches ‹ › apparaissent aux bords quand il y a plus à voir ; la molette et le glisser à la souris font défiler. */
+function hScroll(el) {
+  if (!el || el.dataset.hs) return;
+  el.dataset.hs = "1";
+  const wrap = document.createElement("div");
+  wrap.className = "hs-wrap";
+  el.replaceWith(wrap);
+  wrap.appendChild(el);
+  const mk = (dir) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = `hs-arrow hs-${dir}`; b.tabIndex = -1;
+    b.setAttribute("aria-label", dir === "l" ? "Voir à gauche" : "Voir à droite");
+    b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${dir === "l" ? "m15 6-6 6 6 6" : "m9 6 6 6-6 6"}"/></svg>`;
+    b.onclick = (e) => { e.preventDefault(); el.scrollBy({ left: (dir === "l" ? -1 : 1) * Math.max(160, el.clientWidth * 0.7), behavior: "smooth" }); };
+    wrap.appendChild(b);
+    return b;
+  };
+  const L = mk("l"), R = mk("r");
+  const sync = () => {
+    const more = el.scrollWidth > el.clientWidth + 4;
+    L.hidden = !more || el.scrollLeft < 4;
+    R.hidden = !more || el.scrollLeft + el.clientWidth > el.scrollWidth - 4;
+    wrap.classList.toggle("hs-fl", !L.hidden); wrap.classList.toggle("hs-fr", !R.hidden);
+  };
+  el.addEventListener("scroll", sync, { passive: true });
+  addEventListener("resize", sync);
+  new MutationObserver(() => requestAnimationFrame(sync)).observe(el, { childList: true });
+  requestAnimationFrame(sync);
+  // La molette (haut / bas) fait défiler la rangée de côté.
+  el.addEventListener("wheel", (e) => {
+    if (el.scrollWidth <= el.clientWidth || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    const before = el.scrollLeft;
+    el.scrollLeft += e.deltaY;
+    if (el.scrollLeft !== before) e.preventDefault();
+  }, { passive: false });
+  // Glisser à la souris (le doigt glisse déjà tout seul).
+  let x0 = null, s0 = 0, moved = false;
+  el.addEventListener("pointerdown", (e) => { if (e.pointerType !== "mouse" || e.button) return; x0 = e.clientX; s0 = el.scrollLeft; moved = false; });
+  addEventListener("pointermove", (e) => {
+    if (x0 == null) return;
+    const dx = e.clientX - x0;
+    if (Math.abs(dx) > 5) { moved = true; el.classList.add("hs-drag"); el.scrollLeft = s0 - dx; }
+  });
+  addEventListener("pointerup", () => { x0 = null; setTimeout(() => el.classList.remove("hs-drag"), 0); });
+  el.addEventListener("click", (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+}
+
 // Raccourcis de l'icône (Android) et liens directs : ?bref=une|ville|video, ?focus=search.
 function bootShortcut() {
   const p = new URLSearchParams(location.search);
@@ -3938,6 +3987,7 @@ function drawTopics(f) {
   el.innerHTML = `${mine.length ? `<span class="label">Mes sujets</span>${mine.map(topicChip).join("")}<span style="width:12px"></span>` : ""}
     ${trend.length ? `<span class="label">En ce moment</span>${trend.map((t) => `<a class="chip" href="${href({ q: t })}" data-nav>${esc(t)}</a>`).join("")}` : f.loading ? `<span class="label">En ce moment</span><span class="skel" style="width:280px;height:24px;display:inline-block"></span>` : ""}`;
   el.hidden = !mine.length && !trend.length && !f.loading;
+  hScroll(el);
 }
 
 function drawRail(f) {
