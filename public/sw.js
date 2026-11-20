@@ -1,5 +1,5 @@
-// Service worker de Prisme : réseau d'abord (toujours la version fraîche), cache en secours (hors ligne).
-const CACHE = "prisme-v5";
+﻿// Service worker de Prisme : rÃ©seau d'abord (toujours la version fraÃ®che), cache en secours (hors ligne).
+const CACHE = "prisme-v6";
 const SHELL = ["./", "index.html", "app.js", "i18n.js", "styles.css", "favicon.svg", "manifest.webmanifest", "icons/icon-192.png"];
 
 self.addEventListener("install", (e) => {
@@ -13,7 +13,7 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== "GET" || url.origin !== location.origin) return;
-  // Les pages et les éditions : réseau d'abord, copie gardée pour le mode hors ligne.
+  // Les pages et les Ã©ditions : rÃ©seau d'abord, copie gardÃ©e pour le mode hors ligne.
   e.respondWith(
     fetch(e.request)
       .then((res) => {

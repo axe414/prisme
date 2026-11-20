@@ -756,6 +756,9 @@ function topbarSize() { document.documentElement.style.setProperty("--top-h", `$
   }, { passive: true });
   addEventListener("resize", topbarSize);
   bar.addEventListener("transitionend", topbarSize);
+  // Téléphone : une fois descendu, la recherche se range derrière une loupe dans le bandeau.
+  $("#searchBtn").onclick = () => { bar.classList.add("searching"); bar.classList.remove("tucked"); $("#search input").focus(); };
+  $("#search input").addEventListener("blur", () => setTimeout(() => bar.classList.remove("searching"), 150));
 }
 
 /* ---------- Recherche : suggestions pendant qu'on tape ---------- */
@@ -911,7 +914,8 @@ function reason(s) {
   if (s.sides === 3) parts.push("des 3 côtés");
   else if (s.sides === 2) parts.push("2 côtés");
   parts.push(ago(s.lastSeen || s.firstSeen));
-  return parts.join(" · ");
+  // Chaque morceau reste entier : « il y a 2 heures » ne se coupe jamais en deux lignes.
+  return parts.map((p) => `<span class="kp">${p}</span>`).join(" · ");
 }
 function flags(s) {
   const out = [];
@@ -939,7 +943,7 @@ function coveredBy(s, max = 3) {
 }
 const catKicker = (s, cat) => {
   const c = s.categories?.find((x) => x !== cat) || s.categories?.[0];
-  return c ? `${esc(CAT_LABEL[c] || c)} · ` : "";
+  return c ? `<span class="kp">${esc(CAT_LABEL[c] || c)}</span> · ` : "";
 };
 
 function storyRow(s, cat) {
