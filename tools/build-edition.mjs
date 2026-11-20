@@ -40,6 +40,12 @@ await refreshAuto();
 const index = await getIndex();
 const st = autoStatus();
 log(`${index.articles.length} articles lus (${st.loaded} médias découverts sur ${st.total})`);
+// Rapport : les médias que le robot n'arrive pas à lire, et pourquoi (pour l'entretien des sources).
+{
+  const fails = Object.entries(index.sources || {}).filter(([, s]) => !s.ok).map(([d, s]) => [d, s.error || "?"]);
+  writeFileSync(join(DATA, "sources-status.json"), JSON.stringify({ builtAt: new Date().toISOString(), read: Object.keys(index.sources || {}).length, failed: Object.fromEntries(fails) }));
+  log(`${fails.length} médias illisibles ce passage-ci (voir data/sources-status.json)`);
+}
 
 // 3) Les éditions : Monde d'abord (elle sert à « Vu d'ici, vu d'ailleurs » pour les autres).
 const mondeData = buildStories(index, "monde");
