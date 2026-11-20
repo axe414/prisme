@@ -1500,6 +1500,7 @@ async function viewVille(v, route) {
   const mine = prefs.city === city.s;
   const near = V.list.filter((x) => x !== city && x.pr === city.pr && (city.m ? x.m === city.m : x.r === city.r)).slice(0, 10);
   const nearRegion = near.length < 6 ? V.list.filter((x) => x !== city && x.pr === city.pr && x.r === city.r && !near.includes(x)).slice(0, 10 - near.length) : [];
+  state.wf.media = "";
   v.innerHTML = `<header class="page-h ville-head">
       <div class="kicker">${pin}${esc(city.d || "Ville")} · ${esc(villeWhere(city))}</div>
       <h1>${esc(villeLabel(city))}</h1>
@@ -1582,12 +1583,24 @@ async function viewVille(v, route) {
   const top = new Map();
   if (r) for (const id of r.ids) { const di = r.meta.dom[id]; top.set(di, (top.get(di) || 0) + 1); }
   const topList = [...top.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([di, n]) => ({ d: r.meta.D[di].domain, n: r.meta.D[di].name, c: n }));
-  const chip = (x) => `<a class="chip" href="${href({ m: x.d })}" data-nav>${favicon(x.d, x.n)} ${esc(x.n)}${x.c ? ` <span class="muted">${x.c}</span>` : ""}</a>`;
+  const count = (d) => topList.find((t) => t.d === d)?.c || (r ? r.ids.filter((id) => r.meta.D[r.meta.dom[id]].domain === d).length : 0);
+  // Chaque média est un filtre : on ne voit que ses articles sur la ville. Le ↗ mène à la page du média.
+  const chip = (x) => { const n = x.c ?? count(x.d); return `<span class="mchip"><button class="chip" type="button" data-vmedia="${esc(x.d)}" aria-pressed="false"${n ? "" : " disabled"}>${favicon(x.d, x.n)} ${esc(x.n)} <span class="muted">${n}</span></button><a class="mchip-go" href="${href({ m: x.d })}" data-nav title="Page du média" aria-label="Page de ${esc(x.n)}">↗</a></span>`; };
   if (cityMedia.length || regionMedia.length || topList.length) {
     $("#vLocal").hidden = false;
-    $("#vLocal").innerHTML = `<h2 class="block-h">Les médias <small>de la ville, ceux qui en parlent le plus, et ceux de la région</small></h2>
-      <div class="chips">${cityMedia.map(chip).join("")}${topList.filter((t) => !cityMedia.some((x) => x.d === t.d)).map(chip).join("")}
-      ${regionMedia.filter((x) => !topList.some((t) => t.d === x.d)).slice(0, 16).map(chip).join("")}</div>`;
+    const regionOnly = regionMedia.filter((x) => !topList.some((t) => t.d === x.d) && !cityMedia.some((c) => c.d === x.d)).slice(0, 16);
+    $("#vLocal").innerHTML = `<h2 class="block-h">Choisis un média <small>pour ne voir que ses articles sur ${esc(city.n)}</small></h2>
+      <div class="chips"><button class="chip" type="button" data-vmedia="" aria-pressed="true">Tous les médias</button>
+      ${cityMedia.map(chip).join("")}${topList.filter((t) => !cityMedia.some((x) => x.d === t.d)).map(chip).join("")}</div>
+      ${regionOnly.length ? `<p class="note" style="margin:12px 0 6px">Autres médias de la région (${esc(city.r.replace(/--/g, "–"))}) :</p><div class="chips">${regionOnly.map(chip).join("")}</div>` : ""}`;
+    $("#vLocal").onclick = (e) => {
+      const b = e.target.closest("[data-vmedia]");
+      if (!b || !r) return;
+      state.wf.media = state.wf.media === b.dataset.vmedia ? "" : b.dataset.vmedia;
+      $$("[data-vmedia]", $("#vLocal")).forEach((x) => x.setAttribute("aria-pressed", x.dataset.vmedia === state.wf.media));
+      drawWide($("#wide"), r);
+      $("#wide").scrollIntoView({ behavior: "smooth", block: "start" });
+    };
   }
 }
 
@@ -2088,6 +2101,7 @@ function keywordsOf(s) {
 /* ---------- Un sujet (recherche) ---------- */
 function viewSearch(v, route) {
   document.title = `${route.q} — Prisme`;
+  state.wf.media = "";
   const followed = topics.has(route.q);
   const pq = parseQuery(route.q);
   v.innerHTML = `<header class="page-h">
@@ -2594,7 +2608,7 @@ async function docsFor(ids) {
 }
 
 /* ---------- Résultats de recherche : filtres, chronologie, articles ---------- */
-state.wf = { scope: "auto", hours: 0, side: "all", lang: "all", cat: "all" };
+state.wf = { scope: "auto", hours: 0, side: "all", lang: "all", cat: "all", media: "" };
 const WF_PERIODS = [[6, "6 h"], [24, "24 h"], [48, "48 h"], [0, "7 jours"]];
 const WF_SIDES = [["all", "Tous les côtés"], ["left", "Gauche"], ["center", "Centre"], ["right", "Droite"], ["other", "État ou non évalués"]];
 const SIDE_COLOR = { left: "var(--b-l2)", center: "var(--b-c)", right: "var(--b-r2)", other: "var(--b-unk)" };
@@ -2615,6 +2629,7 @@ function filterIds(r, countries, f, skip = "") {
     if (skip !== "side" && f.side !== "all" && d.side !== f.side) return false;
     if (skip !== "lang" && f.lang !== "all") { const l = m.lang[id], code = l < 0 ? "fr" : m.langs[l]; if (f.lang === "autres" ? ["fr", "en"].includes(code) : code !== f.lang) return false; }
     if (skip !== "cat" && catBit && !(m.cats[id] & catBit)) return false;
+    if (skip !== "media" && f.media && m.D[m.dom[id]].domain !== f.media) return false;
     return true;
   });
 }
@@ -2673,6 +2688,7 @@ async function drawWide(el, r) {
   const chip = (attr, val, cur, label, n) => `<button class="chip" type="button" data-${attr}="${val}" aria-pressed="${String(cur) === String(val)}">${label}${n != null ? ` <span class="muted">${n}</span>` : ""}</button>`;
   const regionName = regionLabel();
   const filters = `<div class="wf">
+      ${f.media ? `<div class="wf-row"><span class="label">Média</span><button class="chip" type="button" aria-pressed="true" data-media="">${esc(m.D.find((d) => d.domain === f.media)?.name || f.media)} ✕</button></div>` : ""}
       ${countries ? `<div class="wf-row"><span class="label">Où</span>${chip("scope", "edition", scope, esc(regionName), inRegion)}${chip("scope", "monde", scope, "Monde entier", r.ids.length)}</div>` : ""}
       <div class="wf-row"><span class="label">Période</span>${WF_PERIODS.map(([h, l]) => chip("hours", h, f.hours, l)).join("")}</div>
       <div class="wf-row"><span class="label">Côté</span>${WF_SIDES.map(([k, l]) => chip("side", k, f.side, k === "all" ? l : `<span class="sw" style="background:${SIDE_COLOR[k]}"></span>${l}`)).join("")}</div>
@@ -2710,6 +2726,7 @@ async function drawWide(el, r) {
     if (b.dataset.side) f.side = b.dataset.side;
     if (b.dataset.lang) f.lang = b.dataset.lang;
     if (b.dataset.cat) f.cat = b.dataset.cat;
+    if (b.dataset.media !== undefined) { f.media = b.dataset.media; $$("[data-vmedia]").forEach((x) => x.setAttribute("aria-pressed", x.dataset.vmedia === f.media)); }
     drawWide(el, r);
   };
 }

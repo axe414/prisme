@@ -1166,3 +1166,10 @@ html, body { overflow-x: clip; }
 .ville-hits { margin-bottom: 16px; padding: 10px 14px; background: var(--card); border: 1px solid var(--hair); }
 .ville-hits .ville-link { flex-direction: column; gap: 2px; }
 .chip .fav { width: 14px; height: 14px; }
+
+/* Page d'une ville : chaque média est un filtre, ↗ mène à sa page */
+.mchip { display: inline-flex; align-items: stretch; }
+.mchip .chip { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.mchip .chip[disabled] { opacity: .45; cursor: default; }
+.mchip-go { display: inline-grid; place-items: center; padding: 0 8px; border: 1px solid var(--hair); border-left: 0; border-radius: 0 2px 2px 0; font: 600 12px var(--sans); color: var(--ink-3); text-decoration: none; }
+.mchip-go:hover { color: var(--ink); border-color: var(--ink); }

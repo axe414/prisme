@@ -1,13 +1,6 @@
 {
  "builtAt": "2026-11-20T03:30:59.825Z",
  "sources": {
-  "journalmetro.com": {
-   "name": "Métro",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://journalmetro.com/feed/",
-   "region": "Montréal"
-  },
   "24heures.ca": {
    "name": "24 heures",
    "cc": "CA",
@@ -538,13 +531,6 @@
    "feed": "https://www.winnipegfreepress.com/feed",
    "region": ""
   },
-  "journaldequebec.com": {
-   "name": "Le Journal de Québec",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://journaldequebec.com/rss.xml",
-   "region": ""
-  },
   "xtramagazine.com": {
    "name": "Xtra!",
    "cc": "CA",
@@ -566,26 +552,12 @@
    "feed": "https://timescolonist.com/rss",
    "region": "Colombie-Britannique"
   },
-  "torontosun.com": {
-   "name": "Toronto Sun",
-   "cc": "CA",
-   "lang": "en",
-   "feed": "https://torontosun.com/feed/",
-   "region": "Ontario"
-  },
   "vancouversun.com": {
    "name": "Vancouver Sun",
    "cc": "CA",
    "lang": "en",
    "feed": "https://vancouversun.com/feed/",
    "region": "Colombie-Britannique"
-  },
-  "theglobeandmail.com": {
-   "name": "The Globe and Mail",
-   "cc": "CA",
-   "lang": "en",
-   "feed": "https://theglobeandmail.com/arc/outboundfeeds/rss/?outputType=xml",
-   "region": "Ontario"
   },
   "montrealmirror.com": {
    "name": "Montreal Mirror",
@@ -607,13 +579,6 @@
    "lang": "fr",
    "feed": "https://l-express.ca/feed/",
    "region": ""
-  },
-  "journaldemontreal.com": {
-   "name": "Le Journal de Montréal",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://journaldemontreal.com/rss.xml",
-   "region": "Montréal"
   },
   "thecjn.ca": {
    "name": "Canadian Jewish News",
@@ -1049,25 +1014,11 @@
    "feed": "https://thebruns.ca/feed/",
    "region": "Nouveau-Brunswick"
   },
-  "globalnews.ca": {
-   "name": "CKND-DT",
-   "cc": "CA",
-   "lang": "en",
-   "feed": "https://globalnews.ca/feed/",
-   "region": "Manitoba"
-  },
   "bnnbloomberg.ca": {
    "name": "BNN Bloomberg",
    "cc": "CA",
    "lang": "en",
    "feed": "https://bnnbloomberg.ca/arc/outboundfeeds/rss/?outputType=xml",
-   "region": "Ontario"
-  },
-  "ctvnews.ca": {
-   "name": "CTV News Channel",
-   "cc": "CA",
-   "lang": "en",
-   "feed": "https://ctvnews.ca/arc/outboundfeeds/rss/?outputType=xml",
    "region": "Ontario"
   },
   "cheknews.ca": {
@@ -1083,13 +1034,6 @@
    "lang": "en",
    "feed": "https://sportsnet.ca/feed/",
    "region": "Ontario"
-  },
-  "tvanouvelles.ca": {
-   "name": "CFTM-DT",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://tvanouvelles.ca/rss",
-   "region": "Montréal"
   },
   "toronto.citynews.ca": {
    "name": "CITY-DT",
@@ -8999,20 +8943,6 @@
    "cc": "CA",
    "lang": "fr",
    "feed": "https://www.lfpress.com/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
-   "region": ""
-  },
-  "nationalpost.com": {
-   "name": "National Post",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://www.nationalpost.com/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
-   "region": ""
-  },
-  "montrealgazette.com": {
-   "name": "Montreal Gazette",
-   "cc": "CA",
-   "lang": "fr",
-   "feed": "https://www.montrealgazette.com/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "northernnews.ca": {
