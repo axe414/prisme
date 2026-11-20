@@ -87,19 +87,23 @@ try { sums = JSON.parse(readFileSync(SUMS, "utf8")); } catch { /* première fois
 const cutoff = Date.now() - 3 * 864e5;
 for (const [id, v] of Object.entries(sums)) if (Date.parse(v.at) < cutoff) delete sums[id];
 if (canSummarize()) {
-  const want = [];
-  for (const region of ["qc", "ca", "monde", "fr", "us", "uk", "europe"]) {
-    for (const s of editions[region].stories.slice(0, 8)) if (s.sources >= 3 && !sums[s.id] && !want.some((w) => w.id === s.id)) want.push(s);
+  // Toutes les histoires d'au moins 2 médias, rang par rang dans chaque édition (les plus en vue d'abord).
+  const { summarizeBatch } = await import("../lib/summarize.mjs");
+  const ORDER_R = ["qc", "monde", "ca", "fr", "us", "uk", "europe", "latam", "afrique", "moyenorient", "asie", "oceanie"];
+  const want = [], seen = new Set();
+  for (let rank = 0; rank < 60; rank++) for (const region of ORDER_R) {
+    const s = editions[region]?.stories[rank];
+    if (s && s.sources >= 2 && !sums[s.id] && !seen.has(s.id)) { seen.add(s.id); want.push(s); }
   }
-  const MAX = Number(process.env.SUMMARY_MAX || 12); // le palier gratuit de Gemini permet environ 500 résumés par jour
+  // 10 histoires par demande : environ 80 résumés par passage avec 8 demandes (palier gratuit de Gemini).
+  const BATCH = 10, CALLS = Number(process.env.SUMMARY_CALLS || 8);
   let done = 0;
-  for (const s of want.slice(0, MAX)) {
+  for (let i = 0; i < Math.min(want.length, BATCH * CALLS); i += BATCH) {
     try {
-      const r = await summarize(s);
-      sums[s.id] = { summary: r.summary, left: r.left, right: r.right, provider: r.provider, at: new Date().toISOString() };
-      done++;
+      const out = await summarizeBatch(want.slice(i, i + BATCH));
+      for (const [id, r] of Object.entries(out)) { sums[id] = { ...r, at: new Date().toISOString() }; done++; }
     } catch (e) {
-      log(`résumé impossible : ${e.message}`);
+      log(`résumés impossibles : ${e.message}`);
       if (e.quota) break;
     }
   }
