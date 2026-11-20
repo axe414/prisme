@@ -47,6 +47,13 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
+      # Un changement de l'app a pu arriver pendant le passage : on publie toujours la toute dernière version de l'app.
+      - name: Dernière version de l'app
+        run: |
+          git fetch --depth 1 origin main
+          git checkout FETCH_HEAD -- public
+          cp -r public/. site/
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
