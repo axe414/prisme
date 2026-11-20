@@ -1625,8 +1625,9 @@ async function viewStory(v, route) {
   const sd = sides(s.counts);
   const pol = sd.left + sd.center + sd.right;
   const pct = (n) => (pol ? Math.round((n / pol) * 100) : 0);
-  const groups = SIDES.map((side) => ({ ...side, items: s.articles.filter((a) => side.keys.includes(biasKey(a.media))) }));
-  const others = s.articles.filter((a) => !sideOf(a.media));
+  const onePer = (list) => { const seen = new Set(); return [...list].sort((a, b) => (b.published || "").localeCompare(a.published || "")).filter((a) => !seen.has(a.domain) && seen.add(a.domain)); };
+  const groups = SIDES.map((side) => ({ ...side, items: onePer(s.articles.filter((a) => side.keys.includes(biasKey(a.media)))) }));
+  const others = onePer(s.articles.filter((a) => !sideOf(a.media)));
   const owners = new Map();
   for (const a of s.articles) if (a.media.known) owners.set(a.media.owner, (owners.get(a.media.owner) || new Set()).add(a.domain));
   const ownerList = [...owners.entries()].map(([o, d]) => ({ owner: o, n: d.size })).sort((a, b) => b.n - a.n);
@@ -1649,7 +1650,7 @@ async function viewStory(v, route) {
           <div class="kicker">${(s.categories || []).map((c) => esc(CAT_LABEL[c] || c)).join(" · ") || "Histoire"} · ${reason(s)}${s.firstBy ? ` · révélée par <b>${esc(s.firstBy)}</b>` : ""}</div>
           <h1 data-no-tr>${titleOf(s)}</h1>
           ${s.titleFr ? `<p class="s-orig">Titre original : <span data-no-tr>${esc(s.title)}</span></p>` : ""}
-          ${s.summary ? `<p class="dek" data-no-tr>${esc(s.summary)}</p><p class="dek-src">Résumé : ${esc(s.summarySource || "")}</p>` : ""}
+          ${readBox(s)}
           <div class="s-acts">${listenBtn(s.id)}${favBtn(storyFav(s), true)}${shareBtn(storyShare(s), true)}${imgShareBtn(s)}</div>
         </header>
         ${keyPoints(s)}
@@ -1666,7 +1667,8 @@ async function viewStory(v, route) {
         </section>
 
         <section class="sec">
-          <h2 class="block-h">Comment ils le titrent</h2>
+          <h2 class="block-h">Comment ils le titrent <small>un article par média</small></h2>
+          <p class="note" style="margin:0 0 12px">Chaque ligne est l'article d'un média différent sur la même nouvelle. Compare comment chacun la présente, ou touche un titre pour lire l'article.</p>
           ${words.left.length || words.right.length ? `<div class="words">
             <p class="note" style="margin:0 0 10px">Les mots surlignés n'apparaissent que d'un côté : c'est souvent là que se cache le cadrage.</p>
             <div class="words-cols">
@@ -1675,14 +1677,14 @@ async function viewStory(v, route) {
             </div>
           </div>` : ""}
           <div class="cols3">${groups.map((g) => `<section>
-            <div class="col-h"><i style="background:${g.color}"></i>${g.label}<small>${plural(g.items.length, "article")}</small></div>
-            ${g.items.length ? `<ul class="hl">${g.items.slice(0, 4).map(hlItem).join("")}</ul>${g.items.length > 4 ? `<ul class="hl" hidden>${g.items.slice(4).map(hlItem).join("")}</ul><button class="col-more" type="button" data-expand>Voir les ${g.items.length - 4} autres</button>` : ""}` : `<div class="col-empty">Aucun média de ${g.label.toLowerCase()} lu par Prisme n'a couvert cette histoire.</div>`}
+            <div class="col-h"><i style="background:${g.color}"></i>${g.label}<small>${plural(g.items.length, "média")}</small></div>
+            ${g.items.length ? `<ul class="hl">${g.items.slice(0, 3).map(hlItem).join("")}</ul>${g.items.length > 3 ? `<ul class="hl" hidden>${g.items.slice(3).map(hlItem).join("")}</ul><button class="col-more" type="button" data-expand>Voir les ${g.items.length - 3} autres</button>` : ""}` : `<div class="col-empty">Aucun média de ${g.label.toLowerCase()} lu par Prisme n'a couvert cette histoire.</div>`}
           </section>`).join("")}</div>
         </section>
 
         ${others.length ? `<section class="sec">
           <h2 class="block-h">Autres sources <small>médias d'État ou non évalués</small></h2>
-          <ul class="hl">${others.map(hlItem).join("")}</ul>
+          <ul class="hl">${others.slice(0, 4).map(hlItem).join("")}</ul>${others.length > 4 ? `<ul class="hl" hidden>${others.slice(4).map(hlItem).join("")}</ul><button class="col-more" type="button" data-expand>Voir les ${others.length - 4} autres</button>` : ""}
         </section>` : ""}
 
         <details class="s-more"${innerWidth > 1020 ? " open" : ""}>
@@ -1724,6 +1726,23 @@ async function viewStory(v, route) {
 
 const still = (id) => state.route.view === "story" && state.route.id === id;
 
+// Lire l'histoire : le meilleur article (dans ta langue, d'un média connu), puis le choix du média.
+function readBox(s) {
+  const seen = new Set();
+  const one = s.articles.filter((a) => !seen.has(a.domain) && seen.add(a.domain));
+  const want = LANG === "en" ? "en" : "fr";
+  const score = (a) => ((a.lang || "fr") === want ? 4 : 0) + (a.media?.known ? 2 : 0) + (a.domain === s.leadDomain ? 1 : 0);
+  const best = [...one].sort((a, b) => score(b) - score(a))[0];
+  if (!best) return "";
+  const meta = (a) => esc(JSON.stringify({ u: a.url, d: a.domain, n: a.sourceName, k: biasKey(a.media), o: a.media?.known ? a.media.owner : null, c: a.media?.country || null, t: a.title }));
+  const rest = one.filter((a) => a !== best).sort((a, b) => score(b) - score(a));
+  return `<div class="s-read">
+    <a class="btn btn-read" href="${esc(safeUrl(best.url))}" target="_blank" rel="noopener noreferrer" data-read="${meta(best)}">Lire l'article <span>chez ${esc(best.sourceName)}</span> ↗</a>
+    ${best.lang && best.lang !== want ? `<a class="link" href="${esc(transUrl(best.url))}" target="_blank" rel="noopener noreferrer">Lire traduit en français</a>` : ""}
+    ${rest.length ? `<div class="s-read-alt"><span class="label">Ou chez</span>${rest.slice(0, 12).map((a) => `<a class="read-chip" href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener noreferrer" data-read="${meta(a)}"><i style="background:${BIAS[biasKey(a.media)].color}"></i>${esc(a.sourceName)}${a.lang && a.lang !== want ? `<small>${esc(a.lang.toUpperCase())}</small>` : ""}</a>`).join("")}${rest.length > 12 ? `<span class="muted">+${rest.length - 12}</span>` : ""}</div>` : ""}
+  </div>`;
+}
+
 // L'essentiel d'une histoire en 3 points : ce qui se passe, qui en parle, l'angle.
 function keyPoints(s) {
   const sd = sides(s.counts);
@@ -1736,7 +1755,7 @@ function keyPoints(s) {
   return `<section class="s-key${ai?.summary ? " has-ai" : ""}" aria-label="L'essentiel">
     <h2 class="block-h">L'essentiel <small id="keySrc">${ai?.summary ? "✦ résumé neutre écrit par IA" : "en 3 points"}</small></h2>
     <ol>
-      <li><b>Ce qui se passe.</b> <span id="keyWhat" data-no-tr>${esc(ai?.summary || s.summary || "Les titres de chaque média sont plus bas.")}</span></li>
+      <li><b>Ce qui se passe.</b> <span id="keyWhat" data-no-tr>${esc(ai?.summary || s.summary || "Les titres de chaque média sont plus bas.")}</span>${!ai?.summary && s.summary ? ` <small class="key-src" id="keyFrom">Extrait de ${esc(s.summarySource || "un média")}${s.lang && s.lang !== "fr" ? `, en ${esc(LANG_NAME[s.lang] || s.lang)} · <a class="link" href="${esc(transUrl((s.articles.find((a) => a.sourceName === s.summarySource) || s.articles[0]).url))}" target="_blank" rel="noopener noreferrer">Traduire</a>` : ""}. Pas de résumé IA pour cette histoire.</small>` : ""}</li>
       <li><b>Qui en parle.</b> ${plural(s.sources, "média")} : ${sd.left} à gauche, ${sd.center} au centre, ${sd.right} à droite${others ? `, ${others} non évalué${others > 1 ? "s" : ""}` : ""}.${first ? ` En premier : <b data-no-tr>${esc(first.sourceName)}</b>, ${esc(ago(first.published))}.` : ""}</li>
       <li><b>L'angle.</b> <span id="keyAngle">${ai?.left || ai?.right ? `${ai.left ? `<span class="bb bb-l2">Gauche</span> <span data-no-tr>${esc(ai.left)}</span> ` : ""}${ai.right ? `<span class="bb bb-r2">Droite</span> <span data-no-tr>${esc(ai.right)}</span>` : ""}` : angle}</span></li>
     </ol>
@@ -1752,6 +1771,7 @@ async function storyExtras(s, hlItem) {
     if (!el || !still(s.id)) return;
     if (r.summary) {
       const kw = $("#keyWhat"); if (kw) kw.textContent = r.summary;
+      $("#keyFrom")?.remove();
       const ks = $("#keySrc"); if (ks) ks.textContent = "✦ résumé neutre écrit par IA";
       const kn = $("#keyNote"); if (kn) kn.hidden = false;
       $(".s-key")?.classList.add("has-ai");

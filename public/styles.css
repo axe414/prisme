@@ -1125,3 +1125,19 @@ html, body { overflow-x: clip; }
 .s-key.has-ai { border-top-color: #E3B23C; }
 .s-key .block-h small#keySrc { color: #8A6A10; }
 .ai-note { margin: 2px 0 10px; font: 12.5px/1.45 var(--sans); color: var(--ink-3); }
+
+/* ---------- Lire l'histoire ---------- */
+.s-read { display: grid; gap: 10px; margin: 16px 0 4px; }
+.btn-read { justify-self: start; height: 46px; padding: 0 20px; font-size: 15px; gap: 8px; }
+.btn-read span { font-weight: 400; opacity: .8; }
+.s-read > .link { font: 13.5px var(--sans); justify-self: start; }
+.s-read-alt { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.s-read-alt .label { margin-right: 4px; }
+.read-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; font: 600 13px var(--sans); color: var(--ink); text-decoration: none; background: var(--card); border: 1px solid var(--hair); border-radius: 2px; }
+.read-chip:hover { border-color: var(--ink); }
+.read-chip i { width: 8px; height: 8px; flex: none; }
+.read-chip small { font: 500 10px var(--mono); color: var(--ink-3); }
+.read-chip.is-read { color: var(--ink-3); }
+.key-src { display: block; margin-top: 4px; font: 12.5px/1.45 var(--sans); color: var(--ink-3); }
+@media (max-width: 760px) { .btn-read { justify-self: stretch; justify-content: center; } .s-read-alt { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--gut)); padding: 0 var(--gut) 2px; } .s-read-alt::-webkit-scrollbar { display: none; } .read-chip { flex: none; } }
+@media (pointer: coarse) { .read-chip { min-height: 36px; } }
