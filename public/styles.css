@@ -2194,3 +2194,4 @@ html.soir img { filter: brightness(.92); }
 /* Téléphone : le doigt suffit, pas de flèches */
 @media (max-width: 760px) { .hs-arrow { display: none !important; } }
 .pk-via { font: 600 10.5px var(--sans); color: var(--ink-3); border: 1px solid var(--hair); border-radius: 4px; padding: 1px 5px; }
+.gn-keep { display: flex; align-items: center; gap: 8px; margin-top: 12px; font: 14px var(--sans); color: var(--ink-2); } .gn-keep input { width: 18px; height: 18px; }

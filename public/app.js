@@ -1107,6 +1107,37 @@ function rankArticles(s) {
   return one.sort((a, b) => score(b) - score(a));
 }
 const viaGoogle = (u) => /^https?:\/\/news\.google\.com\//.test(String(u || ""));
+// Un lien qui passe par Google News : Google bloque parfois ces redirections (« automated queries »).
+// On propose d'aller directement sur le site du média (l'article est parmi ses plus récents), et on retient le choix.
+document.addEventListener("click", (e) => {
+  const a = e.target.closest('a[href^="https://news.google.com/"]');
+  if (!a || e.metaKey || e.ctrlKey) return;
+  let meta = {};
+  try { meta = JSON.parse(a.dataset.read || "{}"); } catch { /* sans détails */ }
+  if (!meta.d) return;
+  const site = `https://${meta.d}/`, name = meta.n || meta.d, pref = store.get("gnPref", "");
+  if (pref === "google") return;
+  e.preventDefault(); e.stopPropagation();
+  const card = a.closest("[data-card-read]") || a;
+  const sid = card.dataset?.cardRead;
+  const go2 = (u) => { window.open(u, "_blank", "noopener"); if (sid && state.stories.get(sid)) setTimeout(() => setSeen(state.stories.get(sid), true), 400); };
+  if (pref === "site") { go2(site); toast(`Sur ${name} : l'article est parmi les plus récents.`); return; }
+  openModal(`<div class="modal-pad gn-sheet"><div class="kicker">Lire chez <span data-no-tr>${esc(name)}</span></div>
+    <h2 class="pk-h2" data-no-tr>${esc(meta.t || "")}</h2>
+    <p class="note">Ce média ne laisse pas Prisme lire son site directement : son lien passe par Google News, et Google le bloque parfois.</p>
+    <ul class="sheet-list">
+      <li><button type="button" data-gn="site">${ico("share")}<span>Aller sur le site de <span data-no-tr>${esc(name)}</span><small>Sans Google. L'article est parmi les plus récents de leur page d'accueil.</small></span></button></li>
+      <li><button type="button" data-gn="google"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16 16 8M9 8h7v7"/></svg><span>Ouvrir l'article (via Google News)<small>Directement sur l'article, quand Google le permet.</small></span></button></li>
+    </ul>
+    <label class="gn-keep"><input type="checkbox" id="gnKeep" checked> Retenir mon choix</label></div>`, true);
+  $("#modalBody .gn-sheet").addEventListener("click", (ev) => {
+    const b = ev.target.closest("[data-gn]");
+    if (!b) return;
+    if ($("#gnKeep")?.checked) store.set("gnPref", b.dataset.gn);
+    closeLayer("#modal");
+    go2(b.dataset.gn === "site" ? site : a.href);
+  });
+}, true);
 // Tes médias préférés (⭐) : quand ils couvrent une nouvelle, le titre s'ouvre chez eux. Sur cet appareil seulement.
 const prefMed = {
   list() { try { return JSON.parse(store.get("prefMed", "[]")); } catch { return []; } },
@@ -2903,7 +2934,10 @@ function settingsExtra() {
   const L = less.get();
   const items = [...L.c.map((c) => `<button class="chip on" type="button" data-unless-cat="${esc(c)}">${esc(CAT_LABEL[c] || c)} <span aria-hidden="true">✕</span></button>`),
     ...L.m.map((x) => `<button class="chip on" type="button" data-unless-med="${esc(x.d)}"><span data-no-tr>${esc(x.n)}</span> <span aria-hidden="true">✕</span></button>`)];
-  return `<section><h3>Lecture du soir <small>de 21 h à 6 h, des couleurs plus chaudes pour les yeux</small></h3>
+  const gp = store.get("gnPref", "");
+  return `<section><h3>Liens des petits hebdos <small>ceux qui passent par Google News</small></h3>
+      <div class="seg seg-big" role="group">${[["", "Demander"], ["site", "Site du média"], ["google", "Via Google"]].map(([v, l]) => `<button type="button" data-gnpref="${v}" aria-pressed="${gp === v}">${l}</button>`).join("")}</div></section>
+    <section><h3>Lecture du soir <small>de 21 h à 6 h, des couleurs plus chaudes pour les yeux</small></h3>
       <div class="seg seg-big" role="group"><button type="button" data-soir-set="0" aria-pressed="${store.get("soir") === "0"}">Non</button><button type="button" data-soir-set="1" aria-pressed="${store.get("soir") !== "0"}">Oui</button></div></section>
     <section><h3>Lecture simple <small>sans barres de couleur ni étiquettes</small></h3>
       <div class="seg seg-big" role="group"><button type="button" data-simple-set="0" aria-pressed="${store.get("simple") !== "1"}">Non</button><button type="button" data-simple-set="1" aria-pressed="${store.get("simple") === "1"}">Oui</button></div></section>
@@ -2923,6 +2957,8 @@ document.addEventListener("click", async (e) => {
     if (sec) sec.outerHTML = settingsExtra().split("</section>")[0] + "</section>";
     return;
   }
+  const gq = e.target.closest("[data-gnpref]");
+  if (gq) { store.set("gnPref", gq.dataset.gnpref); $$("[data-gnpref]").forEach((x) => x.setAttribute("aria-pressed", x === gq)); return; }
   const so = e.target.closest("[data-soir-set]");
   if (so) { store.set("soir", so.dataset.soirSet); applySoir(); $$("[data-soir-set]").forEach((x) => x.setAttribute("aria-pressed", x === so)); return; }
   const sm = e.target.closest("[data-simple-set]");
