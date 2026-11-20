@@ -8927,7 +8927,7 @@
   "finnishcanadian.com": {
    "name": "Kanadan Sanomat",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.finnishcanadian.com/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
@@ -8941,147 +8941,147 @@
   "lfpress.com": {
    "name": "London Free Press",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.lfpress.com/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "northernnews.ca": {
    "name": "Northern News",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.northernnews.ca/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "thesudburystar.com": {
    "name": "The Sudbury Star",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.thesudburystar.com/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "stratfordbeaconherald.com": {
    "name": "The Beacon Herald",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.stratfordbeaconherald.com/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "napaneeguide.com": {
    "name": "The Napanee Guide",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.napaneeguide.com/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "thewhig.com": {
    "name": "Kingston Whig-Standard",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.thewhig.com/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "saultstar.com": {
    "name": "Sault Star",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.saultstar.com/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "simcoereformer.ca": {
    "name": "The Simcoe Reformer",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.simcoereformer.ca/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "trentonian.ca": {
    "name": "Trenton Trentonian",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.trentonian.ca/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "leaderpost.com": {
    "name": "Regina Leader-Post",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.leaderpost.com/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "hilltimes.com": {
    "name": "The Hill Times",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.hilltimes.com/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "singtao.ca": {
    "name": "Sing Tao Media Group",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "zh",
    "feed": "https://www.singtao.ca/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "brantfordexpositor.ca": {
    "name": "Brantford Expositor",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.brantfordexpositor.ca/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "delhinewsrecord.com": {
    "name": "The Delhi News-Record",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.delhinewsrecord.com/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "chathamthisweek.ca": {
    "name": "Chatham This Week",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.chathamthisweek.ca/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "fortsaskatchewanrecord.com": {
    "name": "Fort Saskatchewan Record",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.fortsaskatchewanrecord.com/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "windsorstar.com": {
    "name": "Windsor Star",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.windsorstar.com/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "theobserver.ca": {
    "name": "Sarnia Observer",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.theobserver.ca/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "thestarphoenix.com": {
    "name": "The StarPhoenix",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.thestarphoenix.com/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "nugget.ca": {
    "name": "North Bay Nugget",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.nugget.ca/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   },
   "outtvglobal.com": {
    "name": "OUTtv",
    "cc": "CA",
-   "lang": "fr",
+   "lang": "en",
    "feed": "https://www.outtvglobal.com/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
   }
