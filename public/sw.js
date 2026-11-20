@@ -1,4 +1,4 @@
-﻿// Service worker de Prisme : rÃ©seau d'abord (toujours la version fraÃ®che), cache en secours (hors ligne).
+// Service worker de Prisme : rÃ©seau d'abord (toujours la version fraÃ®che), cache en secours (hors ligne).
 const CACHE = "prisme-v6";
 const SHELL = ["./", "index.html", "app.js", "i18n.js", "styles.css", "favicon.svg", "manifest.webmanifest", "icons/icon-192.png"];
 
