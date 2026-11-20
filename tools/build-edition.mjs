@@ -74,10 +74,11 @@ for (const region of REGIONS) {
 }
 
 // 4) Vidéos des chaînes de médias, et annuaire.
-const videos = await allVideos();
+mkdirSync(STATE, { recursive: true });
+const videos = await allVideos({ memory: join(STATE, "videos.json") });
 writeFileSync(join(DATA, "videos.json"), JSON.stringify({ builtAt: new Date().toISOString(), videos }));
 writeFileSync(join(DATA, "directory.json"), JSON.stringify({ media: directory() }));
-log(`${videos.length} vidéos`);
+log(`${videos.length} vidéos sur 7 jours (${(await import("../lib/videos.mjs")).channelCount()} chaînes)`);
 
 // 5) Résumés neutres des grandes histoires (gardés d'une fois à l'autre ; seuls les nouveaux sont écrits).
 mkdirSync(STATE, { recursive: true });
