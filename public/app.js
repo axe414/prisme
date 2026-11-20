@@ -460,7 +460,7 @@ async function videosLocal(p) {
     const need = Math.min(2, qw.size);
     list = list.filter((v) => { let n = 0; for (const w of vwords(v.title)) if (qw.has(w)) n++; return n >= need; });
   }
-  return { configured: true, videos: list.slice(0, q ? 24 : 150) };
+  return { configured: true, videos: q ? list.slice(0, 24) : list };
 }
 
 async function summaryLocal(id) {
@@ -2625,13 +2625,51 @@ async function viewVideos(v, side = "all", noShorts = true) {
     catch (e) { $("#vidBody").innerHTML = `<div class="empty"><p>${esc(e.message)}</p></div>`; return; }
   }
   if (state.route.view !== "videos") return;
-  const list = r.videos.filter((x) => (side === "all" || (sideOf(x.media) || "other") === side) && (!noShorts || !x.isShort));
+  const keep = (x) => (side === "all" || (sideOf(x.media) || "other") === side) && (!noShorts || !x.isShort);
+  const list = r.videos.filter(keep);
+  // Quand les vidéos de l'édition sont épuisées, on continue avec celles du reste du monde.
+  let world = [];
+  if (state.region !== "monde") {
+    let w = state.videos.get("monde");
+    if (!w) { w = await api(`/api/videos?region=monde`).catch(() => ({ videos: [] })); state.videos.set("monde", w); }
+    if (state.route.view !== "videos") return;
+    const here = new Set(r.videos.map((x) => x.id));
+    world = w.videos.filter((x) => !here.has(x.id) && keep(x));
+  }
+  const all = [...list, ...world];
   const c = { l2: 0, l1: 0, c: 0, r1: 0, r2: 0, state: 0, unk: 0 };
   for (const x of r.videos) c[biasKey(x.media)]++;
-  $("#vidBody").innerHTML = `<div style="margin:6px 0 4px">${bigBar(c)}</div>
-    <p class="note">${plural(r.videos.length, "vidéo")} de la dernière semaine, de ${plural(new Set(r.videos.map((x) => x.domain)).size, "chaîne")} de médias.</p>
-    ${list.length ? videoGrid(list.slice(0, 60)) : `<div class="empty"><p>Aucune vidéo de ce côté pour cette édition.</p></div>`}`;
-  bindVideos($("#vidBody"), list);
+  const body = $("#vidBody");
+  body.innerHTML = `<div style="margin:6px 0 4px">${bigBar(c)}</div>
+    <p class="note">${plural(r.videos.length, "vidéo")} de la dernière semaine, de ${plural(new Set(r.videos.map((x) => x.domain)).size, "chaîne")} de médias${world.length ? `, puis ${plural(world.length, "vidéo")} d'ailleurs dans le monde` : ""}.</p>
+    <div id="vidList">${all.length ? "" : `<div class="empty"><p>Aucune vidéo de ce côté pour cette édition.</p></div>`}</div>
+    <div id="vidSentinel"></div><div id="vidStatus"></div>`;
+  bindVideos(body, all);
+  // Défilement continu : 24 vidéos à la fois.
+  let shown = 0;
+  const more = () => {
+    if (shown >= all.length || !$("#vidList")) return;
+    const start = shown, end = Math.min(all.length, shown + 24);
+    let html = "";
+    if (start < list.length) html += videoGrid(all.slice(start, Math.min(end, list.length)));
+    if (end > list.length) {
+      if (start <= list.length) html += `<h2 class="block-h vid-world">Ailleurs dans le monde <small>les dernières vidéos des autres médias</small></h2>`;
+      html += videoGrid(all.slice(Math.max(start, list.length), end));
+    }
+    shown = end;
+    $("#vidList").insertAdjacentHTML("beforeend", html);
+    $("#vidStatus").innerHTML = shown < all.length
+      ? `<div class="more-row"><button class="btn ghost" type="button" id="vidMore">Plus de vidéos</button></div>`
+      : `<div class="end">C'est tout : ${plural(all.length, "vidéo")} de la dernière semaine.</div>`;
+    const b = $("#vidMore");
+    if (b) b.onclick = more;
+  };
+  more();
+  const sentinel = $("#vidSentinel");
+  state.observer?.disconnect();
+  state.observer = new IntersectionObserver((en) => { if (en.some((e) => e.isIntersecting)) more(); }, { rootMargin: "1200px 0px" });
+  state.observer.observe(sentinel);
+  state.onScroll = () => { if (sentinel.isConnected && sentinel.getBoundingClientRect().top < innerHeight + 1200) more(); };
 }
 
 /* ---------- Le prisme du matin ---------- */

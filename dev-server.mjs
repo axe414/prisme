@@ -103,7 +103,12 @@ async function dataFile(name) {
     return readFileSync(file, "utf8");
   }
   if (name === "videos.json") {
-    if (!videosCache.body || Date.now() - videosCache.at > 30 * 60e3) videosCache = { at: Date.now(), body: JSON.stringify({ builtAt: new Date().toISOString(), videos: await allVideos() }) };
+    // Les vidéos publiées par le robot d'abord (rapide) ; sinon, lecture directe des chaînes YouTube.
+    if (!videosCache.body || Date.now() - videosCache.at > 30 * 60e3) {
+      let body = null;
+      try { const r = await fetch("https://axe414.github.io/prisme/data/videos.json", { signal: AbortSignal.timeout(8000) }); if (r.ok) body = await r.text(); } catch { /* hors ligne */ }
+      videosCache = { at: Date.now(), body: body || JSON.stringify({ builtAt: new Date().toISOString(), videos: await allVideos() }) };
+    }
     return videosCache.body;
   }
   if (name === "directory.json") return JSON.stringify({ media: directory() });

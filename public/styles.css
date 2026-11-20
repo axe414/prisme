@@ -1141,3 +1141,5 @@ html, body { overflow-x: clip; }
 .key-src { display: block; margin-top: 4px; font: 12.5px/1.45 var(--sans); color: var(--ink-3); }
 @media (max-width: 760px) { .btn-read { justify-self: stretch; justify-content: center; } .s-read-alt { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--gut)); padding: 0 var(--gut) 2px; } .s-read-alt::-webkit-scrollbar { display: none; } .read-chip { flex: none; } }
 @media (pointer: coarse) { .read-chip { min-height: 36px; } }
+.vgrid + .vgrid { padding-top: 6px; }
+.vid-world { margin-top: 30px; }
