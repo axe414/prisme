@@ -1164,7 +1164,7 @@ function openAttrs(s) {
 // Sous la carte : « Comparer les 13 médias › » (la page Prisme : gauche, centre, droite) et l'aperçu sur place.
 function cmpRow(s) {
   const n = s.sources || 1;
-  return `<div class="c2-row"><a class="c2-cmp" href="${href({ h: s.id })}" data-nav><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M5 20h14M6 8l-3 6a3 3 0 0 0 6 0Zm12 0-3 6a3 3 0 0 0 6 0ZM6 8h12"/></svg><span>${n > 1 ? `Comparer les ${n} médias` : "Voir l'histoire"}</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>${peekBtn}</div>`;
+  return `<div class="c2-row"><a class="c2-cmp" href="${href({ h: s.id })}" data-nav><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M5 20h14M6 8l-3 6a3 3 0 0 0 6 0Zm12 0-3 6a3 3 0 0 0 6 0ZM6 8h12"/></svg><span>${n > 1 ? `Comparer les ${n} médias` : "Voir l'histoire"}</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a></div>`;
 }
 document.addEventListener("click", (e) => {
   const a = e.target.closest("[data-card-read]");
@@ -3580,6 +3580,14 @@ function storyReadBar(v, s) {
     ${(s.sources || 0) > 1 ? `<button class="rb-pick" type="button" data-pick="${esc(s.id)}" aria-label="Choisir le média" title="Choisir le média"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>` : ""}
     ${nx ? `<button class="rb-next" type="button" data-next title="Histoire suivante"><span>Suivante</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>` : ""}
   </div>`);
+  // La barre n'apparaît qu'une fois le gros bouton « Lire l'article » du haut dépassé (pas de doublon).
+  const bar = $(".s-readbar", v), topBtn = $(".btn-read", v);
+  if (bar && topBtn) {
+    bar.classList.add("rb-hide");
+    state.readIO?.disconnect();
+    state.readIO = new IntersectionObserver(([en]) => bar.classList.toggle("rb-hide", en.isIntersecting || en.boundingClientRect.top > 0), { root: v.id === "panelBody" ? v : null });
+    state.readIO.observe(topBtn);
+  }
   if (nx && matchMedia("(pointer: coarse)").matches && !store.get("hintNext")) {
     store.set("hintNext", "1");
     setTimeout(() => toast("Astuce : glisse vers la gauche pour passer à l'histoire suivante."), 1400);
@@ -3914,29 +3922,30 @@ async function viewStory(v, route) {
         ${s.image ? `<div class="glow-wrap" aria-hidden="true"><img class="glow" src="${esc(safeUrl(s.image))}" alt="" referrerpolicy="no-referrer"></div>` : ""}
         ${s.image ? `<figure class="s-hero s-hero-top"><img src="${esc(safeUrl(s.image))}" alt="" referrerpolicy="no-referrer"><span class="credit">${esc(s.imageSource || "")}</span></figure>` : ""}
         <header class="s-head">
-          <div class="kicker">${(s.categories || []).map((c) => esc(CAT_LABEL[c] || c)).join(" · ") || "Histoire"} · ${reason(s)}${s.firstBy ? ` · révélée par <b>${esc(s.firstBy)}</b>` : ""}</div>
+          <div class="kicker">${(s.categories || []).filter((c) => CAT_LABEL[c] && c !== "une").slice(0, 1).map((c) => esc(CAT_LABEL[c])).join("") || "Histoire"} · ${esc(agoShort(s.lastSeen || s.firstSeen))}</div>
           <h1 data-no-tr>${titleOf(s)}</h1>
           ${s.titleFr ? `<p class="s-orig">Titre original : <span data-no-tr>${esc(s.title)}</span></p>` : ""}
           ${readBox(s)}
           <div class="s-acts">${listenBtn(s.id)}${favBtn(storyFav(s), true)}${shareBtn(storyShare(s), true)}${imgShareBtn(s)}</div>
         </header>
+        <!-- L'essentiel d'abord : le résumé, deux titres face à face, qui en parle. Le reste se déplie. -->
         ${keyPoints(s)}
         ${faceToFace(s)}
 
         <section class="sec" id="sxSummary" hidden></section>
 
-        <section class="sec">
-          <h2 class="block-h">Qui couvre cette histoire <small>${plural(s.sources, "média")} · une voix par média</small></h2>
+        <section class="sec s-who">
+          <h2 class="block-h">Qui en parle <small>${plural(s.sources, "média")}</small></h2>
           ${bigBar(s.counts)}
-          <div class="s-cov">${SIDES.map((side) => `<div><b><span data-count="${pct(sd[side.key])}">${pct(sd[side.key])}</span> %</b><small><i style="background:${side.color}"></i>${side.label} · ${plural(sd[side.key], "média")}</small></div>`).join("")}</div>
+          <div class="s-cov">${SIDES.map((side) => `<div><b><span data-count="${pct(sd[side.key])}">${pct(sd[side.key])}</span> %</b><small><i style="background:${side.color}"></i>${side.label} · ${sd[side.key]}</small></div>`).join("")}</div>
           ${s.blindspot ? `<div class="callout ${s.blindspot === "right" ? "r" : "l"}"><b>ANGLE MORT.</b> Les médias de ${s.blindspot === "right" ? "droite" : "gauche"} en parlent très peu : ${pct(s.blindspot === "right" ? sd.right : sd.left)} % des médias évalués.</div>` : ""}
           ${s.counts.state ? `<div class="callout"><b>MÉDIAS D'ÉTAT.</b> ${plural(s.counts.state, "média contrôlé", "médias contrôlés")} par un gouvernement couvre${s.counts.state > 1 ? "nt" : ""} aussi cette histoire.</div>` : ""}
         </section>
-        ${storyThread(s)}
 
-        <section class="sec">
-          <h2 class="block-h">Comment ils le titrent <small>un article par média</small></h2>
-          <p class="note" style="margin:0 0 12px">Chaque ligne est l'article d'un média différent sur la même nouvelle. Compare comment chacun la présente, ou touche un titre pour lire l'article.</p>
+        <details class="s-fold"${innerWidth > 1020 ? " open" : ""}>
+          <summary>Tous les titres, média par média <small>${plural(s.sources, "média")}</small></summary>
+          <section class="sec">
+          <p class="note" style="margin:0 0 12px">Chaque ligne est l'article d'un média différent sur la même nouvelle. Touche un titre pour lire l'article.</p>
           ${words.left.length || words.right.length ? `<div class="words">
             <p class="note" style="margin:0 0 10px">Les mots surlignés n'apparaissent que d'un côté : c'est souvent là que se cache le cadrage.</p>
             <div class="words-cols">
@@ -3954,9 +3963,12 @@ async function viewStory(v, route) {
           <h2 class="block-h">Autres sources <small>médias d'État ou non évalués</small></h2>
           <ul class="hl">${others.slice(0, 4).map(hlItem).join("")}</ul>${others.length > 4 ? `<ul class="hl" hidden>${others.slice(4).map(hlItem).join("")}</ul><button class="col-more" type="button" data-expand>Voir les ${others.length - 4} autres</button>` : ""}
         </section>` : ""}
+        </details>
 
-        <details class="s-more"${innerWidth > 1020 ? " open" : ""}>
-          <summary>Plus de contexte <small>qui se tait, vu d'ailleurs, vidéos, titres modifiés</small></summary>
+        ${(() => { const t = storyThread(s); return t ? `<details class="s-fold s-fold-thread"><summary>Le fil de l'histoire <small>jour après jour</small></summary>${t}</details>` : ""; })()}
+
+        <details class="s-more s-fold"${innerWidth > 1020 ? " open" : ""}>
+          <summary>Plus de contexte <small>silences, ailleurs, vidéos</small></summary>
           <section class="sec" id="sxSilent" hidden></section>
           <section class="sec" id="sxWorld" hidden></section>
           <section class="sec" id="sxVideos" hidden></section>
@@ -3965,11 +3977,11 @@ async function viewStory(v, route) {
       </div>
 
       <aside class="rail"><div class="rail-in">
-        <section>
+        <section class="r-desk">
           <h2 class="block-h">Qui possède ces médias</h2>
           ${ownerList.length ? `<ul class="rank">${ownerList.slice(0, 8).map((o) => `<li><span class="nm">${esc(o.owner.replace(/\s*\(.*\)$/, ""))}</span><span class="n">${plural(o.n, "média")}</span><span class="track"><span style="width:${(o.n / ownerList[0].n) * 100}%"></span></span></li>`).join("")}</ul>` : `<p class="note">Aucun propriétaire connu.</p>`}
         </section>
-        ${timeline.length ? `<section>
+        ${timeline.length ? `<section class="r-desk">
           <h2 class="block-h">Chronologie <small>qui en a parlé en premier</small></h2>
           <ol class="timeline">${timeline.map((a) => `<li><time>${esc(clock(a.published))}</time><span><b>${esc(a.sourceName)}</b> ${tag(a.media)}</span></li>`).join("")}</ol>
         </section>` : ""}
@@ -4010,7 +4022,7 @@ function readBox(s) {
   return `<div class="s-read">
     <a class="btn btn-read" href="${esc(safeUrl(best.url))}" target="_blank" rel="noopener noreferrer" data-read="${meta(best)}">Lire l'article <span>chez ${esc(best.sourceName)}</span> ↗</a>
     ${best.lang && best.lang !== want ? `<a class="link" href="${esc(transUrl(best.url))}" target="_blank" rel="noopener noreferrer">Lire traduit en français</a>` : ""}
-    ${rest.length ? `<div class="s-read-alt"><span class="label">Ou chez</span>${rest.slice(0, 12).map((a) => `<a class="read-chip" href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener noreferrer" data-read="${meta(a)}"><i style="background:${BIAS[biasKey(a.media)].color}"></i>${esc(a.sourceName)}${a.lang && a.lang !== want ? `<small>${esc(a.lang.toUpperCase())}</small>` : ""}</a>`).join("")}${rest.length > 12 ? `<span class="muted">+${rest.length - 12}</span>` : ""}</div>` : ""}
+    ${rest.length ? `<button class="s-pick" type="button" data-pick="${esc(s.id)}">${logoStack(s, 4)}<span>Choisir un autre média <small>(${rest.length})</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>` : ""}
   </div>`;
 }
 
