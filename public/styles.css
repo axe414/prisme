@@ -2045,3 +2045,15 @@ html.soir img { filter: brightness(.92); }
 .ta-all { display: inline-block; margin-top: 10px; font: 600 13.5px var(--sans); }
 @media (max-width: 760px) { .q-help { display: none; } }
 @media (max-width: 760px) { #panelBody:has(.s-readbar) .s-sticky .ss-acts, #view:has(.s-readbar) .s-sticky .ss-acts { display: none !important; } }
+
+/* Sous chaque carte : « Comparer les N médias › » et l'aperçu ; le titre et la photo ouvrent l'article */
+.c2-row { grid-column: 1 / -1; display: flex; gap: 8px; margin-top: 12px; }
+.c2-cmp { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 10px 0 12px; border-radius: 12px; background: var(--card); border: 1px solid var(--hair); color: var(--ink); text-decoration: none; font: 600 14px var(--sans); }
+.c2-cmp span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.c2-cmp svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.c2-cmp .chev { margin-left: auto; width: 16px; height: 16px; stroke-width: 2.2; opacity: .6; }
+.c2-cmp:active, .c2-row .c2-peek:active { transform: scale(.97); }
+.c2-row .c2-peek { width: 42px; height: 42px; margin: 0; border-radius: 12px; flex: none; }
+.c2-row .c2-peek svg { width: 18px; height: 18px; }
+.story.c2.is-seen .c2-cmp { opacity: .75; }
+.story > .c2-row { display: flex !important; }

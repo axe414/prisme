@@ -1101,10 +1101,17 @@ function rankArticles(s) {
   return one.sort((a, b) => score(b) - score(a));
 }
 const bestArticle = (s) => rankArticles(s)[0] || null;
-// « Lire ↗ » : ouvre directement le meilleur article, en un toucher, depuis la carte.
-function readBtn(s) {
+// Toucher le titre ou la photo d'une carte : l'article s'ouvre directement (le meilleur pour toi).
+// Sans article (rare), on retombe sur la page de l'histoire.
+function openAttrs(s) {
   const a = bestArticle(s);
-  return a ? `<a class="c2-read" href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener noreferrer" data-read="${readAttr(a)}" data-card-read="${esc(s.id)}" title="Lire l'article chez ${esc(a.sourceName)}">Lire<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16 16 8M9 8h7v7"/></svg></a>` : "";
+  return a ? `href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener noreferrer" data-read="${readAttr(a)}" data-card-read="${esc(s.id)}"`
+    : `href="${href({ h: s.id })}" data-nav`;
+}
+// Sous la carte : « Comparer les 13 médias › » (la page Prisme : gauche, centre, droite) et l'aperçu sur place.
+function cmpRow(s) {
+  const n = s.sources || 1;
+  return `<div class="c2-row"><a class="c2-cmp" href="${href({ h: s.id })}" data-nav><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M5 20h14M6 8l-3 6a3 3 0 0 0 6 0Zm12 0-3 6a3 3 0 0 0 6 0ZM6 8h12"/></svg><span>${n > 1 ? `Comparer les ${n} médias` : "Voir l'histoire"}</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>${peekBtn}</div>`;
 }
 document.addEventListener("click", (e) => {
   const a = e.target.closest("[data-card-read]");
@@ -1113,7 +1120,7 @@ document.addEventListener("click", (e) => {
   if (s) setTimeout(() => setSeen(s, true), 400);
 });
 const peekBtn = `<button class="c2-peek" type="button" data-peek aria-expanded="false" aria-label="Aperçu ici" title="Aperçu ici"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>`;
-const metaLine = (s, st) => `<p class="c2-meta">${newTag(s)}${logoStack(s)}${sourcesLine(s, 1)} · <time title="${esc(ago(s.lastSeen || s.firstSeen))}">${agoShort(s.lastSeen || s.firstSeen)}</time>${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}<span class="c2-acts">${readBtn(s)}${peekBtn}</span></p>`;
+const metaLine = (s, st) => `<p class="c2-meta">${newTag(s)}${logoStack(s)}${sourcesLine(s, 1)} · <time title="${esc(ago(s.lastSeen || s.firstSeen))}">${agoShort(s.lastSeen || s.firstSeen)}</time>${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}</p>`;
 
 // La rubrique d'une histoire, en couleur, et l'angle mort : en haut de chaque carte. La rubrique mène à son fil.
 const catOf = (s, cat) => s.categories?.find((x) => x !== cat && x !== "une" && CAT_LABEL[x]) || null;
@@ -1130,20 +1137,20 @@ function kickerLine(s, cat) {
 function cardImg(s, cat, cls = "c2-img") {
   const a = s.articles?.find((x) => x.media?.known) || s.articles?.[0];
   const c = catOf(s, cat) || s.categories?.find((x) => CAT_LABEL[x]) || "une";
-  return `<a class="${cls} cc-${c}${s.image ? "" : " ph"}" href="${href({ h: s.id })}" data-nav tabindex="-1" aria-hidden="true">${s.image ? `<img src="${esc(safeUrl(s.image))}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ""}<span class="ph-logo">${a ? favicon(a.domain, a.sourceName) : ""}</span></a>`;
+  return `<a class="${cls} cc-${c}${s.image ? "" : " ph"}" ${openAttrs(s)} tabindex="-1" aria-hidden="true">${s.image ? `<img src="${esc(safeUrl(s.image))}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ""}<span class="ph-logo">${a ? favicon(a.domain, a.sourceName) : ""}</span></a>`;
 }
 
 function storyRow(s, cat) {
-  const link = href({ h: s.id });
   const st = seenState(s);
   return `<article class="story c2${st?.seen ? " is-seen" : ""}">
     <div class="c2-body">
       ${kickerLine(s, cat)}
-      <h3 data-no-tr><a href="${link}" data-nav>${titleOf(s)}</a></h3>
+      <h3 data-no-tr><a ${openAttrs(s)}>${titleOf(s)}</a></h3>
       ${sideStrip(s)}
       ${metaLine(s, st)}
     </div>
     ${cardImg(s, cat)}
+    ${cmpRow(s)}
   </article>`;
 }
 // La une : la photo pleine largeur, le titre par-dessus, et pourquoi elle est là (le nombre de médias).
@@ -1157,7 +1164,7 @@ function heroStory(s, cat) {
   const dek = s.ai?.summary || s.summary || "";
   return `<article class="lead hero${st?.seen ? " is-seen" : ""}">
     ${s.image ? `<img class="glow" src="${esc(safeUrl(s.image))}" alt="" aria-hidden="true" referrerpolicy="no-referrer">` : ""}
-    <a class="hero-media${s.image ? "" : ` ph cc-${catOf(s, cat) || "une"}`}" href="${link}" data-nav>
+    <a class="hero-media${s.image ? "" : ` ph cc-${catOf(s, cat) || "une"}`}" ${openAttrs(s)}>
       ${s.image ? `<img src="${esc(safeUrl(s.image))}" alt="" referrerpolicy="no-referrer" fetchpriority="high">` : ""}
       <span class="hero-in">
         <span class="hero-k">${when}</span>${isLive(s) ? `<span class="hero-live">En direct</span>` : ""}
@@ -1167,20 +1174,21 @@ function heroStory(s, cat) {
     <div class="hero-why"><b><span data-count="${s.sources}">${s.sources}</span> ${s.sources > 1 ? "médias en parlent" : "média en parle"}</b><span>${all3 ? "La gauche, le centre et la droite" : "L'histoire la plus couverte"} · ${esc(ago(s.lastSeen || s.firstSeen))}</span></div>
     ${sideStrip(s)}
     ${dek ? `<p class="dek" data-no-tr>${esc(dek)}</p>` : ""}
-    <p class="c2-meta">${newTag(s)}${logoStack(s, 5)}${sourcesLine(s, 2)}${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}<span class="c2-acts">${readBtn(s)}${peekBtn}</span></p>
+    <p class="c2-meta">${newTag(s)}${logoStack(s, 5)}${sourcesLine(s, 2)}${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}</p>
+    ${cmpRow(s)}
   </article>`;
 }
 // Les grandes cartes du haut du fil (places 2 à 5) : la photo en large, le titre en blanc par-dessus.
 function bigCard(s, cat) {
-  const link = href({ h: s.id });
   const st = seenState(s);
   return `<article class="story big${st?.seen ? " is-seen" : ""}">
     <div class="big-box">
-      <a class="big-media" href="${link}" data-nav tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(s.image))}" alt="" loading="lazy" referrerpolicy="no-referrer"></a>
-      <div class="big-in">${kickerLine(s, cat)}<h3 data-no-tr><a href="${link}" data-nav>${titleOf(s)}</a></h3></div>
+      <a class="big-media" ${openAttrs(s)} tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(s.image))}" alt="" loading="lazy" referrerpolicy="no-referrer"></a>
+      <div class="big-in">${kickerLine(s, cat)}<h3 data-no-tr><a ${openAttrs(s)}>${titleOf(s)}</a></h3></div>
     </div>
     ${sideStrip(s)}
     ${metaLine(s, st)}
+    ${cmpRow(s)}
   </article>`;
 }
 // L'aperçu sur place : le résumé et les titres de gauche et de droite, sans changer de page.
@@ -1223,12 +1231,13 @@ function leadStory(s, cat) {
   const st = seenState(s);
   const dek = s.ai?.summary || s.summary || "";
   return `<article class="lead c2l${s.image ? "" : " noimg"}${st?.seen ? " is-seen" : ""}">
-    ${s.image ? `<a class="lead-media" href="${link}" data-nav tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(s.image))}" alt="" referrerpolicy="no-referrer"></a>` : ""}
+    ${s.image ? `<a class="lead-media" ${openAttrs(s)} tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(s.image))}" alt="" referrerpolicy="no-referrer"></a>` : ""}
     ${kickerLine(s, cat)}
     ${sideStrip(s)}
-    <h2 data-no-tr><a href="${link}" data-nav>${titleOf(s)}</a></h2>
+    <h2 data-no-tr><a ${openAttrs(s)}>${titleOf(s)}</a></h2>
     ${dek ? `<p class="dek" data-no-tr>${esc(dek)}</p>` : ""}
     ${metaLine(s, st)}
+    ${cmpRow(s)}
   </article>`;
 }
 // Une petite carte dans une rangée qu'on glisse.
