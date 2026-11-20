@@ -446,6 +446,12 @@ async function feedLocal(p) {
       list = all.filter((s) => n(s) > 0).sort((a, b) => n(b) - n(a)).slice(0, 30);
     }
   } else if (cat !== "une") list = list.filter((s) => s.categories.includes(cat));
+  // Rien trouvé : une faute de frappe ? (« victoriavile » → « victoriaville »). On corrige une fois et on le dit.
+  let corrected = null;
+  if (q && !list.length && page === 0 && !p.get("nofix")) {
+    const fix = await fixQuery(q, ed);
+    if (fix) corrected = fix;
+  }
   if (q) {
     // Une recherche qui nomme un média trouve aussi les histoires où ce média apparaît.
     const fq = foldText(q).trim();
@@ -481,6 +487,7 @@ async function feedLocal(p) {
   }
 
   const out = { region, page, fetchedAt: ed.fetchedAt, total: list.length, hasMore: (page + 1) * PAGE < list.length, stories: await withTitlesFr(list.slice(page * PAGE, (page + 1) * PAGE)) };
+  if (corrected && !list.length) out.corrected = corrected;
   if (page === 0) {
     const counts = Object.fromEntries(ORDER.map((k) => [k, 0]));
     const doms = new Map(), owners = new Map();
@@ -505,6 +512,49 @@ async function feedLocal(p) {
     out.fresh = !q && visit.prev ? list.slice(0, 45).filter(isNew).length : 0; // parmi les 3 premières pages : ce qu'on voit vraiment
   }
   return out;
+}
+
+// Corriger une faute de frappe : chaque mot inconnu est remplacé par le mot connu le plus proche
+// (titres de l'édition, noms de villes et de médias), à une lettre près (deux pour les mots longs).
+function editDist(a, b, max) {
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    let best = i;
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      if (cur[j] < best) best = cur[j];
+    }
+    if (best > max) return max + 1;
+    prev = cur;
+  }
+  return prev[b.length];
+}
+async function fixQuery(q, ed) {
+  if (!ed._vocab) {
+    const freq = new Map();
+    const add = (t, w = 1) => { for (const x of foldText(t).split(/[^\p{L}\p{N}-]+/u)) if (x.length >= 4) freq.set(x, (freq.get(x) || 0) + w); };
+    for (const s of ed.stories) { add(s.title); for (const a of s.articles || []) add(a.sourceName, 2); }
+    const V = await villesData().catch(() => null);
+    for (const v of V?.list || []) add(v.n, 3);
+    ed._vocab = freq;
+  }
+  const vocab = ed._vocab;
+  let changed = false;
+  const words = foldText(q).trim().split(/\s+/).map((w) => {
+    if (w.length < 4 || vocab.has(w) || /^["-]/.test(w)) return w;
+    const max = w.length >= 8 ? 2 : 1;
+    let best = null, bd = max + 1, bf = 0;
+    for (const [k, f] of vocab) {
+      if (Math.abs(k.length - w.length) > max || k[0] !== w[0] && k[1] !== w[1]) continue;
+      const d = editDist(w, k, max);
+      if (d < bd || (d === bd && f > bf)) { best = k; bd = d; bf = f; }
+    }
+    if (best && bd <= max) { changed = true; return best; }
+    return w;
+  });
+  return changed ? words.join(" ") : null;
 }
 
 // Vidéos des chaînes de médias, filtrées par édition ou par sujet (au moins 2 mots en commun).
@@ -764,7 +814,9 @@ function renderChrome(route) {
   // « Ma ville » juste après « À la une » : visible tout de suite, sans glisser la barre.
   const catLink = ([v, l]) => `<a class="cc-${v}" href="${href({ cat: v, lens: route.view === "feed" ? route.lens : undefined })}" data-nav ${route.view === "feed" && route.cat === v ? 'aria-current="page"' : ""}>${CAT_EMOJI[v] ? `<span class="ce" aria-hidden="true">${CAT_EMOJI[v]}</span>` : ""}${l}</a>`;
   $("#cats").innerHTML = catLink(CATS[0])
-    + `<a class="cat-ville" href="${prefs.city ? href({ ville: prefs.city }) : href({ v: "villes" })}" data-nav ${["ville", "villes"].includes(route.view) ? 'aria-current="page"' : ""}>📍 ${esc(prefs.cityLabel || "Ma ville")}</a>`
+    // « Ma ville » en un toucher, aller et retour : sur la page de ta ville, la même pastille (avec ✕) ramène à la une.
+    + (() => { const onMine = route.view === "ville" && route.ville === prefs.city && prefs.city;
+      return `<a class="cat-ville${onMine ? " on" : ""}" href="${onMine ? href({}) : prefs.city ? href({ ville: prefs.city }) : href({ v: "villes" })}" data-nav ${["ville", "villes"].includes(route.view) ? 'aria-current="page"' : ""} title="${onMine ? "Revenir à la une" : "Les nouvelles de ma ville"}">📍 ${esc(prefs.cityLabel || "Ma ville")}${onMine ? `<span class="cv-x" aria-hidden="true">✕</span>` : ""}</a>`; })()
     + `${prefs.city ? `<button class="cat-wx" id="catWx" type="button" aria-label="Météo" hidden></button>` : ""}<span class="sep"></span>`
     + CATS.slice(1).map(catLink).join("");
   const onUne = ["feed", "story", "search", "outlet", "ville", "villes"].includes(route.view);
@@ -1835,6 +1887,7 @@ document.addEventListener("click", (e) => {
   if (!b) return;
   const id = b.dataset.listen;
   if (id === "matin") { speak(state.matinSpeech || [], b); return; }
+  if (id === "express") { speak(state.expressSpeech || [], b); return; }
   const s = state.stories.get(id);
   if (s) speak(storySpeech(s), b);
 });
@@ -2887,11 +2940,11 @@ function drawFresh() {
   const el = $("#fresh");
   const f = state.route?.view === "feed" ? state.feeds.get(feedKey(state.route)) : null;
   const off = !navigator.onLine;
-  if (off !== document.body.classList.contains("is-offline")) { document.body.classList.toggle("is-offline", off); $("#topbar").dataset.off = tr("Hors ligne · tes favoris restent lisibles"); topbarSize(); }
+  if (off !== document.body.classList.contains("is-offline")) { document.body.classList.toggle("is-offline", off); $("#topbar").dataset.off = tr("Hors ligne · les dernières nouvelles restent lisibles"); topbarSize(); }
   if (!el) return;
   if (!navigator.onLine) {
     el.hidden = false; el.className = "fresh off";
-    el.innerHTML = `<span class="fr-dot"></span>Hors ligne · tes histoires enregistrées restent lisibles <a class="link" href="${href({ v: "favoris" })}" data-nav>Favoris</a>`;
+    el.innerHTML = `<span class="fr-dot"></span>Hors ligne · voici les dernières nouvelles chargées ${f?.fetchedAt ? `(${esc(ago(f.fetchedAt))})` : ""}`;
     return;
   }
   if (!f?.fetchedAt) { el.hidden = true; return; }
@@ -3554,13 +3607,19 @@ document.addEventListener("keydown", (e) => { if ((e.key === "Enter" || e.key ==
 // Trier le fil (téléphone) : un seul bouton « Trier : L'essentiel ▾ » au lieu de deux rangées de boutons.
 function openSortSheet(route) {
   const list = Object.entries(LENSES).filter(([k, l]) => (!l.qc || ["qc", "ca"].includes(state.region)) && (k !== "local" || prefs.city));
+  // Les 4 choix les plus utiles, avec une phrase courte ; les autres sous « Plus de choix ».
+  const SHORT = { essentiel: "Les plus importantes, couvertes par le plus de médias.", recent: "Tout, du plus récent au plus ancien.", local: "Les nouvelles de ta ville et de sa région.", angles: "Ce qu'un côté couvre et que l'autre ignore." };
+  const main = ["essentiel", "recent", "local", "angles"];
+  const item = ([k, l]) => `<li><button type="button" data-sort="${k}" aria-pressed="${route.lens === k}">
+      <span class="so-t">${l.sw ? `<span class="sw" style="background:${l.sw}"></span>` : ""}${k === "local" ? `📍 ${esc(prefs.cityLabel || "Ma ville")}` : esc(l.label)}</span>
+      <small>${esc(SHORT[k] || l.desc)}</small></button></li>`;
+  const first = list.filter(([k]) => main.includes(k)), rest = list.filter(([k]) => !main.includes(k));
   openModal(`<div class="modal-pad">
     <div class="kicker">${esc(CAT_LABEL[route.cat] || "À la une")}</div>
     <h2>Trier le fil</h2>
-    <ul class="sort-list">${list.map(([k, l]) => `<li><button type="button" data-sort="${k}" aria-pressed="${route.lens === k}">
-      <span class="so-t">${l.sw ? `<span class="sw" style="background:${l.sw}"></span>` : ""}${k === "local" ? `📍 ${esc(prefs.cityLabel || "Ma ville")}` : esc(l.label)}</span>
-      <small>${esc(l.desc)}</small></button></li>`).join("")}</ul>
-    <div class="ld-legend">${legend()}</div>
+    <ul class="sort-list">${first.map(item).join("")}</ul>
+    ${rest.length ? `<details class="sort-more"${rest.some(([k]) => k === route.lens) ? " open" : ""}><summary>Plus de choix <small>gauche, droite, hors radar, pour toi</small></summary>
+      <ul class="sort-list">${rest.map(item).join("")}</ul></details>` : ""}
   </div>`, true);
   $("#modalBody").onclick = (e) => {
     const b = e.target.closest("[data-sort]");
@@ -3773,6 +3832,80 @@ async function searchTopArticles(q) {
   $(".ta-all", el).onclick = (e) => { e.preventDefault(); $("#wide")?.scrollIntoView({ behavior: "smooth" }); };
 }
 
+// « Pour comprendre » : sur une histoire qui dure depuis plus d'un jour, d'où elle part et où elle en est, en 30 secondes.
+function understandCard(s) {
+  const arts = (s.articles || []).filter((a) => a.published).sort((a, b) => a.published.localeCompare(b.published));
+  if (arts.length < 2) return "";
+  const day = (iso) => new Date(iso).toLocaleDateString("en-CA");
+  const first = arts[0], last = arts[arts.length - 1];
+  if (day(first.published) === day(last.published)) return "";
+  const today = new Date().toLocaleDateString("en-CA"), yest = new Date(Date.now() - 864e5).toLocaleDateString("en-CA");
+  const when = (iso) => (day(iso) === today ? "aujourd'hui" : day(iso) === yest ? "hier" : new Date(iso).toLocaleDateString(LOCALE, { weekday: "long" }));
+  const sd = sides(s.counts || {});
+  const lean = sd.left && sd.center && sd.right ? "de tous les côtés" : sd.left > sd.right * 2 ? "surtout à gauche" : sd.right > sd.left * 2 ? "surtout à droite" : "";
+  return `<section class="sec und"><h2 class="block-h">Pour comprendre <small>en 30 secondes</small></h2>
+    <ol class="und-l">
+      <li><b>Ça a commencé ${esc(when(first.published))}</b> : « <span data-no-tr>${esc(first.title)}</span> » <small data-no-tr>${esc(first.sourceName)}</small></li>
+      <li><b>Depuis, ${plural(s.sources, "média")}</b> en ont parlé${lean ? `, ${lean}` : ""}.</li>
+      <li><b>Le plus récent</b> (${esc(agoShort(last.published))}) : « <span data-no-tr>${esc(last.title)}</span> » <small data-no-tr>${esc(last.sourceName)}</small></li>
+    </ol></section>`;
+}
+
+// Matin express : 10 titres, la barre de chacun, et « Écouter » qui les enchaîne. Environ une minute.
+async function openExpress() {
+  openModal(`<div class="modal-pad"><div class="loader">Les 10 titres du matin…</div></div>`, true);
+  const d = await api(`/api/feed?region=${state.region}&page=0&cat=une&lens=essentiel`).catch(() => null);
+  const list = (d?.stories || []).slice(0, 10);
+  const body = $("#modalBody");
+  if (!body) return;
+  if (!list.length) { body.innerHTML = `<div class="modal-pad"><p class="note">Les titres n'ont pas pu se charger.</p></div>`; return; }
+  for (const s of list) state.stories.set(s.id, s);
+  state.expressSpeech = ["Matin express : dix titres.", ...list.map((s, i) => `${i + 1}. ${s.titleFr || s.title}.`), "C'est tout. Bonne journée."];
+  body.innerHTML = `<div class="modal-pad ex-sheet"><div class="kicker">Le matin</div><h2>⚡ Express <small>10 titres, 1 minute</small></h2>
+    <button class="btn ex-listen" type="button" data-listen="express">${'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9Z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>'}<span>Écouter</span></button>
+    <ol class="ex-list">${list.map((s, i) => `<li><span class="ex-n">${i + 1}</span><div><a class="ex-t" ${openAttrs(s)} data-no-tr>${titleOf(s)}</a>${sideStrip(s)}
+      <span class="ex-m">${sourcesLine(s, 1)} · <a class="link" href="${href({ h: s.id })}" data-nav data-close-modal>Comparer ›</a></span></div></li>`).join("")}</ol></div>`;
+}
+document.addEventListener("click", (e) => { if (e.target.closest("[data-express]")) { e.preventDefault(); openExpress(); } });
+
+// Le petit tutoriel des gestes : trois bulles, une seule fois, sur la première nouvelle du fil.
+function coachMarks() {
+  if (store.get("coach") || state.route?.view !== "feed" || $("#modal.open") || !store.get("onboarded")) return;
+  const card = $("#feed .lead.hero, #feed .story");
+  if (!card) return;
+  const steps = [
+    [$(".hero-media h2, h3 a, h2 a", card), "Touche le titre (ou la photo) pour lire l'article."],
+    [$(".c2-cmp", card), "« Comparer » montre ce que la gauche, le centre et la droite en disent."],
+    [$(".src-pick", card), "Touche le nom du média pour en choisir un autre."],
+  ].filter(([el]) => el);
+  if (!steps.length) return;
+  store.set("coach", "1");
+  let i = 0;
+  const o = document.createElement("div");
+  o.className = "coach";
+  document.body.appendChild(o);
+  // La bulle suit l'élément (la page peut encore bouger : images qui arrivent, bandeau qui se range).
+  const place = () => {
+    const [el, txt] = steps[i];
+    const r = el.getBoundingClientRect(), below = r.top < innerHeight / 2;
+    o.innerHTML = `<div class="coach-hole" style="left:${r.left - 8}px;top:${r.top - 6}px;width:${r.width + 16}px;height:${r.height + 12}px"></div>
+      <div class="coach-tip" style="${below ? `top:${r.bottom + 16}px` : `bottom:${innerHeight - r.top + 16}px`}">
+        <p>${esc(txt)}</p><div class="coach-acts"><span>${i + 1} / ${steps.length}</span>
+        <button class="btn" type="button" data-coach>${i < steps.length - 1 ? "Suivant" : "Compris !"}</button></div></div>`;
+  };
+  const show = () => {
+    steps[i][0].scrollIntoView({ block: "center" });
+    setTimeout(place, 350);
+  };
+  const onScroll = () => requestAnimationFrame(() => { if (o.isConnected && o.innerHTML) place(); });
+  addEventListener("scroll", onScroll, { passive: true });
+  o.addEventListener("click", (e) => {
+    e.preventDefault(); e.stopPropagation();
+    if (++i < steps.length) show(); else { o.remove(); removeEventListener("scroll", onScroll); scrollTo({ top: 0, behavior: "smooth" }); }
+  });
+  show();
+}
+
 /* Les rangées qui défilent de côté (rubriques, tendances) : faciles à la souris et au doigt.
    Des flèches ‹ › apparaissent aux bords quand il y a plus à voir ; la molette et le glisser à la souris font défiler. */
 function hScroll(el) {
@@ -3928,6 +4061,14 @@ async function loadMore(key) {
   else { p.set("cat", f.params.cat); p.set("lens", f.params.lens); }
   try {
     const d = await api(`/api/feed?${p}`);
+    // Une faute de frappe corrigée : on cherche le bon mot à la place, et on le dit.
+    if (d.corrected && f.params.q && feedKey(state.route) === key) {
+      f.loading = false;
+      state.feeds.delete(key);
+      toast(`Résultats pour « ${d.corrected} » (au lieu de « ${f.params.q} »)`);
+      go(href({ q: d.corrected }), { replace: true });
+      return;
+    }
     f.page = d.page;
     f.hasMore = d.hasMore;
     if (d.summary) { f.summary = d.summary; f.trending = d.trending; f.total = d.total; f.fresh = d.fresh || 0; f.hero = !!d.hero; f.blind = d.blind || null; if (f.blind) state.stories.set(f.blind.id, f.blind); }
@@ -3965,6 +4106,7 @@ function drawFeed(f) {
     el.dataset.count = String(f.stories.length);
     el.innerHTML = feedRows(f, 0);
     countUp(el);
+    setTimeout(coachMarks, 1500);
     if ($("#rowVille", el)) setTimeout(fillCityRow, 300);
   }
   drawNewPill(f);
@@ -4122,6 +4264,7 @@ async function viewStory(v, route) {
         </header>
         <!-- L'essentiel d'abord : le résumé, deux titres face à face, qui en parle. Le reste se déplie. -->
         ${keyPoints(s)}
+        ${understandCard(s)}
         ${faceToFace(s)}
 
         <section class="sec" id="sxSummary" hidden></section>
@@ -5252,6 +5395,7 @@ async function viewMatin(v) {
     state.matinSpeech = [`${hello}. Voici ton matin Prisme : cinq histoires.`, ...picked.flatMap((s, i) => { const sd = sides(s.counts); return [`${i + 1}. ${s.titleFr || s.title}.`, s.ai?.summary || s.summary || "", `${plural(s.sources, "média")} en parlent : ${sd.left} à gauche, ${sd.center} au centre, ${sd.right} à droite.`]; })];
     $("#matin").innerHTML = `
       <div class="matin-listen">${listenBtn("matin")}<span class="note">Écoute les cinq histoires, environ trois minutes.</span></div>
+      <button class="ex-btn" type="button" data-express><b>⚡ Matin express</b><span>10 titres en 1 minute, à lire ou à écouter</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
       ${reminderCard()}
       <ol class="matin-list">${picked.map((s, i) => `<li>
         <span class="num">${i + 1}</span>

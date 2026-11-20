@@ -237,6 +237,9 @@ const EXACT = {
   "Face à face": "Face to face", "la même nouvelle, deux titres": "same story, two headlines", "À gauche": "On the left", "À droite": "On the right",
   "Le fil de l'histoire": "How the story unfolded", "Aujourd'hui": "Today", "Hier": "Yesterday", "Tout voir →": "See all →",
   "Ensoleillé": "Sunny", "Partiellement nuageux": "Partly cloudy", "Nuageux": "Cloudy", "Brouillard": "Fog", "Bruine": "Drizzle", "Pluie": "Rain", "Neige": "Snow", "Averses": "Showers", "Averses de neige": "Snow showers", "Orages": "Thunderstorms",
+  "Hors ligne · les dernières nouvelles restent lisibles": "Offline · the latest stories are still readable", "Pour comprendre": "Catch up", "en 30 secondes": "in 30 seconds",
+  "Plus de choix": "More options", "Trier le fil": "Sort the feed", "Touche le titre pour lire l'article.": "Tap the headline to read the article.", "Suivant": "Next", "Compris !": "Got it!",
+  "⚡ Matin express": "⚡ Morning express", "10 titres en 1 minute, à lire ou à écouter": "10 headlines in 1 minute, to read or listen to",
   "Les prochaines heures": "Next hours", "Les prochains jours": "Next days", "Maint.": "Now", "Demain": "Tomorrow", "Météo": "Weather",
   "Sous chaque nouvelle, cette barre :":"Under every story, this bar:", "Gauche 4": "Left 4", "Centre 5": "Center 5", "Droite 3": "Right 3", "Quand un côté n'en parle presque pas, c'est un": "When one side barely covers it, it's a",
 };
