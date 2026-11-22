@@ -2246,3 +2246,75 @@ body.shorts-open .modal { z-index: 99; }
 /* Le bouton « Arrêter » flottant de la lecture à voix haute */
 .speak-stop { position: fixed; z-index: 96; left: 50%; transform: translateX(-50%); bottom: calc(78px + env(safe-area-inset-bottom)); display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px 0 14px; border: 0; border-radius: 999px; background: var(--ink); color: var(--paper); font: 600 15px var(--sans); cursor: pointer; box-shadow: 0 10px 30px -8px rgba(0, 0, 0, .6); }
 .speak-stop svg { width: 18px; height: 18px; fill: currentColor; }
+
+/* ================= Utile : payant, opinion, ça vient d'arriver, suivre, alertes, Canadien, dossier ================= */
+/* Étiquettes « Opinion » et « 🔒 Abonnés » */
+.tg { display: inline-flex; align-items: center; gap: 3px; font: 700 10.5px/1 var(--sans); letter-spacing: .04em; text-transform: uppercase; padding: 4px 6px; border-radius: 4px; white-space: nowrap; }
+.tg-op { background: #F2C14E; color: #1B1400; }
+.tg-pay { background: none; border: 1px solid var(--hair); color: var(--ink-3); text-transform: none; letter-spacing: 0; font-weight: 600; }
+.src-pick .lock { margin-left: 4px; font-size: 11px; opacity: .85; }
+.big-in .tg-op { box-shadow: 0 1px 6px rgba(0, 0, 0, .4); }
+
+/* Le bandeau « Ça vient d'arriver » */
+#breaking { display: flex; align-items: stretch; gap: 0; max-width: var(--w); margin: 10px auto 0; padding: 0 var(--gut); }
+.brk-a { flex: 1; min-width: 0; display: grid; gap: 2px; padding: 10px 14px; border-radius: 12px 0 0 12px; background: #E5484D; color: #fff; text-decoration: none; }
+.brk-k { display: inline-flex; align-items: center; gap: 6px; font: 700 10.5px var(--sans); letter-spacing: .1em; text-transform: uppercase; }
+.brk-k::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #fff; animation: live 1.6s ease-out infinite; }
+.brk-a b { font: 700 16.5px/1.25 var(--serif); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.brk-a small { font: 12px var(--sans); opacity: .9; }
+.brk-x { flex: none; width: 42px; border: 0; border-radius: 0 12px 12px 0; background: #C93B40; color: #fff; cursor: pointer; display: grid; place-items: center; }
+.brk-x svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+
+/* La carte « Tes histoires suivies » */
+.fcard { margin: 12px 0 4px; padding: 12px 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--hair); border-left: 5px solid #F2B530; }
+.fcard[hidden] { display: none; }
+.fc-h { font: 700 14px var(--sans); display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.fc-h small { font: 500 12px var(--sans); color: var(--ink-3); }
+.fc-l { list-style: none; margin: 6px 0 0; padding: 0; }
+.fc-l a { display: grid; gap: 2px; padding: 8px 0; border-top: 1px solid var(--hair-2); text-decoration: none; color: var(--ink); font: 600 15.5px/1.3 var(--serif); }
+.fc-plus { font: 700 11px var(--sans); letter-spacing: .05em; text-transform: uppercase; color: #C98A00; }
+:root[data-theme="dark"] .fc-plus, :root[data-theme="oled"] .fc-plus { color: #F2C14E; }
+
+/* Alertes météo et pannes */
+.notices { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; cursor: pointer; }
+.notices[hidden] { display: none; }
+.nt { display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 10px; font: 600 13px/1.25 var(--sans); background: var(--paper-2); color: var(--ink); }
+.nt small { font-weight: 600; opacity: .7; }
+.nt-warning { background: #E5484D; color: #fff; }
+.nt-watch, .nt-advisory { background: #F2C14E; color: #1B1400; }
+.nt-statement { background: var(--paper-2); }
+.nt-out { background: var(--paper-2); }
+.cat-wx.has-alert { border-color: #E5484D; box-shadow: inset 0 0 0 1px #E5484D; }
+.cat-wx.has-alert::after { content: "⚠️"; font-size: 12px; margin-left: 2px; }
+.wx-alerts { display: grid; gap: 8px; margin: 0 0 14px; }
+.wx-alert { border-radius: 12px; padding: 0; overflow: hidden; border: 1px solid var(--hair); background: var(--card); }
+.wx-alert > summary { cursor: pointer; list-style: none; padding: 11px 14px; font: 700 14.5px var(--sans); }
+.wx-alert > summary::-webkit-details-marker { display: none; }
+.wx-alert.nt-warning > summary { background: #E5484D; color: #fff; }
+.wx-alert.nt-watch > summary, .wx-alert.nt-advisory > summary { background: #F2C14E; color: #1B1400; }
+.wx-alert p { margin: 0; padding: 12px 14px; font: 14px/1.5 var(--sans); color: var(--ink-2); }
+.wx-out { margin: 0; padding: 11px 14px; border-radius: 12px; background: var(--paper-2); font: 14px/1.4 var(--sans); color: var(--ink); }
+
+/* Le Canadien */
+.habs { display: flex; align-items: center; gap: 12px; margin: 12px 0; padding: 12px 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--hair); }
+.hb-ico { font-size: 28px; line-height: 1; }
+.hb-in { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
+@media (max-width: 480px) { .hb-in { grid-template-columns: 1fr; } }
+.hb-g { display: grid; gap: 1px; }
+.hb-k { font: 700 10.5px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.hb-g b { font: 700 16px/1.25 var(--sans); }
+.hb-g small { font: 12.5px var(--sans); color: var(--ink-3); }
+
+/* Le dossier de la semaine (page d'un sujet) */
+.dos { margin: 0 0 16px; padding: 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--hair); }
+.dos-h { font: 700 14px var(--sans); display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+.dos-h small { font: 500 12px var(--sans); color: var(--ink-3); }
+.dos-bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; height: 86px; margin: 12px 0 8px; align-items: end; }
+.dos-bars span { display: grid; grid-template-rows: 1fr auto; gap: 4px; height: 100%; align-items: end; justify-items: center; }
+.dos-bars i { width: 100%; min-height: 2px; border-radius: 4px 4px 0 0; background: var(--b-l1); align-self: end; }
+.dos-bars span:last-child i { background: var(--ink); }
+.dos-bars small { font: 11px var(--sans); color: var(--ink-3); text-transform: capitalize; }
+.dos-top { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font: 13px var(--sans); color: var(--ink-3); }
+.dos-top a { display: inline-flex; align-items: center; gap: 5px; color: var(--ink); text-decoration: none; font-weight: 600; }
+.dos-top a b { color: var(--ink-3); font-weight: 600; }
+.dos-top .fav, .dos-top .fav-fallback { width: 16px; height: 16px; border-radius: 50%; font-size: 8.5px; }

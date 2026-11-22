@@ -144,6 +144,56 @@ try {
   log(`logos : ${r.have.length} publiés (${r.fetched} nouveaux sur ${r.tried} essayés)`);
 } catch (e) { log(`logos : ${e.message}`); writeFileSync(join(DATA, "logos.json"), "[]"); }
 
+// 4 c) Utile chez toi : pannes d'Hydro-Québec et résultats du Canadien (données publiques, une lecture par passage).
+// Un échec ici ne doit jamais faire échouer le passage : on publie simplement un fichier vide.
+const getJson = async (url, ms = 10000) => {
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), ms);
+  try { const r = await fetch(url, { signal: ctl.signal, headers: { accept: "application/json" } }); if (!r.ok) throw new Error(`HTTP ${r.status}`); return await r.json(); } finally { clearTimeout(t); }
+};
+try {
+  const v = await getJson("https://pannes.hydroquebec.com/pannes/donnees/v3_0/bisversion.json");
+  const m = await getJson(`https://pannes.hydroquebec.com/pannes/donnees/v3_0/bismarkers${String(v).replace(/[^\d]/g, "")}.json`);
+  // Chaque panne : [clients touchés, début, fin prévue, type, "[longitude, latitude]", …] → [lat, lon, clients]
+  const list = (m.pannes || []).map((p) => { let c = null; try { c = JSON.parse(p[4]); } catch { /* sans position */ } return c && Number(p[0]) > 0 ? [Math.round(c[1] * 1000) / 1000, Math.round(c[0] * 1000) / 1000, Number(p[0])] : null; }).filter(Boolean);
+  writeFileSync(join(DATA, "pannes.json"), JSON.stringify({ at: new Date().toISOString(), total: list.reduce((a, p) => a + p[2], 0), list }));
+  log(`pannes d'Hydro-Québec : ${list.length} pannes, ${list.reduce((a, p) => a + p[2], 0)} clients`);
+} catch (e) { log(`pannes d'Hydro-Québec : ${e.message}`); writeFileSync(join(DATA, "pannes.json"), JSON.stringify({ at: null, total: 0, list: [] })); }
+try {
+  const n = await getJson("https://api-web.nhle.com/v1/scoreboard/MTL/now");
+  const games = (n.gamesByDate || []).flatMap((d) => d.games || []);
+  const team = (t) => ({ a: t?.abbrev || "", n: t?.commonName?.fr || t?.commonName?.default || t?.name?.fr || t?.name?.default || t?.abbrev || "", s: Number.isFinite(t?.score) ? t.score : null });
+  const slim = (g) => (g ? { at: g.startTimeUTC, state: g.gameState, away: team(g.awayTeam), home: team(g.homeTeam), end: g.periodDescriptor?.periodType || "" } : null);
+  const done = games.filter((g) => ["OFF", "FINAL"].includes(g.gameState)), live = games.find((g) => ["LIVE", "CRIT"].includes(g.gameState));
+  const next = games.find((g) => ["FUT", "PRE"].includes(g.gameState));
+  writeFileSync(join(DATA, "habs.json"), JSON.stringify({ at: new Date().toISOString(), last: slim(done[done.length - 1]), live: slim(live), next: slim(next) }));
+  log(`Canadien : dernier match ${done.length ? "trouvé" : "absent"}, prochain ${next ? "trouvé" : "absent"}`);
+} catch (e) { log(`Canadien : ${e.message}`); writeFileSync(join(DATA, "habs.json"), JSON.stringify({ at: null })); }
+
+// 4 d) « Ta semaine » : chaque jour, on retient les 12 histoires les plus couvertes de chaque édition (7 jours gardés).
+try {
+  const WEEKF = join(STATE, "week.json");
+  let week = {};
+  try { week = JSON.parse(readFileSync(WEEKF, "utf8")); } catch { /* première fois */ }
+  const day = new Date().toLocaleDateString("en-CA", { timeZone: "America/Toronto" });
+  const keep = new Date(Date.now() - 7 * 864e5).toLocaleDateString("en-CA", { timeZone: "America/Toronto" });
+  for (const [region, file] of Object.entries(editions)) {
+    const w = (week[region] ||= {});
+    const today = new Map((w[day] || []).map((x) => [x.id, x]));
+    for (const s of [...file.stories].sort((a, b) => (b.sources || 0) - (a.sources || 0)).slice(0, 12)) {
+      const prev = today.get(s.id);
+      if (prev && prev.n >= s.sources) continue;
+      const lead = (s.articles || []).find((a) => a.media?.known) || (s.articles || [])[0];
+      today.set(s.id, { id: s.id, t: s.title, n: s.sources, c: s.counts || {}, img: s.image || null, cat: (s.categories || [])[0] || null, u: lead?.url || null, src: lead?.sourceName || null });
+    }
+    w[day] = [...today.values()].sort((a, b) => b.n - a.n).slice(0, 12);
+    for (const d of Object.keys(w)) if (d < keep) delete w[d];
+    writeFileSync(join(DATA, `week-${region}.json`), JSON.stringify({ builtAt: new Date().toISOString(), days: w }));
+  }
+  writeFileSync(WEEKF, JSON.stringify(week));
+  log(`semaine : ${Object.keys(week.qc || {}).length} jours gardés pour le Québec`);
+} catch (e) { log(`semaine : ${e.message}`); }
+
 // 5) Résumés neutres des grandes histoires (gardés d'une fois à l'autre ; seuls les nouveaux sont écrits).
 mkdirSync(STATE, { recursive: true });
 const SUMS = join(STATE, "summaries.json");
