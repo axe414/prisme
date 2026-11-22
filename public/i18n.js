@@ -243,9 +243,18 @@ const EXACT = {
   "Les prochaines heures": "Next hours", "Les prochains jours": "Next days", "Maint.": "Now", "Demain": "Tomorrow", "Météo": "Weather",
   "Sous chaque nouvelle, cette barre :":"Under every story, this bar:", "Gauche 4": "Left 4", "Centre 5": "Center 5", "Droite 3": "Right 3", "Quand un côté n'en parle presque pas, c'est un": "When one side barely covers it, it's a",
 };
+// Le design « Lumière » : le prisme de chaque nouvelle.
+Object.assign(EXACT, {
+  "Comparer ›": "Compare ›", "Voir ›": "View ›", "Voir l'histoire ›": "View the story ›", "Voir l'histoire": "View the story",
+  "Touche le prisme pour comparer : la gauche, le centre et la droite.": "Tap the prism to compare: left, center and right.",
+  "Touche le titre (ou la photo) pour lire l'article.": "Tap the headline (or the photo) to read the article.",
+  "Ce que tu lis : de gauche, du centre ou de droite ?": "What you read: left, center or right?",
+});
 
 // Textes avec un nombre ou un nom à l'intérieur.
 const PATTERNS = [
+  [/^Comparer les (\d+) médias( ›)?$/, (m, n, a) => `Compare the ${n} outlets${a || ""}`],
+  [/^Médias : gauche (\d+), centre (\d+), droite (\d+)$/, (m, a, b, c) => `Outlets: left ${a}, center ${b}, right ${c}`],
   [/^(\d+) nouvelles cette semaine$/, (m, n) => `${n} stories this week`],
   [/^Voir tout, du plus récent \((\d+) articles?\)$/, (m, n) => `See all, newest first (${n} article${s(n)})`],
   [/^(.+) aujourd'hui$/, (m, x) => `${x} today`],

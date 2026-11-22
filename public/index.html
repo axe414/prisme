@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Prisme</title>
   <meta name="description" content="Prisme lit directement près de 3 000 médias de 70 pays, regroupe leurs articles en histoires et montre qui les couvre, de la gauche à la droite, et qui les possède.">
-  <meta name="theme-color" content="#141414">
+  <meta name="theme-color" content="#060A13">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -43,7 +43,7 @@
   <meta name="apple-mobile-web-app-title" content="Prisme">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script>
     // Démarrage rapide : les nouvelles commencent à se télécharger tout de suite, pendant que le code de l'app se charge
@@ -65,6 +65,9 @@
       if (localStorage.getItem("prisme.themeV") !== "2") { localStorage.setItem("prisme.theme", "dark"); localStorage.setItem("prisme.themeV", "2"); }
       const t = localStorage.getItem("prisme.theme");
       if (t === "auto") document.documentElement.removeAttribute("data-theme"); else if (t) document.documentElement.dataset.theme = t;
+      // « Lumière » : le design bleu nuit s'applique dès que le thème est sombre (classe « lum »).
+      var th = document.documentElement.dataset.theme;
+      document.documentElement.classList.toggle("lum", th === "dark" || (!th && matchMedia("(prefers-color-scheme: dark)").matches));
       // Lecture du soir : de 21 h à 6 h, des couleurs plus chaudes (sauf si on l'a désactivée).
       const h = new Date().getHours();
       if (localStorage.getItem("prisme.soir") !== "0" && (h >= 21 || h < 6)) document.documentElement.classList.add("soir");
@@ -112,6 +115,7 @@
         </a>
         <nav class="mast-links" id="mastLinks" aria-label="Pages"></nav>
         <div class="band-actions">
+          <span class="band-date" id="bandDate"></span>
           <label class="edition-pick" title="Édition">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
             <select id="editionSel" aria-label="Édition"></select>

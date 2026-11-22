@@ -1612,9 +1612,9 @@ body.shorts-open { overflow: hidden; }
 .feed-top .sh-lbl { grid-auto-flow: row; }
 .feed-top .sh-lbl b { font-size: 15.5px; }
 .feed-top .sh-lbl small { font-size: 12.5px; }
-/* « En bref » dans la barre du bas, à côté de « À la une » (6 onglets) */
+/* « En bref » dans la barre du bas, à côté de « À la une » (5 onglets : « Mon prisme » est dans « Plus ») */
 @media (max-width: 760px), (max-width: 1100px) and (pointer: coarse) {
-  .tabbar { grid-template-columns: repeat(6, 1fr) !important; }
+  .tabbar { grid-template-columns: repeat(5, 1fr) !important; }
 }
 @media (max-width: 760px) {
   .tabbar a, .tabbar button { font-size: 10px; letter-spacing: -.01em; white-space: nowrap; }
@@ -2362,3 +2362,203 @@ body.shorts-open .modal { z-index: 99; }
 :root[data-theme="light"] { --ink-3: #686560; }
 @media (prefers-color-scheme: light) { :root:not([data-theme]) { --ink-3: #686560; } }
 @media (pointer: coarse) { .search input { min-height: 40px; } }
+
+/* ================= Prisme Lumière : le faisceau, les nouvelles cartes, et le thème bleu nuit ================= */
+/* --- 1. Pour tous les thèmes : le faisceau et les cartes --- */
+:root { --fx-w: var(--ink); --fx-v: #9FD8FF; --alerte: #E5243B; --marque: "Playfair Display", "Didot", "Bodoni MT", Georgia, serif; }
+svg.fx { display: block; width: 100%; height: auto; overflow: visible; }
+.fx-counts { font: 500 12.5px var(--sans); color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fx-counts b { color: var(--ink); font-weight: 600; }
+.band-date { display: none; }
+
+/* Une nouvelle du fil : le titre et sa source à gauche ; à droite, son prisme, qu'on touche pour comparer */
+.story.c3, .story.c3.noimg { display: grid; grid-template-columns: minmax(0, 1fr) 118px; gap: 16px; align-items: center; padding: 17px 0; border-bottom: 1px solid var(--hair); }
+.story.c3 > .c3-body { display: block; min-width: 0; }
+.story.c3 > .c3-body > .c2-k { margin: 0 0 6px; }
+.story.c3 > .c3-body > h3 { grid-column: auto; grid-row: auto; margin: 0 0 7px; font: 700 21px/1.17 var(--serif); letter-spacing: -.005em; text-wrap: pretty; }
+.story.c3 > .c3-body > h3 a { text-decoration: none; color: inherit; }
+.story.c3 > .c3-body > .c2-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 6px; margin: 0; }
+.story.c3 .src-pick { min-width: 0; max-width: calc(100% - 54px); }
+/* Le nom du média tient sur une ligne ; « +9 » garde son espace */
+.src-pick { gap: 0 4px; }
+.src-pick .lstack { margin-right: 3px; }
+.src-pick > span[data-no-tr] { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.feed-top .fresh { flex-wrap: nowrap; min-width: 0; }
+.c3-cmp { display: grid; gap: 3px; justify-items: end; align-content: center; min-height: 64px; text-decoration: none; color: var(--ink-3); font: 600 11.5px var(--sans); border-radius: 12px; }
+.c3-cmp > span { padding: 4px 9px; border-radius: 999px; background: var(--hair-2); color: var(--ink); white-space: nowrap; }
+.c3-cmp:hover > span { background: var(--hair); }
+.c3-cmp:active { transform: scale(.97); }
+.story.c3.is-seen .c3-cmp { opacity: .7; }
+@media (max-width: 760px) {
+  .story.c3, .story.c3.noimg { grid-template-columns: minmax(0, 1fr) 104px; gap: 10px; padding: 14px 0; }
+  .story.c3 > .c3-body > h3 { font-size: 18.5px; margin-top: 0; }
+  /* Un seul logo par ligne sur téléphone : le nom du média garde sa place */
+  .story.c3 .lstack > :nth-child(n+2) { display: none; }
+  .story.c3 .src-pick { max-width: calc(100% - 48px); }
+}
+
+/* La une : la photo se fond dans le fond, sans cadre ; le titre, le grand faisceau, le compte de chaque côté */
+.lead.hero2 { display: block; position: relative; padding: 0 0 20px; border-bottom: 1px solid var(--hair); }
+.hero2-photo { display: block; position: relative; height: clamp(200px, 30vw, 400px); margin: 0 0 -76px; overflow: hidden; border-radius: 18px 18px 0 0; background: var(--paper-2); }
+.hero2-photo img { width: 100%; height: 100%; object-fit: cover; }
+.hero2-photo::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to bottom, transparent 42%, color-mix(in srgb, var(--paper) 70%, transparent) 76%, var(--paper) 97%); }
+.hero2-txt { position: relative; display: grid; gap: 10px; justify-items: start; }
+.hero2-txt > * { min-width: 0; max-width: 100%; }
+.hero2-txt > .c2-k { margin: 0; }
+.lead.hero2 h2 { margin: 0; font: 700 clamp(26px, 3.4vw, 42px)/1.08 var(--serif); letter-spacing: -.012em; text-wrap: balance; }
+.lead.hero2 h2 a { text-decoration: none; color: inherit; }
+.hero2-fx { display: block; justify-self: stretch; width: 100%; max-width: 540px; margin: 2px 0 -6px; border-radius: 12px; }
+.hero2-meta { justify-self: stretch; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font: 13px/1.4 var(--sans); color: var(--ink-3); }
+.hero2-meta .fx-counts { margin-left: auto; }
+.lead.hero2 .dek { margin: 0; font: 400 16.5px/1.5 var(--serif); color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.hero2-cmp { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 999px; background: var(--hair-2); box-shadow: inset 0 0 0 1px var(--hair); color: var(--ink); font: 600 13.5px var(--sans); text-decoration: none; }
+.hero2-cmp:hover { background: var(--hair); }
+.hero2-cmp:active { transform: scale(.97); }
+.lead.hero2.is-seen .hero2-photo img { opacity: .65; filter: saturate(.5); }
+/* La une sans photo : une carte, pour qu'elle reste « la une » */
+.lead.hero2.noimg { margin: 14px 0 6px; padding: 20px 18px 16px; border-radius: 22px; border-bottom: 0; background: linear-gradient(160deg, var(--card), var(--paper-2)); box-shadow: inset 0 0 0 1px var(--hair); }
+@media (max-width: 760px) {
+  .hero2-photo { height: clamp(190px, 54vw, 300px); margin: 0 calc(-1 * var(--gut)) -62px; border-radius: 0; }
+  .lead.hero2 h2 { font-size: clamp(25px, 6.9vw, 31px); }
+  .lead.hero2 { padding-bottom: 16px; }
+}
+/* Téléphone : les tendances ne collent plus au bord gauche de l'écran */
+@media (max-width: 760px) { .topics { padding-left: var(--gut); padding-right: var(--gut); } }
+/* La page d'une histoire : le grand faisceau, puis les trois côtés sur une ligne (sans filets) */
+.s-fx { max-width: 580px; margin: 6px 0 4px; }
+.s-who .s-cov > div { border: 0 !important; padding: 0 !important; }
+/* La lumière se déploie à l'ouverture (la une et la page d'une histoire) */
+@media (prefers-reduced-motion: no-preference) {
+  .hero2-fx .fx-in, .s-fx .fx-in { transform-box: fill-box; transform-origin: left center; animation: fx-file .5s ease-out both; }
+  .hero2-fx .fx-out, .s-fx .fx-out { transform-box: fill-box; transform-origin: left center; animation: fx-file 1s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i) * 110ms + 380ms); }
+  .hero2-fx .fx-verre, .s-fx .fx-verre { animation: fx-luit .9s ease-out both .25s; }
+  @keyframes fx-file { from { transform: scaleX(0); opacity: 0; } to { transform: scaleX(1); opacity: 1; } }
+  @keyframes fx-luit { from { opacity: .25; } 60% { opacity: 1; } to { opacity: 1; } }
+}
+
+/* --- 2. Le thème « Lumière » (classe lum : thème sombre, ou automatique quand le téléphone est en sombre) --- */
+:root.lum.lum {
+  --paper: #060A13; --paper-2: #0C1220; --card: #0E1524; --ink: #F5F2EA; --ink-2: #C9CFDB; --ink-3: #A0A8B8;
+  --rule: #ffffff2b; --hair: #ffffff1c; --hair-2: #ffffff12; --focus: #7FD6EC;
+  --b-l2: #2FC0E0; --b-l1: #86D8E8; --b-c: #F6F0DE; --b-r1: #FFA277; --b-r2: #FF7340; --b-unk: #2A3347;
+  --fx-w: #fff; --verre: #121A2Bcc; --spectre: linear-gradient(90deg, #2FC0E0, #F6F0DE, #FF7340);
+  color-scheme: dark;
+}
+:root.lum body { background: radial-gradient(120% 460px at 50% 0, #0E1830 0, transparent 70%) no-repeat, var(--paper); }
+/* Le texte foncé sur les couleurs vives du spectre (le blanc n'y était plus lisible) */
+:root.lum .bb-l2, :root.lum .bb-r2, :root.lum .bigbar .seg.l, :root.lum .bigbar .seg.r, :root.lum .chip .new, :root.lum .tabbar .dot, :root.lum .ck-blind, :root.lum #feed .story.swiping.armed[data-dir="r"]::before { color: #06101A; }
+:root.lum body.is-offline #topbar::after { color: #06101A; }
+
+/* La manchette : PRISME, la date, sur un fond transparent qui devient du verre en défilant */
+:root.lum .topbar::before { content: ""; position: absolute; inset: 0; z-index: -1; background: color-mix(in srgb, var(--paper) 78%, transparent); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%); }
+:root.lum .band { position: relative; overflow: hidden; background: transparent; border-bottom: 0; color: var(--ink); }
+:root.lum .band::before, :root.lum .band::after { content: ""; position: absolute; z-index: 0; width: 150px; height: 2px; top: calc(env(safe-area-inset-top, 0px) + 22px); filter: blur(1.2px); pointer-events: none; background: linear-gradient(90deg, transparent, #2FC0E0, #F6F0DE, #FF7340, transparent); opacity: .7; }
+:root.lum .band::before { left: -52px; transform: rotate(-38deg); }
+:root.lum .band::after { right: -52px; transform: rotate(38deg); }
+:root.lum .band-row { position: relative; z-index: 1; }
+:root.lum .mast .spectrum { display: none; }
+:root.lum .logo-word { font: 800 28px/1 var(--marque); letter-spacing: .05em; text-transform: uppercase; font-variation-settings: normal; }
+:root.lum .topbar.compact .logo-word { font-size: 23px; }
+:root.lum .logo-mark .beam, :root.lum .logo-mark .tri { stroke: var(--ink); }
+:root.lum .band-date { display: block; font: 500 11.5px/1.3 var(--sans); color: var(--ink-3); white-space: nowrap; margin-right: 6px; }
+:root.lum .band-date::first-letter { text-transform: uppercase; }
+:root.lum .edition-pick, :root.lum .lang-btn { border-color: var(--hair); border-radius: 10px; }
+:root.lum .icon-btn { border-radius: 50%; }
+:root.lum .sections { background: transparent; border-bottom: 1px solid var(--hair); }
+:root.lum .topbar.compact .sections, :root.lum .topbar.tucked .sections { box-shadow: none; }
+
+/* Les rubriques : du texte, et un trait de lumière sous celle où on est */
+:root.lum .cats { gap: 4px; }
+:root.lum .cats a { position: relative; display: inline-flex; align-items: center; border: 0 !important; border-radius: 0 !important; background: none !important; color: var(--ink-3) !important; font: 500 14.5px var(--sans); padding: 9px 9px 13px !important; }
+:root.lum .cats a:hover { color: var(--ink) !important; }
+:root.lum .cats a::before { display: none !important; }
+:root.lum .cats a .ce, :root.lum .cats .sep { display: none; }
+:root.lum .cats a[aria-current="page"], :root.lum .cats .cat-ville.on { color: var(--ink) !important; font-weight: 600; }
+:root.lum .cats a[aria-current="page"]::after { content: ""; position: absolute; left: 9px; right: 9px; bottom: 4px; height: 2px; border-radius: 2px; background: var(--spectre); box-shadow: 0 0 10px 1px #ffb07a88; }
+:root.lum .cat-wx { border: 0; background: none; padding: 0 6px 4px; margin-left: 0; color: var(--ink-2); font-weight: 500; }
+:root.lum .cat-wx.has-alert { box-shadow: none; color: #FF8A8F; }
+@media (max-width: 760px) {
+  :root.lum .cats { gap: 6px; padding: 0 var(--gut); }
+  :root.lum .cats a:first-child { padding-left: 0 !important; }
+  :root.lum .cats a:first-child[aria-current="page"]::after { left: 0; }
+  /* Le bandeau du téléphone : PRISME à gauche ; à droite la date, l'édition dessous, et la loupe */
+  :root.lum .band-row { min-height: 58px; }
+  :root.lum .logo-mark { display: none; }
+  :root.lum .logo-word { font-size: 29px; }
+  :root.lum .topbar.compact .logo-word { font-size: 24px; }
+  :root.lum #prefsBtn, :root.lum #langBtn { display: none; }
+  :root.lum .band-actions { display: grid; grid-template-columns: minmax(0, auto) auto; justify-content: end; align-items: center; gap: 0 2px; }
+  :root.lum .band-date { grid-area: 1 / 1; align-self: start; margin: 4px 0 0; pointer-events: none; font-size: 11px; }
+  :root.lum .edition-pick { grid-area: 1 / 1; height: 42px; padding: 0; border: 0; }
+  :root.lum .edition-pick svg { display: none; }
+  :root.lum .edition-pick { justify-self: start; }
+  :root.lum .edition-pick select { field-sizing: content; width: auto; height: 42px; min-height: 42px; max-width: 150px; padding: 18px 13px 0 0; font: 500 11px var(--sans); color: var(--ink-3); }
+  :root.lum .edition-pick::after { top: 27px; right: 1px; width: 4px; height: 4px; opacity: .8; }
+  :root.lum .search-btn { grid-area: 1 / 2; display: grid !important; color: var(--ink); }
+  /* La recherche se déplie quand on touche la loupe */
+  :root.lum .topbar:not(.searching) .search { display: none; }
+  :root.lum .sections-in { min-height: 0; }
+}
+
+/* Le fil : la une d'abord, puis « À jour · Trier » et les tendances, puis les nouvelles */
+:root.lum #view > .folio:has(+ .lensbar) { display: none; }
+:root.lum .main-col:has(> #feed) { display: flex; flex-direction: column; }
+:root.lum .main-col:has(> #feed) > * { flex: none; }
+:root.lum #feed { display: contents; }
+:root.lum #feed > .hero2, :root.lum #feed > .sk-hero { order: -1; }
+:root.lum .main-col > .new-pill { order: -2; }
+:root.lum .layout:has(#feed) { padding-top: 0; }
+:root.lum .folio { border-bottom: 1px solid var(--hair); }
+:root.lum .lead.hero2 { border-bottom: 0; padding-bottom: 8px; }
+@media (min-width: 761px) { :root.lum .lead.hero2 { margin-top: 18px; } :root.lum .layout:has(#feed) > .rail { margin-top: 18px; } }
+:root.lum .lead.hero2.noimg { background: linear-gradient(160deg, #101B33, #0A1020); }
+:root.lum .hero2-photo { background: #0A1020; }
+/* « En direct » : une étiquette rouge */
+:root.lum .ck-live { padding: 4px 8px; border-radius: 3px; background: var(--alerte); color: #fff; font-weight: 600; }
+:root.lum .ck-live::before { width: 6px; height: 6px; background: #fff; animation-name: live-b; }
+@keyframes live-b { 0% { box-shadow: 0 0 0 0 #ffffffaa; } 70% { box-shadow: 0 0 0 6px #ffffff00; } 100% { box-shadow: 0 0 0 0 #ffffff00; } }
+/* La rubrique d'une carte : discrète (la couleur est réservée à la lumière) */
+:root.lum .ck { color: var(--ink-3); font-weight: 600; }
+:root.lum .fresh { font-family: var(--sans); letter-spacing: 0; font-size: 12px; }
+:root.lum .sort-btn { border-color: var(--hair); background: var(--hair-2); }
+
+/* Les formes : plus rien de carré */
+:root.lum .btn { border-radius: 12px; }
+:root.lum .chip { border-radius: 999px; border-color: var(--hair); }
+:root.lum .search input { border-radius: 12px; background: var(--hair-2); }
+:root.lum .suggest { border-radius: 14px; border-color: var(--hair); background: #0B111E; }
+:root.lum .toast { border-radius: 14px; }
+:root.lum .howto, :root.lum .city-bar, :root.lum .callout, :root.lum .q-fix, :root.lum .install-hint, :root.lum .s-key, :root.lum .words { border-radius: 12px; }
+:root.lum .act { border-radius: 10px; }
+:root.lum .bigbar { border-radius: 8px; overflow: hidden; }
+:root.lum .lang, :root.lum .bb { border-radius: 4px; }
+:root.lum .modal-box { background: #0B111E; border-color: var(--hair); box-shadow: 0 30px 80px -30px #000; }
+@media (min-width: 761px) { :root.lum .modal-box { border-radius: 20px; } }
+:root.lum .drawer-panel { background: #0B111E; }
+:root.lum .modal-close { background: #172033 !important; }
+/* Les listes des fenêtres (« Plus », « Explorer ») : un seul bloc arrondi */
+:root.lum .sheet-list { padding: 0 14px; border-radius: 16px; background: var(--card); box-shadow: inset 0 0 0 1px var(--hair-2); }
+:root.lum .sheet-list > li:last-child > a, :root.lum .sheet-list > li:last-child > button { border-bottom: 0; }
+:root.lum .sheet-list a, :root.lum .sheet-list button { border-bottom-color: var(--hair-2); }
+
+/* La barre du bas : du verre qui flotte, des icônes fines, le trait de lumière */
+:root.lum .tabbar [aria-current="page"]::before { background: var(--spectre); box-shadow: 0 0 10px 1px #ffb07a88; }
+@media (max-width: 1100px) and (pointer: coarse), (max-width: 760px) {
+  :root.lum .tabbar { background: var(--verre) !important; border-top-color: var(--hair); -webkit-backdrop-filter: blur(20px) saturate(170%); backdrop-filter: blur(20px) saturate(170%); }
+  :root.lum .tabbar a, :root.lum .tabbar button { font-weight: 500; color: var(--ink-3); }
+  :root.lum .tabbar svg { stroke-width: 1.6; }
+  :root.lum .tabbar [aria-current="page"] { color: var(--ink); font-weight: 600; }
+  :root.lum .tabbar [aria-current="page"] svg { fill: none; stroke-width: 1.8; }
+}
+@media (max-width: 760px) {
+  :root.lum .tabbar { left: 12px; right: 12px; bottom: max(10px, calc(env(safe-area-inset-bottom) - 6px)); padding: 0 4px; border-top: 0; border-radius: 26px; box-shadow: inset 0 0 0 1px #ffffff1f, inset 0 1px 0 #ffffff30, 0 18px 40px -18px #000; }
+  :root.lum .tabbar a, :root.lum .tabbar button { height: 58px; font-size: 10.5px; }
+  :root.lum .tabbar svg { width: 21px; height: 21px; }
+  :root.lum .tabbar [aria-current="page"]::before { top: auto; bottom: 5px; left: 30%; right: 30%; height: 2px; border-radius: 2px; }
+  :root.lum .tabbar .dot { top: 6px; }
+  :root.lum body { padding-bottom: calc(82px + env(safe-area-inset-bottom)); }
+  :root.lum .toast { bottom: calc(90px + env(safe-area-inset-bottom)); }
+  :root.lum body:not(.panel-open) .s-readbar { bottom: calc(82px + env(safe-area-inset-bottom)); }
+  :root.lum .speak-stop { bottom: calc(92px + env(safe-area-inset-bottom)); }
+}
+:root.lum .s-readbar { background: var(--verre); border-color: var(--hair); }

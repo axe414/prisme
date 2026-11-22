@@ -120,10 +120,11 @@ document.addEventListener("error", (e) => {
     img.replaceWith(span);
   } else if (img.classList.contains("glow")) {
     img.remove();
-  } else if (img.closest(".big-media")) {
-    // Grande carte sans photo valide : on la remplace par une carte normale.
-    const card = img.closest(".story.big"), s = card && state.stories.get(cardId(card));
-    if (s) { s.image = null; card.outerHTML = storyRow(s); } else img.remove();
+  } else if (img.closest(".hero2-photo")) {
+    // La photo de la une ne charge pas : la une passe en version sans photo.
+    const a = img.closest(".hero2-photo");
+    a.closest(".hero2")?.classList.add("noimg");
+    a.remove();
   } else if (img.closest(".c2-img, .hero-media, .mini-img")) {
     // Photo cassée : la carte garde sa place, avec la couleur de sa rubrique et le logo du média.
     img.closest(".c2-img, .hero-media, .mini-img").classList.add("ph");
@@ -871,6 +872,7 @@ function renderChrome(route) {
   // Ordinateur : « En bref » est un vrai bouton dans le bandeau, à côté des pages (au téléphone, il est dans la barre du bas).
   const dayLabel = (v, l) => (v === "matin" && new Date().getHours() >= 15 ? "Ta journée" : l);
   $("#mastLinks").innerHTML = `<button type="button" class="mast-bref" id="mastBref" title="Une nouvelle par écran"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="3"/><path d="m10.5 9.5 4 2.5-4 2.5Z"/></svg>En bref</button>` + PAGES.map(([v, l]) => `<a href="${href({ v })}" data-nav ${page === v ? 'aria-current="page"' : ""}>${dayLabel(v, l)}</a>`).join("") + `<button type="button" class="mast-more" data-explore ${["proprietaires", "quiz", "comparer"].includes(page) ? 'aria-current="page"' : ""}>Explorer</button>`;
+  $("#bandDate").textContent = new Date().toLocaleDateString(LOCALE, { weekday: "long", day: "numeric", month: "long" });
   $("#editionSel").innerHTML = REGIONS.map(([v, l]) => `<option value="${v}" ${v === state.region ? "selected" : ""}>${l}</option>`).join("");
   // « Ma ville » juste après « À la une » : visible tout de suite, sans glisser la barre.
   const catLink = ([v, l]) => `<a class="cc-${v}" href="${href({ cat: v, lens: route.view === "feed" ? route.lens : undefined })}" data-nav ${route.view === "feed" && route.cat === v ? 'aria-current="page"' : ""}>${CAT_EMOJI[v] ? `<span class="ce" aria-hidden="true">${CAT_EMOJI[v]}</span>` : ""}${l}</a>`;
@@ -887,8 +889,7 @@ function renderChrome(route) {
     <button type="button" id="enBrefTab">${svg("bref")}En bref</button>
     <a href="${href({ v: "matin" })}" data-nav ${page === "matin" ? 'aria-current="page"' : ""}>${svg("matin")}${new Date().getHours() >= 15 ? "Ta journée" : "Le matin"}</a>
     <a href="${href({ v: "videos" })}" data-nav ${page === "videos" ? 'aria-current="page"' : ""}>${svg("videos")}Vidéos</a>
-    <a href="${href({ v: "moi" })}" data-nav ${page === "moi" ? 'aria-current="page"' : ""}>${svg("moi")}Mon prisme</a>
-    <button type="button" id="moreBtnTab" ${["proprietaires", "quiz", "favoris", "comparer", "villes"].includes(page) ? 'aria-current="page"' : ""}>${svg("plus")}Plus</button>`;
+    <button type="button" id="moreBtnTab" ${["proprietaires", "quiz", "favoris", "comparer", "villes", "moi"].includes(page) ? 'aria-current="page"' : ""}>${svg("plus")}Plus</button>`;
   $("#moreBtnTab").onclick = openMoreSheet;
   drawCatWx();
   $("#enBrefTab").onclick = openEnBref;
@@ -934,6 +935,7 @@ function openMoreSheet() {
     <ul class="sheet-list">
       <li><button type="button" data-open-settings>${svg("reglages")}<span>Réglages<small>Taille du texte, langue, thème, ta ville, ce qui t'intéresse.</small></span></button></li>
       <li><a href="${href({ v: "favoris" })}" data-nav data-close-modal>${svg("favoris")}<span>Mes favoris<small>Les histoires suivies, les articles enregistrés, « À lire ».</small></span></a></li>
+      <li><a href="${href({ v: "moi" })}" data-nav data-close-modal>${svg("moi")}<span>Mon prisme<small>Ce que tu lis : de gauche, du centre ou de droite ?</small></span></a></li>
       <li><a href="${href({ v: "villes" })}" data-nav data-close-modal>${svg("ville")}<span>Nouvelles par ville<small>Toutes les municipalités du Québec et les villes du Canada.</small></span></a></li>
       <li><button type="button" data-explore>${svg("proprietaires")}<span>Explorer<small>Qui possède quoi, comparer deux médias, devine le média, comment Prisme choisit.</small></span></button></li>
       <li><button type="button" data-report>${svg("about")}<span>Signaler un problème<small>Quelque chose ne marche pas ? Dis-le en un toucher.</small></span></button></li>
@@ -1387,55 +1389,69 @@ function cardImg(s, cat, cls = "c2-img") {
   return `<a class="${cls} cc-${c}${s.image ? "" : " ph"}" ${openAttrs(s)} tabindex="-1" aria-hidden="true">${s.image ? `<img src="${esc(safeUrl(s.image))}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ""}<span class="ph-logo">${a ? favicon(a.domain, a.sourceName) : ""}</span></a>`;
 }
 
+/* ---------- Le faisceau : la signature de Prisme ----------
+   Un rayon blanc entre dans un prisme de verre et ressort en trois traînées de lumière : gauche, centre, droite.
+   La demi-épaisseur de chaque traînée suit le nombre de médias de ce côté ; un côté absent reste presque éteint.
+   Trois tailles : « mini » (une ligne du fil), normale (la une), « grand » (la page d'une histoire). */
+let fxN = 0;
+function beam(s, size = "") {
+  const sd = sides(s.counts || {});
+  const g = sd.left, c = sd.center, d = sd.right;
+  const mini = size === "mini", grand = size === "grand", id = `fx${++fxN}`;
+  const W = mini ? 104 : 300, H = mini ? 46 : grand ? 92 : 70, mid = H / 2, max = Math.max(g, c, d, 1);
+  const px = mini ? 30 : 74, t = mini ? 13 : grand ? 26 : 21;
+  const ex = px + t * 0.42, ecart = mini ? 9 : grand ? 22 : 16;
+  const demi = (k) => (k ? (mini ? 0.9 : 1.2) + (mini ? 4.2 : grand ? 9.5 : 7) * (k / max) : 0.35);
+  const rows = [[g, mid - ecart, "var(--b-l2)", 1], [c, mid, "var(--b-c)", 2], [d, mid + ecart, "var(--b-r2)", 3]];
+  const grad = rows.map(([k, , col, i]) => `<linearGradient id="${id}r${i}" gradientUnits="userSpaceOnUse" x1="${ex}" y1="0" x2="${W}" y2="0"><stop offset="0" style="stop-color:var(--fx-w)" stop-opacity="${k ? 0.95 : 0.25}"/><stop offset=".14" style="stop-color:${col}" stop-opacity="${k ? 1 : 0.3}"/><stop offset=".72" style="stop-color:${col}" stop-opacity="${k ? 0.55 : 0.12}"/><stop offset="1" style="stop-color:${col}" stop-opacity="0"/></linearGradient>`).join("");
+  const wedge = (y, w) => `M${ex} ${mid} L${W} ${(y - w).toFixed(1)} L${W} ${(y + w).toFixed(1)} Z`;
+  // Le halo (flou) seulement sur la une et la page d'une histoire : le fil reste léger à faire défiler.
+  const rays = rows.map(([k, y, , i]) => `<g class="fx-out" style="--i:${i}">${k && !mini ? `<path class="fx-halo" d="${wedge(y, demi(k) * 2.4)}" fill="url(#${id}r${i})" filter="url(#${id}b)" opacity=".75"/>` : ""}<path d="${wedge(y, demi(k))}" fill="url(#${id}r${i})"/></g>`).join("");
+  const y0 = (mid + (mini ? 1.5 : 3)).toFixed(1), x1 = (px - t * 0.3).toFixed(1);
+  return `<svg class="fx${mini ? " fx-mini" : grand ? " fx-grand" : ""}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Médias : gauche ${g}, centre ${c}, droite ${d}">
+    <defs>${grad}
+      <linearGradient id="${id}in" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--fx-w)" stop-opacity="0"/><stop offset="1" style="stop-color:var(--fx-w)"/></linearGradient>
+      <linearGradient id="${id}v" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--fx-w)" stop-opacity=".42"/><stop offset=".5" style="stop-color:var(--fx-v)" stop-opacity=".14"/><stop offset="1" style="stop-color:var(--fx-w)" stop-opacity=".05"/></linearGradient>
+      ${mini ? "" : `<filter id="${id}b" x="-10%" y="-200%" width="120%" height="500%"><feGaussianBlur stdDeviation="3.2"/></filter>`}
+    </defs>
+    <g class="fx-in">${mini ? "" : `<path d="M0 ${y0} L${x1} ${mid}" stroke="url(#${id}in)" stroke-width="5" filter="url(#${id}b)" opacity=".8"/>`}<path d="M0 ${y0} L${x1} ${mid}" stroke="url(#${id}in)" stroke-width="${mini ? 1 : 1.5}" stroke-linecap="round"/></g>
+    ${rays}
+    <g class="fx-verre"><path d="M${px - t} ${(mid + t * 0.85).toFixed(1)} L${px} ${(mid - t * 0.95).toFixed(1)} L${px + t} ${(mid + t * 0.85).toFixed(1)} Z" fill="url(#${id}v)" style="stroke:var(--fx-w)" stroke-opacity=".9" stroke-width="${mini ? 0.9 : 1.2}" stroke-linejoin="round"/>
+      <path d="M${px} ${(mid - t * 0.95).toFixed(1)} L${(px + t * 0.28).toFixed(1)} ${(mid + t * 0.85).toFixed(1)}" style="stroke:var(--fx-w)" stroke-opacity=".35" stroke-width="${mini ? 0.6 : 0.8}"/>
+      <path d="M${(px - t * 0.62).toFixed(1)} ${(mid + t * 0.62).toFixed(1)} L${(px - t * 0.12).toFixed(1)} ${(mid - t * 0.4).toFixed(1)}" style="stroke:var(--fx-w)" stroke-opacity=".7" stroke-width="${mini ? 0.8 : 1.3}" stroke-linecap="round"/></g>
+  </svg>`;
+}
+// « Gauche 4 · Centre 6 · Droite 3 »
+const sideCounts = (s) => { const sd = sides(s.counts || {}); return `<span class="fx-counts">Gauche <b>${sd.left}</b> · Centre <b>${sd.center}</b> · Droite <b>${sd.right}</b></span>`; };
+
+// Une nouvelle du fil : le titre et sa source à gauche ; à droite, son prisme, qu'on touche pour comparer.
 function storyRow(s, cat) {
   const st = seenState(s);
-  return `<article class="story c2${st?.seen ? " is-seen" : ""}">
-    <div class="c2-body">
+  const n = s.sources || 1;
+  return `<article class="story c3${st?.seen ? " is-seen" : ""}">
+    <div class="c3-body">
       ${kickerLine(s, cat)}
       <h3 data-no-tr><a ${openAttrs(s)}>${titleOf(s)}</a></h3>
-      ${sideStrip(s)}
       ${metaLine(s, st)}
     </div>
-    ${cardImg(s, cat)}
-    ${cmpRow(s)}
+    <a class="c3-cmp" href="${href({ h: s.id })}" data-nav aria-label="${n > 1 ? `Comparer les ${n} médias` : "Voir l'histoire"}">${beam(s, "mini")}<span>${n > 1 ? "Comparer" : "Voir"} ›</span></a>
   </article>`;
 }
-// La une : la photo pleine largeur, le titre par-dessus, et pourquoi elle est là (le nombre de médias).
+// La une : la photo se fond dans la nuit, sans cadre ; le titre, puis le grand faisceau et le compte de chaque côté.
 function heroStory(s, cat) {
-  const link = href({ h: s.id });
   const st = seenState(s);
-  const h = new Date().getHours();
-  const when = h >= 5 && h < 11 ? "La une de ce matin" : h >= 18 ? "La une de ce soir" : "La une";
-  const sd = sides(s.counts || {});
-  const all3 = sd.left && sd.center && sd.right;
+  const n = s.sources || 1;
   const dek = s.ai?.summary || s.summary || "";
-  return `<article class="lead hero${st?.seen ? " is-seen" : ""}">
-    ${s.image ? `<img class="glow" src="${esc(safeUrl(s.image))}" alt="" aria-hidden="true" referrerpolicy="no-referrer">` : ""}
-    <a class="hero-media${s.image ? "" : ` ph cc-${catOf(s, cat) || "une"}`}" ${openAttrs(s)}>
-      ${s.image ? `<img src="${esc(safeUrl(s.image))}" alt="" referrerpolicy="no-referrer" fetchpriority="high">` : ""}
-      <span class="hero-in">
-        <span class="hero-k">${when}</span>${isLive(s) ? `<span class="hero-live">En direct</span>` : ""}
-        <h2 data-no-tr>${titleOf(s)}</h2>
-      </span>
-    </a>
-    <div class="hero-why"><b><span data-count="${s.sources}">${s.sources}</span> ${s.sources > 1 ? "médias en parlent" : "média en parle"}</b><span>${all3 ? "La gauche, le centre et la droite" : "L'histoire la plus couverte"} · ${esc(ago(s.lastSeen || s.firstSeen))}</span></div>
-    ${sideStrip(s)}
-    ${dek ? `<p class="dek" data-no-tr>${esc(dek)}</p>` : ""}
-    <p class="c2-meta">${newTag(s)}${srcPick(s, 2, 5)}${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}</p>
-    ${cmpRow(s)}
-  </article>`;
-}
-// Les grandes cartes du haut du fil (places 2 à 5) : la photo en large, le titre en blanc par-dessus.
-function bigCard(s, cat) {
-  const st = seenState(s);
-  return `<article class="story big${st?.seen ? " is-seen" : ""}">
-    <div class="big-box">
-      <a class="big-media" ${openAttrs(s)} tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(s.image))}" alt="" loading="lazy" referrerpolicy="no-referrer"></a>
-      <div class="big-in">${kickerLine(s, cat)}<h3 data-no-tr><a ${openAttrs(s)}>${titleOf(s)}</a></h3></div>
+  return `<article class="lead hero2${s.image ? "" : " noimg"}${st?.seen ? " is-seen" : ""}">
+    ${s.image ? `<a class="hero2-photo" ${openAttrs(s)} tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(s.image))}" alt="" referrerpolicy="no-referrer" fetchpriority="high"></a>` : ""}
+    <div class="hero2-txt">
+      ${kickerLine(s, cat)}
+      <h2 data-no-tr><a ${openAttrs(s)}>${titleOf(s)}</a></h2>
+      <a class="hero2-fx" href="${href({ h: s.id })}" data-nav aria-label="${n > 1 ? `Comparer les ${n} médias` : "Voir l'histoire"}">${beam(s)}</a>
+      <div class="hero2-meta">${newTag(s)}${srcPick(s, 1, 3)}${st?.fresh ? `<b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}${sideCounts(s)}</div>
+      ${dek ? `<p class="dek" data-no-tr>${esc(dek)}</p>` : ""}
+      <a class="hero2-cmp" href="${href({ h: s.id })}" data-nav>${n > 1 ? `Comparer les ${n} médias` : "Voir l'histoire"} ›</a>
     </div>
-    ${sideStrip(s)}
-    ${metaLine(s, st)}
-    ${cmpRow(s)}
   </article>`;
 }
 // Une carte « Angle mort » glissée dans le fil.
@@ -1796,6 +1812,7 @@ function openSettings() {
       const v = b.dataset.themeSet;
       store.set("theme", v);
       if (v === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = v;
+      syncThemeColor();
       syncThemeColor();
       $$("[data-theme-set]", box).forEach((x) => x.setAttribute("aria-pressed", x === b));
     }
@@ -3023,7 +3040,7 @@ function feedRows(f, from) {
     if (i === 1 && home) html += `<section class="fcard" id="followCard" hidden></section>`;
     if (i === 3 && home && prefs.city) html += `<section class="vcard" id="rowVille" hidden></section>`;
     if (i === 8 && home && f.blind) html += blindCard(f.blind);
-    html += i === 0 ? (f.hero ? heroStory(s, cat) : leadStory(s, cat)) : home && i <= 4 && s.image ? bigCard(s, cat) : storyRow(s, cat);
+    html += i === 0 ? heroStory(s, cat) : storyRow(s, cat);
   }
   return html;
 }
@@ -3372,7 +3389,8 @@ async function openVideoBref() {
   const check = () => {
     const h = $("#view h1");
     const bar = $("#topbar");
-    if (!h || !bar || innerWidth > 760) { bar?.classList.remove("has-title"); return; }
+    // Un titre caché (le fil, dans le design Lumière) ne remplace pas « PRISME » dans le bandeau.
+    if (!h || !bar || innerWidth > 760 || !h.getClientRects().length) { bar?.classList.remove("has-title"); return; }
     const gone = h.getBoundingClientRect().bottom < bar.getBoundingClientRect().bottom;
     const text = (h.firstChild?.textContent || h.textContent).replace(/\s+/g, " ").trim().slice(0, 40);
     if (text !== last) { last = text; t.textContent = text; }
@@ -3408,9 +3426,14 @@ async function openVideoBref() {
 
 // La couleur de la barre d'état suit le bandeau (noir, ou vrai noir en mode OLED).
 function syncThemeColor() {
+  // « Lumière » : le design bleu nuit accompagne tout thème sombre (choisi, ou celui du téléphone en « Automatique »).
+  const th = document.documentElement.dataset.theme;
+  const lum = th === "dark" || (!th && matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.classList.toggle("lum", lum);
   const m = $('meta[name="theme-color"]');
-  if (m) m.content = document.documentElement.dataset.theme === "oled" ? "#000000" : "#141414";
+  if (m) m.content = th === "oled" ? "#000000" : lum ? "#060A13" : "#141414";
 }
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => syncThemeColor());
 
 // La taille du texte suit celle choisie dans les réglages de l'iPhone (tant qu'on ne l'a pas choisie dans Prisme).
 function iosTextRatio() {
@@ -3437,7 +3460,7 @@ document.addEventListener("click", (e) => {
   const a = e.target.closest("a[data-nav]");
   if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button || reduceMotion() || !/[?&]h=/.test(a.getAttribute("href") || "")) return;
   const card = a.closest("article, aside");
-  const img = card && card.querySelector(".c2-img img, .hero-media img, .big-media img, .lead-media img, .mini-img img");
+  const img = card && card.querySelector(".c2-img img, .hero2-photo img, .lead-media img, .mini-img img");
   if (!img || !img.complete || !img.naturalWidth) return;
   const r = img.getBoundingClientRect();
   if (r.bottom < 0 || r.top > innerHeight || !r.width) return;
@@ -3972,11 +3995,11 @@ document.addEventListener("click", (e) => { if (e.target.closest("[data-express]
 // Le petit tutoriel des gestes : trois bulles, une seule fois, sur la première nouvelle du fil.
 function coachMarks() {
   if (store.get("coach") || state.route?.view !== "feed" || $("#modal.open") || !store.get("onboarded")) return;
-  const card = $("#feed .lead.hero, #feed .story");
+  const card = $("#feed .lead.hero2, #feed .story");
   if (!card) return;
   const steps = [
-    [$(".hero-media h2, h3 a, h2 a", card), "Touche le titre (ou la photo) pour lire l'article."],
-    [$(".c2-cmp", card), "« Comparer » montre ce que la gauche, le centre et la droite en disent."],
+    [$("h2 a, h3 a", card), "Touche le titre (ou la photo) pour lire l'article."],
+    [$(".hero2-fx, .c3-cmp", card), "Touche le prisme pour comparer : la gauche, le centre et la droite."],
     [$(".src-pick", card), "Touche le nom du média pour en choisir un autre."],
   ].filter(([el]) => el);
   if (!steps.length) return;
@@ -4325,9 +4348,8 @@ function viewFeed(v, route) {
     </div>`;
   v.innerHTML = `${folio(esc(CAT_LABEL[route.cat]), regionLabel())}${lensHtml}
     ${route.lens === "local" ? `<div class="city-bar" id="cityBar"></div>` : ""}
-    <div class="topics" id="topics"></div>
     <div class="layout">
-      <div class="main-col"><button class="new-pill" id="newPill" type="button" hidden></button><div class="feed-top"><p class="fresh" id="fresh" hidden></p><button class="sort-btn" type="button" id="sortBtn" aria-haspopup="dialog">Trier : <b>${esc(LENS_SHORT[route.lens] || LENSES[route.lens]?.label || "")}</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button></div>${homeCards(route)}${route.cat === "sports" ? `<div id="habsFeed" hidden></div>` : ""}${installCard()}${store.get("howto") ? "" : HOWTO}<div id="feed"></div><div id="sentinel"></div><div id="feedStatus"></div></div>
+      <div class="main-col"><button class="new-pill" id="newPill" type="button" hidden></button><div class="feed-top"><p class="fresh" id="fresh" hidden></p><button class="sort-btn" type="button" id="sortBtn" aria-haspopup="dialog">Trier : <b>${esc(LENS_SHORT[route.lens] || LENSES[route.lens]?.label || "")}</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button></div><div class="topics" id="topics"></div>${homeCards(route)}${route.cat === "sports" ? `<div id="habsFeed" hidden></div>` : ""}${installCard()}${store.get("howto") ? "" : HOWTO}<div id="feed"></div><div id="sentinel"></div><div id="feedStatus"></div></div>
       <aside class="rail" aria-label="Autour du fil"><div class="rail-in" id="rail"></div></aside>
     </div>`;
   $("#sortBtn", v).onclick = () => openSortSheet(route);
@@ -4609,7 +4631,7 @@ async function viewStory(v, route) {
 
         <section class="sec s-who">
           <h2 class="block-h">Qui en parle <small>${plural(s.sources, "média")}</small></h2>
-          ${bigBar(s.counts)}
+          <div class="s-fx">${beam(s, "grand")}</div>
           <div class="s-cov">${SIDES.map((side) => `<div><b><span data-count="${pct(sd[side.key])}">${pct(sd[side.key])}</span> %</b><small><i style="background:${side.color}"></i>${side.label} · ${sd[side.key]}</small></div>`).join("")}</div>
           ${s.blindspot ? `<div class="callout ${s.blindspot === "right" ? "r" : "l"}"><b>ANGLE MORT.</b> Les médias de ${s.blindspot === "right" ? "droite" : "gauche"} en parlent très peu : ${pct(s.blindspot === "right" ? sd.right : sd.left)} % des médias évalués.</div>` : ""}
           ${s.counts.state ? `<div class="callout"><b>MÉDIAS D'ÉTAT.</b> ${plural(s.counts.state, "média contrôlé", "médias contrôlés")} par un gouvernement couvre${s.counts.state > 1 ? "nt" : ""} aussi cette histoire.</div>` : ""}
