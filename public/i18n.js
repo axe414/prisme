@@ -249,6 +249,9 @@ Object.assign(EXACT, {
   "Touche le prisme pour comparer : la gauche, le centre et la droite.": "Tap the prism to compare: left, center and right.",
   "Touche le titre (ou la photo) pour lire l'article.": "Tap the headline (or the photo) to read the article.",
   "Ce que tu lis : de gauche, du centre ou de droite ?": "What you read: left, center or right?",
+  "Religion": "Religion", "Matin express": "Morning express", "Journée express": "Day express", "Ta semaine": "Your week", "Express": "Express",
+  "Médias non évalués": "Unrated outlets", "Les plus récentes": "Most recent", "3 médias ou plus": "3 outlets or more", "les sujets qui montent": "rising topics",
+  "Abonnés": "Subscribers", "Son": "Sound", "Utiliser ma position": "Use my location", "Recherche de ta ville…": "Finding your city…",
 });
 
 // Textes avec un nombre ou un nom à l'intérieur.

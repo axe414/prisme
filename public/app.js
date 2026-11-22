@@ -4,9 +4,38 @@ const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 
 /* ---------- Constantes ---------- */
 const REGIONS = [["qc", "Québec"], ["ca", "Canada"], ["us", "États-Unis"], ["fr", "France"], ["uk", "Royaume-Uni"], ["europe", "Europe"], ["latam", "Amérique latine"], ["afrique", "Afrique"], ["moyenorient", "Moyen-Orient"], ["asie", "Asie"], ["oceanie", "Océanie"], ["monde", "Monde entier"]];
-const CATS = [["une", "À la une"], ["politique", "Politique"], ["international", "International"], ["economie", "Économie"], ["environnement", "Environnement"], ["techno", "Techno"], ["science", "Science"], ["sante", "Santé"], ["culture", "Culture"], ["sports", "Sports"]];
+const CATS = [["une", "À la une"], ["politique", "Politique"], ["international", "International"], ["economie", "Économie"], ["environnement", "Environnement"], ["techno", "Techno"], ["science", "Science"], ["sante", "Santé"], ["culture", "Culture"], ["sports", "Sports"], ["religion", "Religion"]];
 const CAT_LABEL = Object.fromEntries(CATS);
-const CAT_EMOJI = { une: "📰", politique: "⚖️", international: "🌍", economie: "💰", environnement: "🌱", techno: "💻", science: "🔬", sante: "🩺", culture: "🎭", sports: "🏒" };
+
+/* ---------- Les icônes de Prisme : dessinées au trait, pas des emojis ----------
+   Le trait prend la couleur du texte. Dans une pastille de verre (.pi), il est tracé avec la lumière du prisme (du bleu à l'orangé).
+   Météo : le soleil et l'éclair en teinte chaude (ic-w), la pluie, la neige et la lune en teinte froide (ic-c). */
+const CLOUD = '<path d="M7.2 15a3.9 3.9 0 0 1-.5-7.77A5.2 5.2 0 0 1 16.8 6.4a4.3 4.3 0 0 1 .4 8.6Z"/>';
+const SPEAKER = '<path d="M4 9v6h4l5 4V5L8 9Z"/>';
+const IC = {
+  bolt: '<path d="M13.4 2.6 5.4 13.7h5.9l-.9 7.7 8.2-11.3h-6l.8-7.5Z"/>',
+  week: '<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 9.8h17M8 3v3.6M16 3v3.6"/><path d="M7.6 13.4h.01M12 13.4h.01M16.4 13.4h.01M7.6 17h.01M12 17h.01" stroke-width="2.3"/>',
+  hockey: '<path d="M6.2 3 13 16.4a2.2 2.2 0 0 0 2 1.2h5.5"/><ellipse cx="6.4" cy="18.6" rx="3.4" ry="1.5"/><path d="M3 18.6V20c0 .8 1.5 1.5 3.4 1.5s3.4-.7 3.4-1.5v-1.4"/>',
+  alarm: '<circle cx="12" cy="13" r="7"/><path d="M12 9.4V13l2.4 1.6M5.2 4.3 2.9 6.6M18.8 4.3l2.3 2.3M7.4 18.6 5.9 20.8M16.6 18.6l1.5 2.2"/>',
+  lock: '<rect x="5" y="10.5" width="14" height="10" rx="2.4"/><path d="M8.4 10.5V8a3.6 3.6 0 0 1 7.2 0v2.5M12 14.6v2"/>',
+  warn: '<path d="M12 3.8 2.6 19.6h18.8L12 3.8Z"/><path d="M12 10v4.4M12 17.2h.01"/>',
+  pin: '<path d="M12 21s-6.5-6.2-6.5-11A6.5 6.5 0 0 1 18.5 10c0 4.8-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/>',
+  sound: SPEAKER + '<path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>',
+  mute: SPEAKER + '<path d="m17 9.5 5 5M22 9.5l-5 5"/>',
+  sun: '<g class="ic-w"><circle cx="12" cy="12" r="4"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></g>',
+  moon: '<path class="ic-c" d="M19.5 14.2A7.8 7.8 0 0 1 9.8 4.5a7.8 7.8 0 1 0 9.7 9.7Z"/>',
+  partly: '<path class="ic-w" d="M8 3v1.6M3.6 5.6l1.1 1.1M2 10.4h1.6M12.4 5.6l-1.1 1.1M5.2 11.2A3.6 3.6 0 0 1 11 7.6"/><path d="M9.5 19a3.2 3.2 0 0 1-.4-6.37A4.3 4.3 0 0 1 17.4 12a3.5 3.5 0 0 1 .3 7Z"/>',
+  cloud: '<path d="M7.2 17.5a3.9 3.9 0 0 1-.5-7.77A5.2 5.2 0 0 1 16.8 8.9a4.3 4.3 0 0 1 .4 8.6Z"/>',
+  fog: CLOUD + '<path class="ic-c" d="M5 18.5h14M7.5 21.5h9"/>',
+  drizzle: CLOUD + '<path class="ic-c" d="M9 18v1.5M15 18v1.5M12 20v1.5"/>',
+  rain: CLOUD + '<path class="ic-c" d="m8.5 17.8-1 3.2M12.5 17.8l-1 3.2M16.5 17.8l-1 3.2"/>',
+  snow: CLOUD + '<path class="ic-c" d="M8 18.6h.01M12 18.6h.01M16 18.6h.01M10 21.4h.01M14 21.4h.01" stroke-width="2.4"/>',
+  thunder: CLOUD + '<path class="ic-w" d="M12.8 15.5 10.4 19h3l-1.6 3.2"/>',
+};
+function pico(name, lum) { return `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"${lum ? ' style="stroke:url(#pfxg)"' : ""}>${IC[name]}</svg>`; }
+// La lumière du prisme, pour le trait des icônes en pastille.
+document.body.insertAdjacentHTML("beforeend", `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="pfxg" gradientUnits="userSpaceOnUse" x1="3" y1="4" x2="21" y2="20"><stop offset="0" style="stop-color:var(--b-l2)"/><stop offset=".5" style="stop-color:var(--fx-w)"/><stop offset="1" style="stop-color:var(--b-r2)"/></linearGradient></defs></svg>`);
+const soundLabel = () => `${pico(state.vidSound ? "sound" : "mute")} Son`;
 const LENSES = {
   essentiel: { label: "L'essentiel", desc: "Les histoires couvertes par le plus de médias, avec un bonus quand la gauche, le centre et la droite en parlent tous. Les plus récentes passent devant." },
   angles: { label: "Angles morts", desc: "Des histoires qu'un côté du spectre couvre beaucoup et que l'autre ignore presque." },
@@ -308,6 +337,8 @@ const SYN = [
   ["election", "elections", "electoral", "scrutin", "vote", "sondage", "poll"],
   ["economie", "economy", "economique", "economic", "recession"],
   ["sante", "health", "hopital", "hopitaux", "hospital"],
+  ["religion", "religions", "religieux", "religieuse", "religious"],
+  ["eglise", "eglises", "church", "churches"],
   ["guerre", "war", "conflit", "conflict"],
   ["tarifs", "tariffs", "tariff", "droits de douane", "douanes"],
   ["petrole", "oil", "pipeline", "oleoduc"],
@@ -875,11 +906,11 @@ function renderChrome(route) {
   $("#bandDate").textContent = new Date().toLocaleDateString(LOCALE, { weekday: "long", day: "numeric", month: "long" });
   $("#editionSel").innerHTML = REGIONS.map(([v, l]) => `<option value="${v}" ${v === state.region ? "selected" : ""}>${l}</option>`).join("");
   // « Ma ville » juste après « À la une » : visible tout de suite, sans glisser la barre.
-  const catLink = ([v, l]) => `<a class="cc-${v}" href="${href({ cat: v, lens: route.view === "feed" ? route.lens : undefined })}" data-nav ${route.view === "feed" && route.cat === v ? 'aria-current="page"' : ""}>${CAT_EMOJI[v] ? `<span class="ce" aria-hidden="true">${CAT_EMOJI[v]}</span>` : ""}${l}</a>`;
+  const catLink = ([v, l]) => `<a class="cc-${v}" href="${href({ cat: v, lens: route.view === "feed" ? route.lens : undefined })}" data-nav ${route.view === "feed" && route.cat === v ? 'aria-current="page"' : ""}>${l}</a>`;
   $("#cats").innerHTML = catLink(CATS[0])
     // « Ma ville » en un toucher, aller et retour : sur la page de ta ville, la même pastille (avec ✕) ramène à la une.
     + (() => { const onMine = route.view === "ville" && route.ville === prefs.city && prefs.city;
-      return `<a class="cat-ville${onMine ? " on" : ""}" href="${onMine ? href({}) : prefs.city ? href({ ville: prefs.city }) : href({ v: "villes" })}" data-nav ${["ville", "villes"].includes(route.view) ? 'aria-current="page"' : ""} title="${onMine ? "Revenir à la une" : "Les nouvelles de ma ville"}">📍 ${esc(prefs.cityLabel || "Ma ville")}${onMine ? `<span class="cv-x" aria-hidden="true">✕</span>` : ""}</a>`; })()
+      return `<a class="cat-ville${onMine ? " on" : ""}" href="${onMine ? href({}) : prefs.city ? href({ ville: prefs.city }) : href({ v: "villes" })}" data-nav ${["ville", "villes"].includes(route.view) ? 'aria-current="page"' : ""} title="${onMine ? "Revenir à la une" : "Les nouvelles de ma ville"}">${pico("pin")} ${esc(prefs.cityLabel || "Ma ville")}${onMine ? `<span class="cv-x" aria-hidden="true">✕</span>` : ""}</a>`; })()
     + `${prefs.city ? `<button class="cat-wx" id="catWx" type="button" aria-label="Météo" hidden></button>` : ""}<span class="sep"></span>`
     + CATS.slice(1).map(catLink).join("");
   const onUne = ["feed", "story", "search", "outlet", "ville", "villes"].includes(route.view);
@@ -1321,7 +1352,7 @@ function openPicker(s) {
     <h2 class="pk-h2" data-no-tr>${titleOf(s)}</h2>
     ${tabs}
     <ul class="pk-list">${all.map(row).join("")}</ul>
-    <p class="note pk-note">⭐ Touche l'étoile d'un média : quand il couvre une nouvelle, le titre s'ouvrira chez lui en premier.</p>
+    <p class="note pk-note">★ Touche l'étoile d'un média : quand il couvre une nouvelle, le titre s'ouvrira chez lui en premier.</p>
   </div>`, true);
   const box = $("#modalBody .pk-sheet");
   box.addEventListener("click", (e) => {
@@ -1336,7 +1367,7 @@ function openPicker(s) {
       const on = prefMed.toggle(st.dataset.prefMed, st.dataset.name);
       st.setAttribute("aria-pressed", on);
       buzz(10);
-      toast(on ? `⭐ ${st.dataset.name} : ses articles s'ouvriront en premier.` : `${st.dataset.name} n'est plus un média préféré.`);
+      toast(on ? `★ ${st.dataset.name} : ses articles s'ouvriront en premier.` : `${st.dataset.name} n'est plus un média préféré.`);
       favDomCache = null;
     }
   });
@@ -1368,7 +1399,7 @@ document.addEventListener("click", (e) => {
   if (s) setTimeout(() => setSeen(s, true), 400);
 });
 // Les sources d'une carte sont un bouton : « Le Devoir +11 ▾ » ouvre « Lire chez… » pour choisir le média.
-const srcPick = (s, n = 1, logos = 3) => `<button class="src-pick" type="button" data-pick="${esc(s.id)}" title="Choisir le média à lire">${logoStack(s, logos)}${sourcesLine(s, n)}${isPaywall(bestArticle(s)) ? `<span class="lock" title="Ce média demande souvent un abonnement">🔒</span>` : ""}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>`;
+const srcPick = (s, n = 1, logos = 3) => `<button class="src-pick" type="button" data-pick="${esc(s.id)}" title="Choisir le média à lire">${logoStack(s, logos)}${sourcesLine(s, n)}${isPaywall(bestArticle(s)) ? `<span class="lock" title="Ce média demande souvent un abonnement">${pico("lock")}</span>` : ""}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>`;
 const metaLine = (s, st) => `<p class="c2-meta">${newTag(s)}${srcPick(s)} · <time title="${esc(ago(s.lastSeen || s.firstSeen))}">${agoShort(s.lastSeen || s.firstSeen)}</time>${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}</p>`;
 
 // La rubrique d'une histoire, en couleur, et l'angle mort : en haut de chaque carte. La rubrique mène à son fil.
@@ -1422,7 +1453,7 @@ function beam(s, size = "") {
   </svg>`;
 }
 // « Gauche 4 · Centre 6 · Droite 3 »
-const sideCounts = (s) => { const sd = sides(s.counts || {}); return `<span class="fx-counts">Gauche <b>${sd.left}</b> · Centre <b>${sd.center}</b> · Droite <b>${sd.right}</b></span>`; };
+const sideCounts = (s) => { const sd = sides(s.counts || {}); if (!(sd.left + sd.center + sd.right)) return `<span class="fx-counts">Médias non évalués</span>`; return `<span class="fx-counts">Gauche <b>${sd.left}</b> · Centre <b>${sd.center}</b> · Droite <b>${sd.right}</b></span>`; };
 
 // Une nouvelle du fil : le titre et sa source à gauche ; à droite, son prisme, qu'on touche pour comparer.
 function storyRow(s, cat) {
@@ -1594,7 +1625,7 @@ document.addEventListener("click", async (e) => {
 });
 // Le haut de « En bref » : À la une ou ta ville, la position, et fermer.
 const shBar = (mode, cityName) => `<div class="sh-bar">
-    <div class="sh-modes"><button type="button" data-shmode="une" aria-pressed="${mode === "une"}">À la une</button>${cityName ? `<button type="button" data-shmode="ville" aria-pressed="${mode === "ville"}">📍 <span data-no-tr>${esc(cityName)}</span></button>` : ""}<button type="button" data-shmode="video" aria-pressed="${mode === "video"}">▶ Vidéos</button></div>
+    <div class="sh-modes"><button type="button" data-shmode="une" aria-pressed="${mode === "une"}">À la une</button>${cityName ? `<button type="button" data-shmode="ville" aria-pressed="${mode === "ville"}">${pico("pin")} <span data-no-tr>${esc(cityName)}</span></button>` : ""}<button type="button" data-shmode="video" aria-pressed="${mode === "video"}">▶ Vidéos</button></div>
     <button class="icon-btn sh-x" type="button" aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     <span class="sh-pos" id="shPos"></span>
   </div>`;
@@ -1628,7 +1659,7 @@ async function placeIds(c, loc) {
 const artSlide = (x, c, near = false) => `<section class="sh${x.image ? "" : " sh-noimg"}" data-city="${esc(c.n)}">
     ${x.image ? `<img class="sh-bg" src="${esc(safeUrl(x.image))}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="sh-logo">${favicon(x.domain, x.sourceName)}<span data-no-tr>${esc(x.sourceName)}</span></div>`}
     <div class="sh-in">
-      <div class="sh-place${near ? " near" : ""}">📍 <b data-no-tr>${esc(c.n)}</b>${near ? "<small>ville voisine</small>" : ""}</div>
+      <div class="sh-place${near ? " near" : ""}">${pico("pin")} <b data-no-tr>${esc(c.n)}</b>${near ? "<small>ville voisine</small>" : ""}</div>
       <div class="sh-k"><span data-no-tr>${esc(x.sourceName)}</span> · ${esc(ago(x.published))}</div>
       <h2 data-no-tr>${esc(x.title)}</h2>
       ${x.summary ? `<p class="sh-dek" data-no-tr>${esc(x.summary.length > 280 ? `${x.summary.slice(0, 277)}…` : x.summary)}</p>` : ""}
@@ -1861,7 +1892,7 @@ function openOnboarding() {
         </div></div>`,
     // Deux écrans seulement : bienvenue, puis ta ville (en un toucher avec ta position). Le reste se règle plus tard.
     () => `<h2>Ta ville</h2><p class="ob-sub">Pour ses nouvelles, même celles des petits médias locaux, et sa météo. Facultatif.</p>
-        <button class="btn ob-geo" type="button" data-ob="geo">📍 Utiliser ma position</button>
+        <button class="btn ob-geo" type="button" data-ob="geo">${pico("pin")} Utiliser ma position</button>
         <p class="ob-geo-msg" id="obGeoMsg" hidden></p>
         <h3 class="ob-h3">Ou tape son nom</h3>
         <input class="set-select" id="obCity" list="obVilles" placeholder="ex. Victoriaville" autocomplete="off" value="${esc(choice.cityLabel || "")}"><datalist id="obVilles"></datalist>
@@ -3305,7 +3336,7 @@ addEventListener("keydown", (e) => { if (e.key === "Escape") exitSelect(); });
 const vidSlide = (v) => `<section class="sh sh-v" data-vid="${esc(v.id)}">
     <img class="sh-blur" src="${esc(safeUrl(v.thumb))}" alt="" loading="lazy" referrerpolicy="no-referrer">
     <div class="sh-player"><img src="${esc(safeUrl(v.thumb))}" alt="" loading="lazy" referrerpolicy="no-referrer"><span class="sh-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg></span>
-      <button class="sh-sound" type="button" data-sound aria-pressed="${state.vidSound ? "true" : "false"}">${state.vidSound ? "🔊 Son" : "🔇 Son"}</button></div>
+      <button class="sh-sound" type="button" data-sound aria-pressed="${state.vidSound ? "true" : "false"}">${soundLabel()}</button></div>
     <div class="sh-in">
       <div class="sh-k">${badge(v.media)} <span class="sh-ch" data-no-tr>${esc(v.channel)}</span> · ${esc(ago(v.published))}</div>
       <h2 data-no-tr>${esc(v.title)}</h2>
@@ -3325,7 +3356,7 @@ function playSlide(sec, on) {
     // Le son déjà ouvert sur la vidéo d'avant : on le garde.
     nf.addEventListener("load", () => { if (state.vidSound) [600, 1500].forEach((t) => setTimeout(() => ytSend(nf, "unMute"), t)); });
     const sb = $("[data-sound]", sec);
-    if (sb) { sb.setAttribute("aria-pressed", String(!!state.vidSound)); sb.textContent = state.vidSound ? "🔊 Son" : "🔇 Son"; }
+    if (sb) { sb.setAttribute("aria-pressed", String(!!state.vidSound)); sb.innerHTML = soundLabel(); }
   }
   if (!on && f) f.remove();
 }
@@ -3337,7 +3368,7 @@ document.addEventListener("click", (e) => {
   const f = $("iframe", b.closest(".sh-player"));
   if (f) { ytSend(f, state.vidSound ? "unMute" : "mute"); ytSend(f, "playVideo"); }
   b.setAttribute("aria-pressed", String(state.vidSound));
-  b.textContent = state.vidSound ? "🔊 Son" : "🔇 Son";
+  b.innerHTML = soundLabel();
 }, true);
 async function openVideoBref() {
   closeShorts();
@@ -3557,8 +3588,8 @@ function storyThread(s) {
 }
 
 // La météo de ta ville (Open-Meteo : gratuit, sans clé ; seule la ville est envoyée). Gardée 30 minutes.
-const WMO = (c) => (c === 0 ? ["☀️", "Ensoleillé"] : c <= 2 ? ["🌤️", "Partiellement nuageux"] : c === 3 ? ["☁️", "Nuageux"] : c <= 48 ? ["🌫️", "Brouillard"] : c <= 57 ? ["🌦️", "Bruine"]
-  : c <= 67 ? ["🌧️", "Pluie"] : c <= 77 ? ["🌨️", "Neige"] : c <= 82 ? ["🌧️", "Averses"] : c <= 86 ? ["🌨️", "Averses de neige"] : ["⛈️", "Orages"]);
+const WMO = (c) => (c === 0 ? [pico("sun"), "Ensoleillé"] : c <= 2 ? [pico("partly"), "Partiellement nuageux"] : c === 3 ? [pico("cloud"), "Nuageux"] : c <= 48 ? [pico("fog"), "Brouillard"] : c <= 57 ? [pico("drizzle"), "Bruine"]
+  : c <= 67 ? [pico("rain"), "Pluie"] : c <= 77 ? [pico("snow"), "Neige"] : c <= 82 ? [pico("rain"), "Averses"] : c <= 86 ? [pico("snow"), "Averses de neige"] : [pico("thunder"), "Orages"]);
 async function weather(city) {
   try { const c = JSON.parse(store.get(`wx.${city.s}`, "null")); if (c?.hours && Date.now() - c.at < 30 * 60e3) return c; } catch { /* rien en mémoire */ }
   let geo = null;
@@ -3600,7 +3631,7 @@ async function weather(city) {
   return out;
 }
 // L'icône de nuit pour un ciel dégagé.
-const wxIco = (code, day = true) => (!day && code <= 1 ? "🌙" : !day && code === 2 ? "☁️" : WMO(code)[0]);
+const wxIco = (code, day = true) => (!day && code <= 1 ? pico("moon") : !day && code === 2 ? pico("cloud") : WMO(code)[0]);
 const isDayAt = (iso, days) => { const dd = days?.find((x) => x.t === iso.slice(0, 10)); return !dd || !dd.rise ? true : iso >= dd.rise && iso < dd.set; };
 async function fillWeather(el, city) {
   if (!el || !navigator.onLine) return;
@@ -3641,7 +3672,7 @@ async function openWeather(slug, { add = false } = {}) {
   if (!city) return;
   // Les villes de la météo : ta ville, puis celles ajoutées (jusqu'à 4).
   const list = [...new Set([prefs.city, ...wxSaved()].filter(Boolean))].map((x) => V.bySlug.get(x)).filter(Boolean);
-  const chips = `<div class="wx-cities">${list.map((c) => `<span class="wx-city${c.s === city.s ? " on" : ""}"><button type="button" data-wx-pick="${esc(c.s)}">${c.s === prefs.city ? "📍 " : ""}${esc(c.n)}</button>${c.s !== prefs.city ? `<button class="wx-del" type="button" data-wx-del="${esc(c.s)}" aria-label="Retirer ${esc(c.n)}">✕</button>` : ""}</span>`).join("")}
+  const chips = `<div class="wx-cities">${list.map((c) => `<span class="wx-city${c.s === city.s ? " on" : ""}"><button type="button" data-wx-pick="${esc(c.s)}">${c.s === prefs.city ? pico("pin") + " " : ""}${esc(c.n)}</button>${c.s !== prefs.city ? `<button class="wx-del" type="button" data-wx-del="${esc(c.s)}" aria-label="Retirer ${esc(c.n)}">✕</button>` : ""}</span>`).join("")}
       ${wxSaved().length < 4 ? `<button class="wx-add" type="button" data-wx-add>+ Ajouter une ville</button>` : ""}</div>
     <div class="wx-addbox" id="wxAddBox"${add ? "" : " hidden"}><input class="set-select" id="wxAddIn" placeholder="Chalet, parents… tape le nom de la ville" autocomplete="off"></div>`;
   openModal(`<div class="modal-pad wx-sheet">${chips}<div class="loader">Météo de ${esc(city.n)}…</div></div>`, true);
@@ -3678,7 +3709,7 @@ async function openWeather(slug, { add = false } = {}) {
   localNotices(city).then(({ al, out }) => {
     const wb = $("#modalBody .wx-body");
     if (!wb || (!al.length && !(out?.clients > 0))) return;
-    wb.insertAdjacentHTML("afterbegin", `<div class="wx-alerts">${al.map((a) => `<details class="wx-alert nt-${esc(a.type)}"><summary>⚠️ ${esc(a.name)}</summary><p>${esc(a.text).replace(/\n+/g, "<br>")}</p></details>`).join("")}${out?.clients > 0 ? `<p class="wx-out">⚡ <b>${out.clients.toLocaleString(LOCALE)}</b> ${out.clients > 1 ? "clients" : "client"} d'Hydro-Québec sans courant à moins de 30 km (${plural(out.n, "panne")}, ${esc(ago(out.at))}).</p>` : ""}</div>`);
+    wb.insertAdjacentHTML("afterbegin", `<div class="wx-alerts">${al.map((a) => `<details class="wx-alert nt-${esc(a.type)}"><summary>${pico("warn")} ${esc(a.name)}</summary><p>${esc(a.text).replace(/\n+/g, "<br>")}</p></details>`).join("")}${out?.clients > 0 ? `<p class="wx-out">${pico("bolt")} <b>${out.clients.toLocaleString(LOCALE)}</b> ${out.clients > 1 ? "clients" : "client"} d'Hydro-Québec sans courant à moins de 30 km (${plural(out.n, "panne")}, ${esc(ago(out.at))}).</p>` : ""}</div>`);
   }).catch(() => {});
 }
 // Les gestes de la feuille météo : changer de ville, en ajouter une, en retirer une.
@@ -3733,7 +3764,7 @@ function openSortSheet(route) {
   const SHORT = { essentiel: "Les plus importantes, couvertes par le plus de médias.", recent: "Tout, du plus récent au plus ancien.", local: "Les nouvelles de ta ville et de sa région.", angles: "Ce qu'un côté couvre et que l'autre ignore." };
   const main = ["essentiel", "recent", "local", "angles"];
   const item = ([k, l]) => `<li><button type="button" data-sort="${k}" aria-pressed="${route.lens === k}">
-      <span class="so-t">${l.sw ? `<span class="sw" style="background:${l.sw}"></span>` : ""}${k === "local" ? `📍 ${esc(prefs.cityLabel || "Ma ville")}` : esc(l.label)}</span>
+      <span class="so-t">${l.sw ? `<span class="sw" style="background:${l.sw}"></span>` : ""}${k === "local" ? `${pico("pin")} ${esc(prefs.cityLabel || "Ma ville")}` : esc(l.label)}</span>
       <small>${esc(SHORT[k] || l.desc)}</small></button></li>`;
   const first = list.filter(([k]) => main.includes(k)), rest = list.filter(([k]) => !main.includes(k));
   openModal(`<div class="modal-pad">
@@ -3769,7 +3800,7 @@ function findMyCity(btn, cb) {
   const say = (t) => { if (msg) { msg.hidden = false; msg.textContent = t; } else toast(t); };
   if (!navigator.geolocation) { say("Ton appareil ne donne pas sa position. Tape le nom de ta ville."); return; }
   const old = btn.innerHTML;
-  btn.disabled = true; btn.textContent = "📍 Recherche de ta ville…";
+  btn.disabled = true; btn.innerHTML = `${pico("pin")} Recherche de ta ville…`;
   const done = () => { btn.disabled = false; btn.innerHTML = old; };
   navigator.geolocation.getCurrentPosition(async (p) => {
     try {
@@ -3859,7 +3890,7 @@ addEventListener("visibilitychange", () => {
 // Le calendrier du téléphone fait sonner le rappel ; le toucher ouvre « Le matin » de Prisme.
 function reminderCard() {
   const t = store.get("remTime", "07:00");
-  return `<aside class="rem-card"><div class="rem-h"><span aria-hidden="true">⏰</span><b>Un rappel chaque matin</b></div>
+  return `<aside class="rem-card"><div class="rem-h"><span class="pi" aria-hidden="true">${pico("alarm", 1)}</span><b>Un rappel chaque matin</b></div>
     <p class="note">Ton téléphone te rappelle de lire ton matin Prisme, à l'heure choisie. Ça passe par ton calendrier : rien n'est envoyé à Prisme.</p>
     <div class="rem-row"><label>À <input type="time" id="remTime" value="${esc(t)}"></label>
       <select id="remDays" aria-label="Quels jours"><option value="all">tous les jours</option><option value="week"${store.get("remDays") === "week" ? " selected" : ""}>en semaine</option></select>
@@ -3985,7 +4016,7 @@ async function openExpress() {
   if (!list.length) { body.innerHTML = `<div class="modal-pad"><p class="note">Les titres n'ont pas pu se charger.</p></div>`; return; }
   for (const s of list) state.stories.set(s.id, s);
   state.expressSpeech = ["Matin express : dix titres.", ...list.map((s, i) => `${i + 1}. ${s.titleFr || s.title}.`), "C'est tout. Bonne journée."];
-  body.innerHTML = `<div class="modal-pad ex-sheet"><div class="kicker">Le matin</div><h2>⚡ Express <small>10 titres, 1 minute</small></h2>
+  body.innerHTML = `<div class="modal-pad ex-sheet"><div class="kicker">Le matin</div><h2>Express <small>10 titres, 1 minute</small></h2>
     <button class="btn ex-listen" type="button" data-listen="express">${'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9Z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>'}<span>Écouter</span></button>
     <ol class="ex-list">${list.map((s, i) => `<li><span class="ex-n">${i + 1}</span><div><a class="ex-t" ${openAttrs(s)} data-no-tr>${titleOf(s)}</a>${sideStrip(s)}
       <span class="ex-m">${sourcesLine(s, 1)} · <a class="link" href="${href({ h: s.id })}" data-nav data-close-modal>Comparer ›</a></span></div></li>`).join("")}</ol></div>`;
@@ -4058,7 +4089,7 @@ function isOpinion(a) {
   }
   return a._op;
 }
-const artTags = (a) => `${isOpinion(a) ? `<span class="tg tg-op" title="Texte d'opinion : chronique, éditorial ou lettre. Ce n'est pas un reportage.">Opinion</span>` : ""}${isPaywall(a) ? `<span class="tg tg-pay" title="Ce média demande souvent un abonnement pour lire l'article">🔒 Abonnés</span>` : ""}`;
+const artTags = (a) => `${isOpinion(a) ? `<span class="tg tg-op" title="Texte d'opinion : chronique, éditorial ou lettre. Ce n'est pas un reportage.">Opinion</span>` : ""}${isPaywall(a) ? `<span class="tg tg-pay" title="Ce média demande souvent un abonnement pour lire l'article">${pico("lock")} Abonnés</span>` : ""}`;
 
 // « Ça vient d'arriver » : réservé aux vraies nouvelles importantes. Une histoire née depuis moins de 3 heures,
 // couverte par 6 médias ou plus, dont au moins 3 médias reconnus (évalués par Prisme) dans les 90 dernières minutes,
@@ -4198,8 +4229,8 @@ async function localNotices(city) {
 }
 function noticeLine({ al, out }) {
   const bits = [];
-  if (al.length) bits.push(`<span class="nt nt-${esc(al[0].type)}">⚠️ <span>${esc(al[0].name)}</span>${al.length > 1 ? ` <small>+${al.length - 1}</small>` : ""}</span>`);
-  if (out?.clients > 0) bits.push(`<span class="nt nt-out">⚡ ${out.clients.toLocaleString(LOCALE)} ${out.clients > 1 ? "clients" : "client"} sans courant à proximité</span>`);
+  if (al.length) bits.push(`<span class="nt nt-${esc(al[0].type)}">${pico("warn")} <span>${esc(al[0].name)}</span>${al.length > 1 ? ` <small>+${al.length - 1}</small>` : ""}</span>`);
+  if (out?.clients > 0) bits.push(`<span class="nt nt-out">${pico("bolt")} ${out.clients.toLocaleString(LOCALE)} ${out.clients > 1 ? "clients" : "client"} sans courant à proximité</span>`);
   return bits.join("");
 }
 async function fillNotices(el, city) {
@@ -4225,7 +4256,7 @@ async function habsCard() {
       <b>${nm(mtl)} ${mtl.s} · ${nm(opp)} ${opp.s}</b><small>${live ? "" : won ? "Victoire" : "Défaite"}${g.end === "OT" ? " en prolongation" : g.end === "SO" ? " en tirs de barrage" : ""}${g.home.a === "MTL" ? " · à Montréal" : ` · à l'étranger`}</small></div>`; };
   const nx = h.next ? (() => { const opp = h.next.home.a === "MTL" ? h.next.away : h.next.home; return `<div class="hb-g"><span class="hb-k">Prochain match</span><b>${h.next.home.a === "MTL" ? "contre" : "chez"} ${nm(opp)}</b><small>${esc(when(h.next.at))}</small></div>`; })() : "";
   const cur = h.live ? score(h.live, true) : h.last ? score(h.last, false) : "";
-  return cur || nx ? `<aside class="habs"><span class="hb-ico" aria-hidden="true">🏒</span><div class="hb-in">${cur}${nx}</div></aside>` : "";
+  return cur || nx ? `<aside class="habs"><span class="pi" aria-hidden="true">${pico("hockey", 1)}</span><div class="hb-in">${cur}${nx}</div></aside>` : "";
 }
 async function fillHabs(el) {
   if (!el) return;
@@ -4343,7 +4374,7 @@ function viewFeed(v, route) {
   const lensHtml = `<div class="lensbar">
       <span class="label">Voir par</span>
       <div class="lenses" role="group" aria-label="Lentille">${Object.entries(LENSES).filter(([k, l]) => (!l.qc || ["qc", "ca"].includes(state.region)) && (k !== "local" || route.lens === "local")).map(([k, l]) =>
-        `<button type="button" data-lens="${k}" aria-pressed="${route.lens === k}">${l.sw ? `<span class="sw" style="background:${l.sw}"></span>` : ""}${k === "local" ? `📍 ${esc(prefs.cityLabel || "Ma ville")}` : `<span class="ln-l">${l.label}</span><span class="ln-s">${LENS_SHORT[k] || l.label}</span>`}</button>`).join("")}<button class="lens-help" type="button" aria-expanded="false" aria-label="Expliquer cette lentille">?</button></div>
+        `<button type="button" data-lens="${k}" aria-pressed="${route.lens === k}">${l.sw ? `<span class="sw" style="background:${l.sw}"></span>` : ""}${k === "local" ? `${pico("pin")} ${esc(prefs.cityLabel || "Ma ville")}` : `<span class="ln-l">${l.label}</span><span class="ln-s">${LENS_SHORT[k] || l.label}</span>`}</button>`).join("")}<button class="lens-help" type="button" aria-expanded="false" aria-label="Expliquer cette lentille">?</button></div>
       <div class="lens-desc" hidden>${esc(LENSES[route.lens].desc)}<div class="ld-legend">${legend()}</div></div>
     </div>`;
   v.innerHTML = `${folio(esc(CAT_LABEL[route.cat]), regionLabel())}${lensHtml}
@@ -4525,7 +4556,7 @@ function drawTopics(f) {
   const mine = topics.list();
   const trend = (f.trending || []).filter((t) => !mine.some((m) => m.toLowerCase() === t.toLowerCase())).slice(0, 10);
   el.innerHTML = `${mine.length ? `<span class="label">Mes sujets</span>${mine.map(topicChip).join("")}<span style="width:12px"></span>` : ""}
-    ${trend.length ? `<span class="label">En ce moment</span>${trend.map((t) => `<a class="chip" href="${href({ q: t })}" data-nav>${esc(t)}</a>`).join("")}` : f.loading ? `<span class="label">En ce moment</span><span class="skel" style="width:280px;height:24px;display:inline-block"></span>` : ""}`;
+    ${trend.length ? `<span class="t-now"><span class="label">En ce moment</span>${trend.map((t) => `<a class="chip" href="${href({ q: t })}" data-nav>${esc(t)}</a>`).join("")}</span>` : f.loading ? `<span class="label">En ce moment</span><span class="skel" style="width:280px;height:24px;display:inline-block"></span>` : ""}`;
   el.hidden = !mine.length && !trend.length && !f.loading;
   hScroll(el);
 }
@@ -4536,6 +4567,7 @@ function drawRail(f) {
   const sm = f.summary;
   const blinds = f.stories.filter((s) => s.blindspot).slice(0, 4);
   const maxOwner = sm?.owners?.[0]?.n || 1;
+  const now = (f.trending || []).slice(0, 7);
   // Une colonne aérée : la météo de ta ville, tes sujets (s'il y en a), les angles morts. Les chiffres du fil sont repliés.
   el.innerHTML = `
     ${prefs.city ? `<section class="rail-wx" id="railWx" hidden></section>` : ""}
@@ -4544,6 +4576,11 @@ function drawRail(f) {
       <div class="chips">${topics.list().map(topicChip).join("")}</div>
       ${"Notification" in window && Notification.permission === "default" ? `<button class="link small" type="button" id="notifBtn" style="margin-top:10px">Recevoir une alerte quand un de mes sujets bouge</button>` : ""}
     </section>` : ""}
+    ${now.length ? `<section class="rail-now rail-desk">
+      <h2 class="block-h">En ce moment <small>les sujets qui montent</small></h2>
+      <ol class="now-list">${now.map((t, i) => `<li><a href="${href({ q: t })}" data-nav><span class="now-n" aria-hidden="true">${i + 1}</span><b data-no-tr>${esc(t)}</b></a></li>`).join("")}</ol>
+    </section>` : ""}
+    ${f.params?.q || f.params?.lens === "recent" ? "" : `<section class="rail-desk" id="railLate" hidden></section>`}
     ${blinds.length && f.params.lens !== "angles" ? `<section>
       <h2 class="block-h">Angles morts <small>dans ce fil</small></h2>
       <ul class="mini-stories">${blinds.map((s) => `<li><span class="flag ${s.blindspot === "right" ? "r" : "l"}">Peu couvert ${s.blindspot === "right" ? "à droite" : "à gauche"}</span>
@@ -4563,6 +4600,25 @@ function drawRail(f) {
   const nb = $("#notifBtn", el);
   if (nb) nb.onclick = async () => { await Notification.requestPermission(); drawRail(f); };
   fillRailWx($("#railWx", el));
+  fillRailLate($("#railLate", el), f);
+}
+// Les plus récentes de l'édition (ou de la rubrique) : seulement des histoires reprises par 3 médias ou plus,
+// dont 2 médias reconnus, pour ne pas remplir la colonne de communiqués et de chroniques reprises partout.
+async function fillRailLate(el, f) {
+  if (!el) return;
+  const ed = await edition(state.region).catch(() => null);
+  if (!ed || !el.isConnected) return;
+  const cat = f.params?.cat;
+  const known = (s) => new Set((s.articles || []).filter((a) => a.media?.known).map((a) => a.domain)).size;
+  const list = ed.stories.filter((s) => (s.sources || 0) >= 3 && s.firstSeen && known(s) >= 2 && (!cat || cat === "une" || s.categories?.includes(cat)))
+    .sort((a, b) => Date.parse(b.firstSeen) - Date.parse(a.firstSeen)).slice(0, 5);
+  if (list.length < 3) return;
+  await withTitlesFr(list);
+  if (!el.isConnected) return;
+  for (const s of list) state.stories.set(s.id, s);
+  el.innerHTML = `<h2 class="block-h">Les plus récentes <small>3 médias ou plus</small></h2>
+    <ul class="late-list">${list.map((s) => `<li><a href="${href({ h: s.id })}" data-nav><time>${esc(agoShort(s.firstSeen))}</time><span data-no-tr>${titleOf(s)}</span></a></li>`).join("")}</ul>`;
+  el.hidden = false;
 }
 // La météo de ta ville dans la colonne de droite (ordinateur) : un toucher ouvre la feuille météo.
 async function fillRailWx(el) {
@@ -5757,8 +5813,10 @@ async function viewMatin(v) {
     state.matinSpeech = [`${hello}. Voici ton matin Prisme : cinq histoires.`, ...picked.flatMap((s, i) => { const sd = sides(s.counts); return [`${i + 1}. ${s.titleFr || s.title}.`, s.ai?.summary || s.summary || "", `${plural(s.sources, "média")} en parlent : ${sd.left} à gauche, ${sd.center} au centre, ${sd.right} à droite.`]; })];
     $("#matin").innerHTML = `
       <div class="matin-listen">${listenBtn("matin")}<span class="note">Écoute les cinq histoires, environ trois minutes.</span></div>
-      <button class="ex-btn" type="button" data-express><b>⚡ ${new Date().getHours() >= 15 ? "Journée express" : "Matin express"}</b><span>10 titres en 1 minute, à lire ou à écouter</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
-      <button class="ex-btn" type="button" data-week><b>📅 Ta semaine</b><span>Les 7 grandes histoires des 7 derniers jours</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+      <div class="ex-duo">
+        <button class="ex-btn" type="button" data-express><span class="pi" aria-hidden="true">${pico("bolt", 1)}</span><b>${new Date().getHours() >= 15 ? "Journée express" : "Matin express"}</b><span class="ex-s">10 titres en 1 minute, à lire ou à écouter</span><svg class="ex-go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+        <button class="ex-btn" type="button" data-week><span class="pi" aria-hidden="true">${pico("week", 1)}</span><b>Ta semaine</b><span class="ex-s">Les 7 grandes histoires des 7 derniers jours</span><svg class="ex-go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+      </div>
       <div id="habsMatin" hidden></div>
       ${reminderCard()}
       <ol class="matin-list">${picked.map((s, i) => `<li>

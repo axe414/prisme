@@ -585,7 +585,8 @@
    "cc": "CA",
    "lang": "en",
    "feed": "https://thecjn.ca/feed/",
-   "region": ""
+   "region": "",
+   "topic": "religion"
   },
   "ngnews.ca": {
    "name": "The News",
@@ -620,7 +621,8 @@
    "cc": "CA",
    "lang": "en",
    "feed": "https://catholicregister.org/rss",
-   "region": "Ontario"
+   "region": "Ontario",
+   "topic": "religion"
   },
   "medicinehatnews.com": {
    "name": "Medicine Hat News",
@@ -963,7 +965,8 @@
    "cc": "CA",
    "lang": "en",
    "feed": "https://www.lifesitenews.com/feed/",
-   "region": ""
+   "region": "",
+   "topic": "religion"
   },
   "richmond-news.com": {
    "name": "Richmond News",
@@ -8210,6 +8213,173 @@
    "lang": "en",
    "feed": "https://www.outtvglobal.com/wp-json/wp/v2/posts?per_page=40&_fields=date_gmt,link,title,excerpt,jetpack_featured_media_url",
    "region": ""
+  },
+  "presence-info.ca": {
+   "name": "Présence – information religieuse",
+   "cc": "CA",
+   "lang": "fr",
+   "feed": "https://presence-info.ca/feed/",
+   "region": "Montréal",
+   "topic": "religion"
+  },
+  "christiancourier.ca": {
+   "name": "Christian Courier",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://www.christiancourier.ca/feed/",
+   "region": "Ontario",
+   "topic": "religion"
+  },
+  "bccatholic.ca": {
+   "name": "The B.C. Catholic",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://bccatholic.ca/rss",
+   "region": "Colombie-Britannique",
+   "topic": "religion"
+  },
+  "evangeliques.info": {
+   "name": "Evangeliques.info",
+   "cc": "FR",
+   "lang": "fr",
+   "feed": "https://www.evangeliques.info/feed/",
+   "region": "",
+   "topic": "religion"
+  },
+  "christianismeaujourdhui.info": {
+   "name": "Christianisme Aujourd'hui",
+   "cc": "CH",
+   "lang": "fr",
+   "feed": "https://www.christianismeaujourdhui.info/feed/",
+   "region": "",
+   "topic": "religion"
+  },
+  "reforme.net": {
+   "name": "Réforme",
+   "cc": "FR",
+   "lang": "fr",
+   "feed": "https://www.reforme.net/feed/",
+   "region": "",
+   "topic": "religion"
+  },
+  "regardsprotestants.com": {
+   "name": "Regards protestants",
+   "cc": "FR",
+   "lang": "fr",
+   "feed": "https://regardsprotestants.com/feed/",
+   "region": "",
+   "topic": "religion"
+  },
+  "cath.ch": {
+   "name": "cath.ch",
+   "cc": "CH",
+   "lang": "fr",
+   "feed": "https://www.cath.ch/feed/",
+   "region": "",
+   "topic": "religion"
+  },
+  "saphirnews.com": {
+   "name": "Saphirnews",
+   "cc": "FR",
+   "lang": "fr",
+   "feed": "https://www.saphirnews.com/xml/syndication.rss",
+   "region": "",
+   "topic": "religion"
+  },
+  "tribunejuive.info": {
+   "name": "Tribune Juive",
+   "cc": "FR",
+   "lang": "fr",
+   "feed": "https://www.tribunejuive.info/feed/",
+   "region": "",
+   "topic": "religion"
+  },
+  "vaticannews.va": {
+   "name": "Vatican News",
+   "cc": "VA",
+   "lang": "fr",
+   "feed": "https://www.vaticannews.va/fr.rss.xml",
+   "region": "",
+   "topic": "religion"
+  },
+  "religionnews.com": {
+   "name": "Religion News Service",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://religionnews.com/feed/",
+   "region": "",
+   "topic": "religion"
+  },
+  "christianitytoday.com": {
+   "name": "Christianity Today",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.christianitytoday.com/feed/",
+   "region": "",
+   "topic": "religion"
+  },
+  "christianpost.com": {
+   "name": "The Christian Post",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.christianpost.com/rss",
+   "region": "",
+   "topic": "religion"
+  },
+  "ncronline.org": {
+   "name": "National Catholic Reporter",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.ncronline.org/rss.xml",
+   "region": "",
+   "topic": "religion"
+  },
+  "cruxnow.com": {
+   "name": "Crux",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://cruxnow.com/feed",
+   "region": "",
+   "topic": "religion"
+  },
+  "jta.org": {
+   "name": "Jewish Telegraphic Agency",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://www.jta.org/feed",
+   "region": "",
+   "topic": "religion"
+  },
+  "forward.com": {
+   "name": "The Forward",
+   "cc": "US",
+   "lang": "en",
+   "feed": "https://forward.com/feed/",
+   "region": "",
+   "topic": "religion"
+  },
+  "jewishpostandnews.ca": {
+   "name": "Jewish Post and News",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://jewishpostandnews.ca/feed/",
+   "region": "Manitoba",
+   "topic": "religion"
+  },
+  "anglicanjournal.com": {
+   "name": "Anglican Journal",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "http://anglicanjournal.com/?feed=rss",
+   "region": "Canada",
+   "topic": "religion"
+  },
+  "broadview.org": {
+   "name": "Broadview",
+   "cc": "CA",
+   "lang": "en",
+   "feed": "https://broadview.org/feed/atom/",
+   "region": "Canada"
   }
  }
 }

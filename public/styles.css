@@ -2562,3 +2562,71 @@ svg.fx { display: block; width: 100%; height: auto; overflow: visible; }
   :root.lum .speak-stop { bottom: calc(92px + env(safe-area-inset-bottom)); }
 }
 :root.lum .s-readbar { background: var(--verre); border-color: var(--hair); }
+
+/* ================= Icônes dessinées, rubrique Religion, colonne de droite, tuiles du matin ================= */
+/* Les icônes : un trait fin de la couleur du texte (plus d'emojis). Météo : teinte chaude (soleil, éclair) et froide (pluie, neige, lune). */
+.ic { width: 1.15em; height: 1.15em; vertical-align: -.2em; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.ic .ic-w { stroke: var(--b-r1); }
+.ic .ic-c { stroke: var(--b-l2); }
+.nt .ic .ic-w, .nt .ic .ic-c, .wx-alert > summary .ic * { stroke: currentColor; }
+.wx-big .ic { stroke-width: 1.15; }
+.rw-ico .ic { stroke-width: 1.3; }
+.wx-hours b .ic, .wx-days b .ic { width: 22px; height: 22px; vertical-align: middle; }
+.cat-wx .ic { width: 18px; height: 18px; vertical-align: -4px; }
+.src-pick .lock .ic { width: 12px; height: 12px; stroke-width: 2; vertical-align: -1px; }
+.tg-pay .ic { width: 11px; height: 11px; stroke-width: 2.1; vertical-align: -1px; }
+.cat-wx.has-alert::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #E5484D; margin-left: 4px; }
+/* La pastille de verre : l'icône y est tracée avec la lumière du prisme. */
+.pi { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 14px; border: 1px solid var(--hair);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--ink) 10%, transparent), color-mix(in srgb, var(--ink) 2%, transparent)); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ink) 12%, transparent); }
+.pi .ic { width: 23px; height: 23px; stroke-width: 1.6; }
+
+/* Le matin : deux tuiles côte à côte, le titre dans le caractère des manchettes, un filet de lumière au survol. */
+.ex-duo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0 12px; }
+.ex-duo .ex-btn { margin: 0; }
+@media (max-width: 620px) { .ex-duo { grid-template-columns: 1fr; gap: 10px; } }
+.ex-btn { grid-template-columns: auto 1fr auto; gap: 1px 14px; padding: 14px 16px; border-radius: 18px; position: relative; overflow: hidden; transition: border-color .2s; }
+.ex-btn > .pi { grid-column: 1; grid-row: 1 / span 2; }
+.ex-btn > b { grid-column: 2; font: 700 19px/1.2 var(--serif); }
+.ex-btn > .ex-s { grid-column: 2; }
+.ex-btn > .ex-go { grid-column: 3; grid-row: 1 / span 2; }
+.ex-btn .pi .ic { width: 23px; height: 23px; stroke-width: 1.6; opacity: 1; }
+.ex-btn::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, var(--b-l2), var(--b-c), var(--b-r2)); opacity: 0; transition: opacity .2s; }
+.ex-btn:hover { border-color: color-mix(in srgb, var(--ink) 32%, transparent); }
+.ex-btn:hover::before, .ex-btn:focus-visible::before { opacity: .9; }
+.habs { gap: 14px; padding: 14px 16px; border-radius: 18px; }
+.hb-g b { font: 700 19px/1.2 var(--serif); }
+.rem-card { padding: 16px; border-radius: 18px; }
+.rem-h { gap: 12px; }
+.rem-h b { font: 700 19px/1.2 var(--serif); }
+
+/* La rubrique Religion. */
+.cc-religion { --cc: #1E7F86; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cc-religion { --cc: #6FD0D2; } }
+:root[data-theme="dark"] .cc-religion, :root[data-theme="oled"] .cc-religion { --cc: #6FD0D2; }
+
+/* La colonne de droite, sur ordinateur : les sujets du moment (numérotés) et les dernières nouvelles. */
+.t-now { display: contents; }
+.now-list, .late-list { list-style: none; margin: 0; padding: 0; }
+.now-list a { display: grid; grid-template-columns: 28px minmax(0, 1fr); align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--hair); text-decoration: none; color: var(--ink); }
+.now-list li:last-child a, .late-list li:last-child a { border-bottom: 0; }
+.now-n { font: italic 400 19px/1 var(--serif); color: var(--ink-3); }
+.now-list b { font: 600 16.5px/1.25 var(--serif); overflow-wrap: anywhere; }
+.late-list a { display: grid; grid-template-columns: 50px minmax(0, 1fr); gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--hair); text-decoration: none; color: var(--ink); }
+.late-list time { font: 600 11.5px/1.75 var(--mono); color: var(--ink-3); white-space: nowrap; }
+.late-list span { font: 600 15px/1.28 var(--serif); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.now-list a:hover b, .late-list a:hover span { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+@media (max-width: 1020px) { .rail-desk { display: none; } }
+/* Les sujets du moment sont dans la colonne : on ne les répète pas au-dessus du fil. */
+@media (min-width: 1021px) {
+  .layout:has(.rail-now) .topics .t-now { display: none; }
+  .layout:has(.rail-now) .hs-wrap:has(> .topics:not(:has(.star))), .layout:has(.rail-now) .main-col > .topics:not(:has(.star)) { display: none; }
+}
+/* Sur un écran d'ordinateur moyen, la recherche se replie en loupe pour laisser la place à toutes les rubriques ; elle s'ouvre dès qu'on la touche (ou avec « / »). */
+@media (min-width: 1021px) and (max-width: 1620px) {
+  .search:not(:focus-within) { width: 42px; }
+  .search:not(:focus-within) input { padding: 0; color: transparent; cursor: pointer; }
+  .search:not(:focus-within) input::placeholder { color: transparent; }
+  .search:not(:focus-within) > svg { left: 13px; }
+  .search:not(:focus-within) kbd, .search:not(:focus-within) .mic { display: none; }
+}
