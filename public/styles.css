@@ -2630,3 +2630,20 @@ svg.fx { display: block; width: 100%; height: auto; overflow: visible; }
   .search:not(:focus-within) > svg { left: 13px; }
   .search:not(:focus-within) kbd, .search:not(:focus-within) .mic { display: none; }
 }
+
+/* ================= Les lignes du fil retrouvent leur photo ================= */
+/* Ordinateur : la photo à gauche, le titre, puis le prisme. Téléphone : le titre à gauche ; à droite, la photo et le prisme dessous. */
+.story.c3.has-img { grid-template-columns: 172px minmax(0, 1fr) 118px; gap: 18px; }
+.c3-img { display: block; aspect-ratio: 3 / 2; border-radius: 12px; overflow: hidden; background: var(--paper-2); box-shadow: 0 0 0 1px var(--hair-2); }
+.c3-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .35s ease; }
+@media (hover: hover) { .story.c3:hover .c3-img img { transform: scale(1.035); } }
+.story.c3.is-seen .c3-img { opacity: .72; }
+@media (max-width: 760px) {
+  .story.c3.has-img { grid-template-columns: minmax(0, 1fr) 104px; grid-template-areas: "body img" "body cmp"; gap: 6px 12px; align-items: start; }
+  .story.c3.has-img > .c3-img { grid-area: img; aspect-ratio: 13 / 9; border-radius: 10px; }
+  .story.c3.has-img > .c3-body { grid-area: body; align-self: center; }
+  /* Sous la photo, le prisme reste compact : pas de pastille, juste « Comparer › » en petit. */
+  .story.c3.has-img > .c3-cmp { grid-area: cmp; min-height: 0; gap: 0; }
+  .story.c3.has-img > .c3-cmp svg { margin: -7px 0 -6px; }
+  .story.c3.has-img > .c3-cmp > span { padding: 2px 0; background: none; color: var(--ink-2); font-size: 12px; }
+}

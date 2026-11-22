@@ -154,6 +154,11 @@ document.addEventListener("error", (e) => {
     const a = img.closest(".hero2-photo");
     a.closest(".hero2")?.classList.add("noimg");
     a.remove();
+  } else if (img.closest(".c3-img")) {
+    // La photo d'une ligne du fil ne charge pas : la ligne reprend toute la largeur, sans trou.
+    const a = img.closest(".c3-img");
+    a.closest(".story")?.classList.remove("has-img");
+    a.remove();
   } else if (img.closest(".c2-img, .hero-media, .mini-img")) {
     // Photo cassée : la carte garde sa place, avec la couleur de sa rubrique et le logo du média.
     img.closest(".c2-img, .hero-media, .mini-img").classList.add("ph");
@@ -1455,11 +1460,12 @@ function beam(s, size = "") {
 // « Gauche 4 · Centre 6 · Droite 3 »
 const sideCounts = (s) => { const sd = sides(s.counts || {}); if (!(sd.left + sd.center + sd.right)) return `<span class="fx-counts">Médias non évalués</span>`; return `<span class="fx-counts">Gauche <b>${sd.left}</b> · Centre <b>${sd.center}</b> · Droite <b>${sd.right}</b></span>`; };
 
-// Une nouvelle du fil : le titre et sa source à gauche ; à droite, son prisme, qu'on touche pour comparer.
+// Une nouvelle du fil : sa photo, le titre et sa source ; à droite, son prisme, qu'on touche pour comparer.
 function storyRow(s, cat) {
   const st = seenState(s);
   const n = s.sources || 1;
-  return `<article class="story c3${st?.seen ? " is-seen" : ""}">
+  return `<article class="story c3${s.image ? " has-img" : ""}${st?.seen ? " is-seen" : ""}">
+    ${s.image ? `<a class="c3-img" ${openAttrs(s)} tabindex="-1" aria-hidden="true"><img src="${esc(safeUrl(s.image))}" alt="" loading="lazy" referrerpolicy="no-referrer"></a>` : ""}
     <div class="c3-body">
       ${kickerLine(s, cat)}
       <h3 data-no-tr><a ${openAttrs(s)}>${titleOf(s)}</a></h3>
@@ -3491,7 +3497,7 @@ document.addEventListener("click", (e) => {
   const a = e.target.closest("a[data-nav]");
   if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button || reduceMotion() || !/[?&]h=/.test(a.getAttribute("href") || "")) return;
   const card = a.closest("article, aside");
-  const img = card && card.querySelector(".c2-img img, .hero2-photo img, .lead-media img, .mini-img img");
+  const img = card && card.querySelector(".c3-img img, .c2-img img, .hero2-photo img, .lead-media img, .mini-img img");
   if (!img || !img.complete || !img.naturalWidth) return;
   const r = img.getBoundingClientRect();
   if (r.bottom < 0 || r.top > innerHeight || !r.width) return;
