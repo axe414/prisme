@@ -1,10 +1,16 @@
 # Le robot de Prisme : toutes les 30 minutes, il lit près de 3 000 médias, prépare les éditions
 # et publie le site (app + données) sur GitHub Pages. Gratuit pour un dépôt public.
+#
+# L'horloge de GitHub (schedule) n'est pas fiable : réglée aux 30 minutes, elle ne lançait le robot qu'aux 4 à 9 heures.
+# Le robot se relance donc lui-même : à la fin de chaque passage, il attend que 30 minutes se soient écoulées depuis
+# son départ, puis il demande le passage suivant. L'horloge de GitHub reste là comme filet : elle repart la chaîne
+# si elle s'est arrêtée (panne de GitHub, passage annulé à la main).
+# Pour arrêter le robot : annuler le passage en cours (il ne se relance pas), ou désactiver ce flux de travail.
 name: Édition Prisme
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "13,43 * * * *"
   workflow_dispatch:
   push:
     branches: [main]
@@ -15,15 +21,37 @@ permissions:
   contents: read
   pages: write
   id-token: write
-
-concurrency:
-  group: edition
-  cancel-in-progress: false
+  actions: write # pour demander le passage suivant
 
 jobs:
+  # L'horloge de GitHub ne lance un passage que si aucun autre n'est en cours ou en attente (la chaîne tourne déjà).
+  garde:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      go: ${{ steps.g.outputs.go }}
+    steps:
+      - id: g
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          go=1
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
+            n=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow edition.yml --limit 30 --json databaseId,status \
+              --jq "[.[] | select(.databaseId != $GITHUB_RUN_ID and .status != \"completed\")] | length")
+            if [ "$n" != "0" ]; then go=0; echo "Un passage est déjà en cours : celui de l'horloge est inutile."; fi
+          fi
+          echo "go=$go" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: garde
+    if: needs.garde.outputs.go == '1'
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    # Un seul passage lit les médias à la fois ; les autres attendent leur tour.
+    concurrency:
+      group: edition
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
 
@@ -46,6 +74,8 @@ jobs:
         run: node --max-old-space-size=6144 tools/build-edition.mjs site
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Passages plus fréquents : moins de résumés à la fois, pour rester dans le palier gratuit de Gemini sur la journée.
+          SUMMARY_CALLS: 4
 
       # Un changement de l'app a pu arriver pendant le passage : on publie toujours la toute dernière version de l'app.
       - name: Dernière version de l'app
@@ -69,3 +99,29 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Le passage suivant : 30 minutes après le départ de celui-ci. Même si ce passage a échoué (un média en panne, GitHub
+  # qui tousse), la chaîne continue. Si un passage plus récent existe déjà (un changement poussé entre-temps), c'est lui
+  # qui prend le relais : il n'y a jamais deux chaînes.
+  relance:
+    needs: [build, deploy]
+    if: ${{ !cancelled() && needs.build.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          depart=$(gh run view "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --json createdAt --jq .createdAt)
+          attente=$(( 1800 - ( $(date +%s) - $(date -d "$depart" +%s) ) ))
+          if [ "$attente" -gt 1500 ]; then attente=1500; fi
+          if [ "$attente" -gt 0 ]; then echo "Prochain passage dans $attente secondes."; sleep "$attente"; fi
+          # Les passages de l'horloge ne comptent pas : tant que celui-ci tourne, leur garde les arrête.
+          plus_recent=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow edition.yml --limit 30 --json databaseId,status,event \
+            --jq "[.[] | select(.databaseId > $GITHUB_RUN_ID and .status != \"completed\" and .event != \"schedule\")] | length")
+          if [ "$plus_recent" = "0" ]; then
+            gh workflow run edition.yml --repo "$GITHUB_REPOSITORY" --ref main
+            echo "Passage suivant demandé."
+          else
+            echo "Un passage plus récent est déjà en cours : il prend le relais."
+          fi

@@ -477,8 +477,35 @@ async function api(path) {
   }
 }
 
+// La rubrique Religion est mondiale : aux histoires de l'édition s'ajoutent celles du monde entier, en français ou en
+// anglais (un fichier léger préparé par le robot). Dans une édition francophone, une histoire sans aucun média
+// francophone passe derrière, comme partout ailleurs dans l'édition.
+const relWorldFile = () => dataJson("religion-monde.json").catch(() => null);
+async function religionWorld(ed, region) {
+  if (region === "monde") return [];
+  if (ed._relW) return ed._relW;
+  const f = await relWorldFile();
+  const frEd = region === "qc" || region === "fr";
+  const ids = new Set(ed.stories.map((s) => s.id));
+  const urls = new Set(ed.stories.flatMap((s) => (s.articles || []).map((a) => a.url)));
+  ed._relW = (f?.stories || [])
+    .filter((s) => !ids.has(s.id) && (s.lang === "en" || (s.lang === "fr" && (frEd || region === "ca"))) && !(s.articles || []).some((a) => urls.has(a.url)))
+    .map((s) => {
+      const articles = (s.articles || []).map((a) => ({ ...a, sourceName: cleanName(a.sourceName) }));
+      const fr = articles.some((a) => a.lang === "fr");
+      return { ...s, articles, scores: frEd && !fr ? { ...s.scores, essentiel: s.scores.essentiel * 0.4 } : s.scores };
+    });
+  return ed._relW;
+}
+
 async function findStory(id, region) {
-  for (const r of [region, "monde", "qc", "ca"]) {
+  for (const r of [region, "religion", "monde", "qc", "ca"]) {
+    if (r === "religion") {
+      // Une histoire religieuse du monde : on la trouve dans le fichier léger, sans charger toute l'édition Monde.
+      const s = (await relWorldFile())?.stories.find((x) => x.id === id);
+      if (s) return { s, ed: { active: [], stories: [] } };
+      continue;
+    }
     const ed = await edition(r).catch(() => null);
     const s = ed?.stories.find((x) => x.id === id);
     if (s) return { s, ed };
@@ -531,7 +558,10 @@ async function feedLocal(p) {
       const n = (s) => pq.terms.filter((g) => g.some((w) => hasWord(storyFold(s), w))).length;
       list = all.filter((s) => n(s) > 0).sort((a, b) => n(b) - n(a)).slice(0, 30);
     }
-  } else if (cat !== "une") list = list.filter((s) => s.categories.includes(cat));
+  } else if (cat !== "une") {
+    list = list.filter((s) => s.categories.includes(cat));
+    if (cat === "religion") list = [...list, ...await religionWorld(ed, region)];
+  }
   // Rien trouvé : une faute de frappe ? (« victoriavile » → « victoriaville »). On corrige une fois et on le dit.
   let corrected = null;
   if (q && !list.length && page === 0 && !p.get("nofix")) {

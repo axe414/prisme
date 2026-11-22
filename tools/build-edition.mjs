@@ -20,7 +20,7 @@ if (existsSync(join(ROOT, ".env"))) {
 }
 
 const { getIndex, refreshAuto, autoStatus } = await import("../lib/ingest.mjs");
-const { buildStories, editionFile, articlesFile, mondeLookup, REGIONS } = await import("../lib/edition.mjs");
+const { buildStories, editionFile, articlesFile, mondeLookup, religionWorld, REGIONS } = await import("../lib/edition.mjs");
 const { allVideos } = await import("../lib/videos.mjs");
 const { directory } = await import("../lib/media-db.mjs");
 const { canSummarize, summarize } = await import("../lib/summarize.mjs");
@@ -65,6 +65,10 @@ for (const region of REGIONS) {
   writeFileSync(join(DATA, `articles-${region}.json`), JSON.stringify(articlesFile(index, region)));
   log(`édition ${region} : ${file.stories.length} histoires publiées sur ${file.totals.stories}, ${file.totals.outlets} médias`);
 }
+// La rubrique Religion de chaque édition y ajoute les nouvelles religieuses du monde entier.
+const relWorld = religionWorld(editions.monde);
+writeFileSync(join(DATA, "religion-monde.json"), JSON.stringify(relWorld));
+log(`religion dans le monde : ${relWorld.stories.length} histoires`);
 
 // 3 0) Rapport de qualité des regroupements (édition Québec) : le cœur de Prisme est de bien regrouper les articles
 // d'une même nouvelle. À chaque passage, on note les histoires douteuses, pour corriger les règles avec des faits :
@@ -269,7 +273,9 @@ const published = new Set(Object.values(editions).flatMap((e) => e.stories.map((
   let tr = {};
   try { tr = JSON.parse(readFileSync(TR, "utf8")); } catch { /* première fois */ }
   const want = [];
-  for (const region of ["qc", "fr", "monde", "ca"]) for (const s of editions[region].stories.slice(0, 80)) {
+  // Dans l'ordre : le Québec, la religion dans le monde (ajoutée à la rubrique Religion), puis les autres éditions.
+  const lists = [editions.qc.stories.slice(0, 80), relWorld.stories.slice(0, 40), ...["fr", "monde", "ca"].map((r) => editions[r].stories.slice(0, 80))];
+  for (const list of lists) for (const s of list) {
     if (s.lang && s.lang !== "fr" && s.title && !tr[s.title] && !want.includes(s.title)) want.push(s.title);
   }
   let added = 0;

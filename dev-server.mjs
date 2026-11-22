@@ -15,7 +15,7 @@ if (existsSync(join(root, ".env"))) {
 }
 
 const { getIndex } = await import("./lib/ingest.mjs");
-const { buildStories, editionFile, articlesFile, mondeLookup, REGIONS } = await import("./lib/edition.mjs");
+const { buildStories, editionFile, articlesFile, mondeLookup, religionWorld, REGIONS } = await import("./lib/edition.mjs");
 const { allVideos } = await import("./lib/videos.mjs");
 const { directory } = await import("./lib/media-db.mjs");
 const { loadArchive, mergeArchive, archiveFromIndex, outletFile, olderFile } = await import("./lib/archive.mjs");
@@ -70,6 +70,7 @@ let searchCache = { stamp: null, body: null };
 async function dataFile(name) {
   const m = name.match(/^edition-([a-z]+)\.json$/);
   if (m && REGIONS.includes(m[1])) return editionJson(m[1]);
+  if (name === "religion-monde.json") return JSON.stringify(religionWorld(JSON.parse(await editionJson("monde"))));
   const a = name.match(/^articles-([a-z]+)\.json$/);
   if (a && REGIONS.includes(a[1])) return JSON.stringify(articlesFile(await getIndex(), a[1]));
   // Archive : celle du robot si elle existe en local (.data/archive.json), sinon l'édition en cours seulement.
