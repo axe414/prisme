@@ -46,6 +46,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script>
+    // Démarrage rapide : les nouvelles commencent à se télécharger tout de suite, pendant que le code de l'app se charge
+    // (app.js les reprend ensuite : window.__pre).
+    try {
+      var rg = new URLSearchParams(location.search).get("r") || localStorage.getItem("prisme.region") || "qc";
+      if (/^[a-z]{2,12}$/.test(rg) && location.protocol !== "file:") {
+        window.__pre = {};
+        ["edition-" + rg + ".json", "logos.json", "summaries.json", "translations.json"].forEach(function (n) {
+          var p = fetch("data/" + n, { cache: "no-cache" });
+          p.catch(function () {});
+          window.__pre[n] = p;
+        });
+      }
+    } catch (e) {}
     try {
       // Le sombre devient le thème de tout le monde, une seule fois (même si « Clair » avait été choisi avant).
       // Ensuite, ce que chacun choisit dans les réglages reste.

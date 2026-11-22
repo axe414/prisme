@@ -1,5 +1,5 @@
 // Service worker de Prisme : réseau d'abord (toujours la version fraîche), cache en secours (hors ligne).
-const CACHE = "prisme-v53";
+const CACHE = "prisme-v55";
 // Les données (éditions, villes, logos) dans une réserve à part, qui survit aux mises à jour de l'app :
 // sans réseau (chalet, bois), les dernières nouvelles déjà chargées restent lisibles.
 const DATA = "prisme-data-v1";

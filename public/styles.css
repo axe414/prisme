@@ -2318,3 +2318,47 @@ body.shorts-open .modal { z-index: 99; }
 .dos-top a { display: inline-flex; align-items: center; gap: 5px; color: var(--ink); text-decoration: none; font-weight: 600; }
 .dos-top a b { color: var(--ink-3); font-weight: 600; }
 .dos-top .fav, .dos-top .fav-fallback { width: 16px; height: 16px; border-radius: 50%; font-size: 8.5px; }
+
+/* ================= Consolidation : Explorer, Signaler un problème ================= */
+.mast-more { font: 500 13px var(--sans); color: #C9C5BC; background: none; border: 0; padding: 8px 10px; border-radius: 2px; white-space: nowrap; cursor: pointer; }
+.mast-more:hover { color: #fff; background: rgba(255, 255, 255, .07); }
+.mast-more[aria-current="page"] { color: #fff; box-shadow: inset 0 -2px 0 #fff; border-radius: 0; }
+.rp-sheet textarea { width: 100%; box-sizing: border-box; margin: 6px 0 10px; padding: 12px; border-radius: 12px; border: 1px solid var(--hair); background: var(--card); color: var(--ink); font: 16px/1.45 var(--sans); resize: vertical; }
+.rp-det { margin: 0 0 12px; font: 13px var(--sans); color: var(--ink-3); }
+.rp-det summary { cursor: pointer; padding: 6px 0; }
+.rp-det pre { margin: 6px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--paper-2); font: 12px/1.5 var(--mono); white-space: pre-wrap; color: var(--ink-2); }
+.rp-send { width: 100%; justify-content: center; min-height: 48px; font-size: 16px; margin-bottom: 10px; }
+
+/* ================= Accessibilité : des zones tactiles assez grandes pour un doigt (écrans tactiles) ================= */
+@media (pointer: coarse) {
+  /* Boutons ronds du bandeau et des fenêtres */
+  .icon-btn { min-width: 40px; min-height: 40px; }
+  .modal-close, .drawer-close, .panel-x { min-width: 44px; min-height: 44px; }
+  .edition-pick select { min-height: 40px; }
+  .mic { min-width: 40px; min-height: 40px; }
+  /* Rubriques, météo, tendances, tri */
+  .cats a { min-height: 40px; box-sizing: border-box; }
+  .cat-wx { min-height: 40px; box-sizing: border-box; }
+  .topics .chip, .chips .chip { min-height: 40px; display: inline-flex; align-items: center; box-sizing: border-box; }
+  .sort-btn { height: 40px; }
+  /* Cartes : la rubrique et le nom du média ont une zone de toucher plus haute que leur texte (sans bouger la mise en page) */
+  .ck { padding: 12px 0; margin: -9px 0; }
+  .src-pick { padding: 9px 6px 9px 0; margin: -9px 0; }
+  .c2-cmp { min-height: 44px; }
+  /* Carte de la ville */
+  .vc-t { padding: 8px 0; margin: -8px 0; }
+  .vc-all { padding: 12px 0 12px 12px; margin: -12px 0; }
+  .vc-bref { height: 40px; }
+  .wx[data-wx-city] { padding: 8px 10px; margin: -4px 0; }
+  .notices .nt { min-height: 36px; box-sizing: border-box; }
+  /* Fil : « Plus d'histoires », étoile du média préféré, fermer le bandeau */
+  #moreBtn { min-height: 44px; }
+  .pk-star { width: 44px; height: 44px; }
+  .brk-x { width: 46px; }
+  .sh-sound { height: 40px; }
+  .hc-x { min-width: 44px; min-height: 44px; }
+}
+/* Thème clair : le gris des petits textes un peu plus foncé (contraste suffisant pour lire en plein jour) */
+:root[data-theme="light"] { --ink-3: #686560; }
+@media (prefers-color-scheme: light) { :root:not([data-theme]) { --ink-3: #686560; } }
+@media (pointer: coarse) { .search input { min-height: 40px; } }

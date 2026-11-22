@@ -66,6 +66,41 @@ for (const region of REGIONS) {
   log(`édition ${region} : ${file.stories.length} histoires publiées sur ${file.totals.stories}, ${file.totals.outlets} médias`);
 }
 
+// 3 0) Rapport de qualité des regroupements (édition Québec) : le cœur de Prisme est de bien regrouper les articles
+// d'une même nouvelle. À chaque passage, on note les histoires douteuses, pour corriger les règles avec des faits :
+//  - « mélange possible » : une bonne part des titres ne partagent aucun mot important avec le reste du groupe ;
+//  - « doublon possible » : deux histoires séparées dont les titres se ressemblent beaucoup.
+try {
+  const { tokens } = await import("../lib/cluster.mjs");
+  const toks = (t) => new Set(tokens(t || ""));
+  const stories = editions.qc?.stories || [];
+  const melanges = [];
+  for (const s of stories) {
+    const arts = s.articles || [];
+    if (arts.length < 4) continue;
+    const sets = arts.map((a) => toks(a.title));
+    const freq = new Map();
+    for (const st of sets) for (const w of st) freq.set(w, (freq.get(w) || 0) + 1);
+    const core = new Set([...freq].filter(([, n]) => n >= Math.max(2, Math.ceil(arts.length * 0.4))).map(([w]) => w));
+    const etrangers = arts.filter((a, i) => ![...sets[i]].some((w) => core.has(w)));
+    if (!core.size || etrangers.length / arts.length >= 0.35) melanges.push({ id: s.id, titre: s.title, medias: s.sources, part: Math.round((etrangers.length / arts.length) * 100), exemples: etrangers.slice(0, 4).map((a) => `${a.sourceName} : ${a.title}`) });
+  }
+  const top = [...stories].sort((a, b) => (b.sources || 0) - (a.sources || 0)).slice(0, 300).map((s) => ({ s, t: toks(s.title) })).filter((x) => x.t.size >= 3);
+  const doublons = [];
+  for (let i = 0; i < top.length; i++) for (let j = i + 1; j < top.length; j++) {
+    const a = top[i], b = top[j];
+    let inter = 0;
+    for (const w of a.t) if (b.t.has(w)) inter++;
+    const jac = inter / (a.t.size + b.t.size - inter);
+    // 60 % et plus : doublon probable ; de 34 à 60 % : histoires proches, peut-être à réunir (à l'œil).
+    if (jac >= 0.34) doublons.push({ ressemblance: Math.round(jac * 100), a: { id: a.s.id, titre: a.s.title, medias: a.s.sources }, b: { id: b.s.id, titre: b.s.title, medias: b.s.sources } });
+  }
+  melanges.sort((x, y) => y.medias - x.medias);
+  doublons.sort((x, y) => y.ressemblance - x.ressemblance);
+  writeFileSync(join(DATA, "qualite.json"), JSON.stringify({ builtAt: new Date().toISOString(), histoires: stories.length, examinees: stories.filter((s) => (s.articles || []).length >= 4).length, melanges: melanges.slice(0, 40), proches: doublons.slice(0, 40), totaux: { melanges: melanges.length, doublons: doublons.filter((d) => d.ressemblance >= 60).length, proches: doublons.length } }, null, 1));
+  log(`qualité des regroupements : ${melanges.length} mélanges possibles, ${doublons.filter((d) => d.ressemblance >= 60).length} doublons probables, ${doublons.length} paires d'histoires proches (voir data/qualite.json)`);
+} catch (e) { log(`qualité des regroupements : ${e.message}`); }
+
 // 3 a) Pages de partage : un lien Prisme collé dans Messages ou Messenger montre la photo, le titre et la couverture.
 {
   const H = join(OUT, "h");

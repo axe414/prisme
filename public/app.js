@@ -367,16 +367,54 @@ function matchQuery(text, pq) {
    La fonction api() répond aux mêmes questions qu'avant (/api/feed, /api/videos…) à partir de ces fichiers. */
 const DATA_BASE = new URL("data/", document.baseURI).href;
 const dataCache = new Map();
-function dataJson(name, maxAgeMs = 10 * 60e3) {
-  const hit = dataCache.get(name);
-  if (hit && Date.now() - hit.at < maxAgeMs) return hit.promise;
-  const promise = fetch(DATA_BASE + name, { cache: "no-cache" }).then((r) => {
+// Démarrage rapide, en deux temps :
+// 1. la page (index.html) lance le téléchargement des nouvelles dès sa première ligne, pendant que le code se charge :
+//    on reprend ici ces téléchargements déjà en route (window.__pre) ;
+// 2. aux visites suivantes, la copie de l'édition gardée sur l'appareil s'affiche tout de suite, et les nouvelles
+//    fraîches la remplacent dès qu'elles arrivent (freshArrived).
+const netJson = (name) => {
+  const pre = window.__pre?.[name];
+  if (pre) delete window.__pre[name];
+  return (pre || fetch(DATA_BASE + name, { cache: "no-cache" })).then((r) => {
     if (!r.ok) throw new Error(r.status === 404 ? "Cette édition n'est pas encore prête. Réessaie dans quelques minutes." : `Erreur ${r.status}`);
     return r.json();
   });
+};
+const staleDone = new Set(); // une seule fois par visite et par édition
+const stamp = (ed) => ed?.fetchedAt || ed?.builtAt || "";
+function dataJson(name, maxAgeMs = 10 * 60e3) {
+  const hit = dataCache.get(name);
+  if (hit && Date.now() - hit.at < maxAgeMs) return hit.promise;
+  let promise;
+  if (/^edition-/.test(name) && !staleDone.has(name) && "caches" in window) {
+    staleDone.add(name);
+    const net = netJson(name);
+    net.catch(() => {});
+    promise = caches.match(DATA_BASE + name).then((c) => (c ? c.json() : null)).catch(() => null).then((stale) => {
+      // Rien de gardé, ou une copie de plus de 3 heures : on attend le réseau, comme avant.
+      if (!stale || !(Date.now() - Date.parse(stamp(stale) || 0) < 3 * 36e5)) return net;
+      // (Repère de diagnostic : quelle copie a servi au démarrage, et quand les nouvelles fraîches l'ont remplacée.)
+      window.__prismeDemarrage = { copie: stamp(stale), copieA: Math.round(performance.now()) };
+      net.then((fresh) => {
+        dataCache.set(name, { at: Date.now(), promise: Promise.resolve(fresh) });
+        Object.assign(window.__prismeDemarrage, { frais: stamp(fresh), fraisA: Math.round(performance.now()) });
+        if (stamp(fresh) !== stamp(stale)) freshArrived();
+      }).catch(() => {});
+      return stale;
+    });
+  } else promise = netJson(name);
   dataCache.set(name, { at: Date.now(), promise });
   promise.catch(() => dataCache.delete(name));
   return promise;
+}
+// Les nouvelles fraîches viennent d'arriver par-dessus la copie gardée : on met le fil à jour sans déranger.
+function freshArrived() {
+  const r = state.route;
+  if (!r) return;
+  const busy = state.panel || $("#modal.open") || $("#shorts") || $(".coach") || $("#smenu") || state.sel;
+  if (r.view === "feed" && scrollY < 300 && !busy) { state.feeds.clear(); render({ scroll: scrollY }); }
+  else if (r.view === "story" && !state.panel && $("#view .empty")) render(); // un lien vers une histoire trop récente pour la copie
+  else state.refreshFeeds = true; // au prochain retour sur un fil
 }
 // La liste des logos publiés par le robot (une fois par jour suffit).
 const logosReady = dataJson("logos.json", 864e5).then((l) => { LOGOS = new Set(Array.isArray(l) ? l : []); }).catch(() => { LOGOS = new Set(); });
@@ -807,7 +845,7 @@ function render({ scroll = 0 } = {}) {
 }
 
 /* ---------- Bandeau et rubriques ---------- */
-const PAGES = [["matin", "Le matin"], ["videos", "Vidéos"], ["moi", "Mon prisme"], ["favoris", "Favoris"], ["proprietaires", "Qui possède quoi"], ["quiz", "Devine le média"]];
+const PAGES = [["matin", "Le matin"], ["videos", "Vidéos"], ["moi", "Mon prisme"], ["favoris", "Favoris"]];
 const ICON = {
   une: '<path d="M4 5h13v14H5a1 1 0 0 1-1-1V5Z"/><path d="M17 9h3v9a1 1 0 0 1-1 1h-2M7 9h7M7 12h7M7 15h4"/>',
   matin: '<circle cx="12" cy="14" r="4"/><path d="M12 4v3M4.9 8.9l2 2M19.1 8.9l-2 2M2 18h20M3 14h2M19 14h2"/>',
@@ -832,7 +870,7 @@ function renderChrome(route) {
   const page = routePage(route);
   // Ordinateur : « En bref » est un vrai bouton dans le bandeau, à côté des pages (au téléphone, il est dans la barre du bas).
   const dayLabel = (v, l) => (v === "matin" && new Date().getHours() >= 15 ? "Ta journée" : l);
-  $("#mastLinks").innerHTML = `<button type="button" class="mast-bref" id="mastBref" title="Une nouvelle par écran"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="3"/><path d="m10.5 9.5 4 2.5-4 2.5Z"/></svg>En bref</button>` + PAGES.map(([v, l]) => `<a href="${href({ v })}" data-nav ${page === v ? 'aria-current="page"' : ""}>${dayLabel(v, l)}</a>`).join("");
+  $("#mastLinks").innerHTML = `<button type="button" class="mast-bref" id="mastBref" title="Une nouvelle par écran"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="3"/><path d="m10.5 9.5 4 2.5-4 2.5Z"/></svg>En bref</button>` + PAGES.map(([v, l]) => `<a href="${href({ v })}" data-nav ${page === v ? 'aria-current="page"' : ""}>${dayLabel(v, l)}</a>`).join("") + `<button type="button" class="mast-more" data-explore ${["proprietaires", "quiz", "comparer"].includes(page) ? 'aria-current="page"' : ""}>Explorer</button>`;
   $("#editionSel").innerHTML = REGIONS.map(([v, l]) => `<option value="${v}" ${v === state.region ? "selected" : ""}>${l}</option>`).join("");
   // « Ma ville » juste après « À la une » : visible tout de suite, sans glisser la barre.
   const catLink = ([v, l]) => `<a class="cc-${v}" href="${href({ cat: v, lens: route.view === "feed" ? route.lens : undefined })}" data-nav ${route.view === "feed" && route.cat === v ? 'aria-current="page"' : ""}>${CAT_EMOJI[v] ? `<span class="ce" aria-hidden="true">${CAT_EMOJI[v]}</span>` : ""}${l}</a>`;
@@ -850,7 +888,7 @@ function renderChrome(route) {
     <a href="${href({ v: "matin" })}" data-nav ${page === "matin" ? 'aria-current="page"' : ""}>${svg("matin")}${new Date().getHours() >= 15 ? "Ta journée" : "Le matin"}</a>
     <a href="${href({ v: "videos" })}" data-nav ${page === "videos" ? 'aria-current="page"' : ""}>${svg("videos")}Vidéos</a>
     <a href="${href({ v: "moi" })}" data-nav ${page === "moi" ? 'aria-current="page"' : ""}>${svg("moi")}Mon prisme</a>
-    <button type="button" id="moreBtnTab" ${["proprietaires", "quiz", "favoris"].includes(page) ? 'aria-current="page"' : ""}>${svg("plus")}Plus</button>`;
+    <button type="button" id="moreBtnTab" ${["proprietaires", "quiz", "favoris", "comparer", "villes"].includes(page) ? 'aria-current="page"' : ""}>${svg("plus")}Plus</button>`;
   $("#moreBtnTab").onclick = openMoreSheet;
   drawCatWx();
   $("#enBrefTab").onclick = openEnBref;
@@ -895,12 +933,10 @@ function openMoreSheet() {
     <h2>Plus</h2>
     <ul class="sheet-list">
       <li><button type="button" data-open-settings>${svg("reglages")}<span>Réglages<small>Taille du texte, langue, thème, ta ville, ce qui t'intéresse.</small></span></button></li>
+      <li><a href="${href({ v: "favoris" })}" data-nav data-close-modal>${svg("favoris")}<span>Mes favoris<small>Les histoires suivies, les articles enregistrés, « À lire ».</small></span></a></li>
       <li><a href="${href({ v: "villes" })}" data-nav data-close-modal>${svg("ville")}<span>Nouvelles par ville<small>Toutes les municipalités du Québec et les villes du Canada.</small></span></a></li>
-      <li><a href="${href({ v: "comparer" })}" data-nav data-close-modal>${svg("comparer")}<span>Comparer deux médias<small>Les mêmes histoires, deux titres, côte à côte.</small></span></a></li>
-      <li><a href="${href({ v: "favoris" })}" data-nav data-close-modal>${svg("favoris")}<span>Mes favoris<small>Les histoires et articles enregistrés, et les médias que tu suis.</small></span></a></li>
-      <li><a href="${href({ v: "proprietaires" })}" data-nav data-close-modal>${svg("proprietaires")}<span>Qui possède quoi<small>Les médias regroupés par propriétaire, et la toile des familles.</small></span></a></li>
-      <li><a href="${href({ v: "quiz" })}" data-nav data-close-modal>${svg("quiz")}<span>Devine le média<small>Un titre : gauche, centre ou droite ?</small></span></a></li>
-      <li><button type="button" data-about>${svg("about")}<span>Comment Prisme choisit<small>Les sources, les lentilles et les limites.</small></span></button></li>
+      <li><button type="button" data-explore>${svg("proprietaires")}<span>Explorer<small>Qui possède quoi, comparer deux médias, devine le média, comment Prisme choisit.</small></span></button></li>
+      <li><button type="button" data-report>${svg("about")}<span>Signaler un problème<small>Quelque chose ne marche pas ? Dis-le en un toucher.</small></span></button></li>
       <li><button type="button" id="sheetTheme">${svg("theme")}<span>Thème clair ou sombre</span></button></li>
       ${installBlock()}
     </ul>
@@ -909,7 +945,49 @@ function openMoreSheet() {
   const ib = $("#installBtn");
   if (ib) ib.onclick = async () => { installEvt.prompt(); await installEvt.userChoice.catch(() => null); installEvt = null; closeLayer("#modal"); };
 }
+// « Explorer » : les pages pour les curieux, rangées ensemble.
+function openExplore() {
+  openModal(`<div class="modal-pad">
+    <div class="kicker">Prisme</div>
+    <h2>Explorer</h2>
+    <ul class="sheet-list">
+      <li><a href="${href({ v: "proprietaires" })}" data-nav data-close-modal>${svg("proprietaires")}<span>Qui possède quoi<small>Les médias regroupés par propriétaire, et la toile des familles.</small></span></a></li>
+      <li><a href="${href({ v: "comparer" })}" data-nav data-close-modal>${svg("comparer")}<span>Comparer deux médias<small>Les mêmes histoires, deux titres, côte à côte.</small></span></a></li>
+      <li><a href="${href({ v: "quiz" })}" data-nav data-close-modal>${svg("quiz")}<span>Devine le média<small>Un titre : gauche, centre ou droite ?</small></span></a></li>
+      <li><button type="button" data-about>${svg("about")}<span>Comment Prisme choisit<small>Les sources, les façons de trier et les limites.</small></span></button></li>
+    </ul>
+  </div>`, true);
+}
+// « Signaler un problème » : on décrit en une phrase, et l'envoi part par Messages, Messenger ou courriel (au choix),
+// avec la page et l'appareil déjà notés. Rien n'est envoyé à Prisme : c'est la personne qui choisit à qui l'envoyer.
+function openReport() {
+  const r = state.route || {};
+  const page = r.view === "story" ? `histoire ${r.id}` : r.view === "search" ? `recherche « ${r.q} »` : r.view === "ville" ? `ville ${r.ville}` : r.view === "feed" ? `fil ${r.cat} / ${r.lens}` : r.view || "?";
+  const ua = navigator.userAgent;
+  const device = /iPhone/.test(ua) ? "iPhone" : /iPad/.test(ua) ? "iPad" : /Android/.test(ua) ? "Android" : "Ordinateur";
+  const os = (ua.match(/OS (\d+[_.]\d+)/) || ua.match(/Android (\d+(?:\.\d+)?)/) || [])[1]?.replace("_", ".") || "";
+  const details = [`Page : ${page}`, `Édition : ${state.region}`, `Ville : ${prefs.cityLabel || "aucune"}`, `Appareil : ${device}${os ? " " + os : ""}${isStandalone() ? " (app installée)" : " (navigateur)"}`,
+    `Écran : ${innerWidth} × ${innerHeight}`, `Thème : ${document.documentElement.dataset.theme || "auto"}`, `Taille du texte : ${prefs.scale}`, `En ligne : ${navigator.onLine ? "oui" : "non"}`, `Date : ${new Date().toLocaleString(LOCALE)}`].join("\n");
+  openModal(`<div class="modal-pad rp-sheet">
+    <div class="kicker">Prisme</div>
+    <h2>Signaler un problème</h2>
+    <p class="note">Dis ce qui ne marche pas, en une phrase. Les détails utiles (page, appareil) sont ajoutés tout seuls.</p>
+    <textarea id="rpText" rows="4" placeholder="Ex. : quand je touche « Comparer », rien ne s'ouvre." aria-label="Ce qui ne marche pas"></textarea>
+    <details class="rp-det"><summary>Voir ce qui sera ajouté</summary><pre data-no-tr>${esc(details)}</pre></details>
+    <button class="btn rp-send" type="button" id="rpSend">Envoyer…</button>
+    <p class="note">Tu choisis ensuite à qui l'envoyer (à la personne qui t'a fait installer Prisme, par exemple). Rien n'est envoyé automatiquement.</p>
+  </div>`, true);
+  $("#rpSend").onclick = async () => {
+    const text = `Prisme : un problème\n\n${$("#rpText").value.trim() || "(sans description)"}\n\n${details}\n${location.href}`;
+    if (navigator.share) { try { await navigator.share({ title: "Prisme : un problème", text }); closeLayer("#modal"); return; } catch (e) { if (e.name === "AbortError") return; } }
+    try { await navigator.clipboard.writeText(text); toast("Copié : colle-le dans un message ou un courriel."); closeLayer("#modal"); }
+    catch { prompt("Copie ce texte et envoie-le :", text); }
+  };
+  setTimeout(() => $("#rpText")?.focus(), 250);
+}
 document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-explore]")) { e.preventDefault(); openExplore(); return; }
+  if (e.target.closest("[data-report]")) { e.preventDefault(); openReport(); return; }
   if (e.target.closest("[data-open-settings]")) { e.preventDefault(); openSettings(); return; }
   if (e.target.closest("[data-close-modal]")) closeLayer("#modal");
   if (e.target.closest("[data-close-drawer]")) closeLayer("#drawer");
@@ -1140,8 +1218,8 @@ function pickBySide(s) {
 function sideStrip(s) {
   const sd = sides(s.counts || {});
   const tot = sd.left + sd.center + sd.right;
-  if (!tot) return `<span class="c2-bar none" title="Aucun média évalué"></span>`;
-  return `<span class="c2-bar" title="Gauche ${sd.left} · Centre ${sd.center} · Droite ${sd.right}">${sd.left ? `<i class="l" style="flex:${sd.left}"></i>` : ""}${sd.center ? `<i class="c" style="flex:${sd.center}"></i>` : ""}${sd.right ? `<i class="r" style="flex:${sd.right}"></i>` : ""}</span>`;
+  if (!tot) return `<span class="c2-bar none" role="img" aria-label="Aucun média évalué" title="Aucun média évalué"></span>`;
+  return `<span class="c2-bar" role="img" aria-label="Médias : gauche ${sd.left}, centre ${sd.center}, droite ${sd.right}" title="Gauche ${sd.left} · Centre ${sd.center} · Droite ${sd.right}">${sd.left ? `<i class="l" style="flex:${sd.left}"></i>` : ""}${sd.center ? `<i class="c" style="flex:${sd.center}"></i>` : ""}${sd.right ? `<i class="r" style="flex:${sd.right}"></i>` : ""}</span>`;
 }
 // « Radio-Canada, Le Devoir +11 » : deux médias nommés (les connus d'abord), puis le reste en nombre.
 function sourcesLine(s, max = 2) {
@@ -4237,6 +4315,7 @@ const LENS_SHORT = { essentiel: "Essentiel", angles: "Angles morts", gauche: "Ga
 const feedKey = (r) => (r.q ? `q|${r.q.toLowerCase()}|${state.region}` : `f|${r.cat}|${r.lens}|${state.region}`);
 
 function viewFeed(v, route) {
+  if (state.refreshFeeds) { state.refreshFeeds = false; state.feeds.clear(); } // des nouvelles fraîches sont arrivées entre-temps
   const key = feedKey(route);
   const lensHtml = `<div class="lensbar">
       <span class="label">Voir par</span>
@@ -4360,6 +4439,8 @@ function drawFeed(f) {
   } else {
     el.dataset.count = String(f.stories.length);
     el.innerHTML = feedRows(f, 0);
+    // Repère de vitesse : le moment où les premières nouvelles sont à l'écran (lisible dans les outils du navigateur).
+    if (!state.firstFeedAt) { state.firstFeedAt = Math.round(performance.now()); try { performance.mark("prisme-fil"); } catch { /* sans repères */ } }
     countUp(el);
     fillFollowCard();
     setTimeout(coachMarks, 1500);
