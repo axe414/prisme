@@ -2234,3 +2234,6 @@ html.soir img { filter: brightness(.92); }
 /* En bref · Vidéos : un seul bouton « Son » de Prisme */
 .sh-sound { position: absolute; z-index: 4; right: 10px; bottom: 10px; height: 34px; padding: 0 12px; border-radius: 999px; border: 0; background: rgba(0, 0, 0, .62); color: #fff; font: 600 13.5px var(--sans); cursor: pointer; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
 .sh-sound[aria-pressed="true"] { background: rgba(255, 255, 255, .9); color: #111; }
+
+/* Téléphone : la barre des rubriques (maintenant dans .hs-wrap) garde sa propre rangée sous la recherche */
+@media (max-width: 760px) { .sections-in > .hs-wrap { order: 2; flex: 0 0 100%; min-width: 0; } }
