@@ -35,9 +35,19 @@ const SIDES = [
 ];
 const TYPE_LABEL = { public: "Service public", "État": "Contrôlé par un État", "privé": "Privé", OBNL: "Sans but lucratif", "coopérative": "Coopérative", agence: "Agence de presse", "indépendant": "Indépendant" };
 
+const memStore = new Map(); // ce que le téléphone a refusé d'enregistrer (stockage plein ou bloqué) : gardé pour la visite
 const store = {
-  get(k, d) { try { return localStorage.getItem("prisme." + k) ?? d; } catch { return d; } },
-  set(k, v) { try { localStorage.setItem("prisme." + k, v); } catch { /* stockage indisponible */ } },
+  get(k, d) {
+    if (memStore.has(k)) return memStore.get(k);
+    try { return localStorage.getItem("prisme." + k) ?? d; } catch { return d; }
+  },
+  set(k, v) {
+    try { localStorage.setItem("prisme." + k, v); memStore.delete(k); }
+    catch {
+      memStore.set(k, String(v));
+      if (!store.warned) { store.warned = true; setTimeout(() => { try { toast("Le stockage de ton téléphone est plein ou bloqué : tes choix seront gardés seulement pour cette visite."); } catch { /* pas encore prêt */ } }, 1500); }
+    }
+  },
 };
 
 const state = {
@@ -565,7 +575,7 @@ async function videosLocal(p) {
   const region = p.get("region") || "monde";
   const countries = region === "monde" ? null : (await edition(region)).countries;
   // Les capsules commerciales (idées cadeaux, commandité…) ne sont pas des nouvelles (même règle que le robot).
-  const PROMO = /(gift ideas?|gifts? (for|guide|under)|must[- ]have gifts|holiday gifts|stocking stuffers|everyday finds|id[ée]es?[- ](de )?cadeaux|guide (des |de )?cadeaux|cadeaux (de no[eë]l|pour)|deals? (of|du) (the )?(day|jour|week|semaine)|sponsored|sponsoris|commandit|pr[ée]sent[ée]e? par|presented by|brought to you by|paid partnership|partenariat (pay|r[ée]mun)|#ad\b|#sponsored|unboxing|giveaway|product picks|shopping (picks|guide|list))/i;
+  const PROMO = /(gift ideas?|gifts? (guide|under \$?\d)|must[- ]have gifts|holiday gifts|stocking stuffers|everyday finds|id[ée]es?[- ](de )?cadeaux|guide (des |de )?cadeaux|deals? (of|du) (the )?(day|jour|week|semaine)|sponsored (by|content|post|video)|contenu (commandit|sponsoris)|(commandit|sponsoris)[ée]e?s? par|brought to you by|paid partnership|partenariat (pay|r[ée]mun)|#ad\b|#sponsored|unboxing|product picks|shopping (picks|guide|list))/i;
   let list = all.filter((v) => (!countries || countries.includes(v.media.country)) && !PROMO.test(v.title || ""));
   const q = p.get("q");
   if (q) {
@@ -742,7 +752,14 @@ document.addEventListener("click", (e) => {
   e.preventDefault();
   go(a.getAttribute("href"));
 });
-addEventListener("popstate", () => render({ scroll: history.state?.y || 0 }));
+addEventListener("popstate", () => {
+  // Le bouton Retour ferme d'abord ce qui est ouvert par-dessus (En bref, fenêtre, menu, tutoriel).
+  if ($("#shorts")) closeShorts();
+  if ($("#modal.open")) closeLayer("#modal");
+  closeStoryMenu();
+  $(".coach")?.remove();
+  render({ scroll: history.state?.y || 0 });
+});
 
 function render({ scroll = 0 } = {}) {
   const route = parseRoute();
@@ -762,10 +779,12 @@ function render({ scroll = 0 } = {}) {
     if (location.search === base) { state.route = baseRoute; document.title = title; updateBackBtn(); return; }
   }
   state.route = route;
-  if (route.region !== state.region) { state.region = route.region; store.set("region", route.region); }
+  // Une édition venue de l'adresse (lien partagé « &r=monde ») vaut pour cette visite seulement :
+  // on ne remplace pas l'édition choisie par la personne (c'est le sélecteur d'édition qui l'enregistre).
+  if (route.region !== state.region) state.region = route.region;
   state.observer?.disconnect();
   state.onScroll = null;
-  if (canSpeak) speechSynthesis.cancel();
+  stopSpeaking();
   renderChrome(route);
   const v = $("#view");
   if (route.view === "story") viewStory(v, route);
@@ -841,7 +860,7 @@ function renderChrome(route) {
     const bar = el.parentElement;
     if (el.offsetLeft + el.offsetWidth > bar.scrollLeft + bar.clientWidth || el.offsetLeft < bar.scrollLeft) bar.scrollLeft = el.offsetLeft - 16;
   }
-  $("#search").q.value = route.view === "search" ? route.q : "";
+  if (document.activeElement !== $("#search").q) $("#search").q.value = route.view === "search" ? route.q : "";
   $("#sections").hidden = !["feed", "search", "story", "outlet"].includes(route.view) && innerWidth < 761;
   topbarSize();
   document.title = route.view === "feed" ? (route.cat === "une" ? "Prisme" : `${CAT_LABEL[route.cat]} — Prisme`) : document.title;
@@ -1171,7 +1190,10 @@ document.addEventListener("click", (e) => {
   if (!meta.d) return;
   const site = `https://${meta.d}/`, name = meta.n || meta.d, pref = store.get("gnPref", "");
   if (pref === "google") return;
-  e.preventDefault(); e.stopPropagation();
+  // Pas de « stopPropagation » : la lecture compte toujours dans Mon prisme, et les autres gestes
+  // (mode sélection, appui long), qui passent avant, gardent la main.
+  if (e.defaultPrevented) return;
+  e.preventDefault();
   const card = a.closest("[data-card-read]") || a;
   const sid = card.dataset?.cardRead;
   const go2 = (u) => { window.open(u, "_blank", "noopener"); if (sid && state.stories.get(sid)) setTimeout(() => setSeen(state.stories.get(sid), true), 400); };
@@ -1191,7 +1213,7 @@ document.addEventListener("click", (e) => {
     closeLayer("#modal");
     go2(b.dataset.gn === "site" ? site : a.href);
   });
-}, true);
+});
 // Tes médias préférés (⭐) : quand ils couvrent une nouvelle, le titre s'ouvre chez eux. Sur cet appareil seulement.
 const prefMed = {
   list() { try { return JSON.parse(store.get("prefMed", "[]")); } catch { return []; } },
@@ -1263,7 +1285,6 @@ document.addEventListener("click", (e) => {
   const s = state.stories.get(a.dataset.cardRead);
   if (s) setTimeout(() => setSeen(s, true), 400);
 });
-const peekBtn = `<button class="c2-peek" type="button" data-peek aria-expanded="false" aria-label="Aperçu ici" title="Aperçu ici"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>`;
 // Les sources d'une carte sont un bouton : « Le Devoir +11 ▾ » ouvre « Lire chez… » pour choisir le média.
 const srcPick = (s, n = 1, logos = 3) => `<button class="src-pick" type="button" data-pick="${esc(s.id)}" title="Choisir le média à lire">${logoStack(s, logos)}${sourcesLine(s, n)}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>`;
 const metaLine = (s, st) => `<p class="c2-meta">${newTag(s)}${srcPick(s)} · <time title="${esc(ago(s.lastSeen || s.firstSeen))}">${agoShort(s.lastSeen || s.firstSeen)}</time>${st?.fresh ? ` · <b class="c2-fresh">+${st.fresh} depuis ta lecture</b>` : ""}</p>`;
@@ -1337,30 +1358,6 @@ function bigCard(s, cat) {
     ${cmpRow(s)}
   </article>`;
 }
-// L'aperçu sur place : le résumé et les titres de gauche et de droite, sans changer de page.
-function peekHtml(s) {
-  const dek = s.ai?.summary || s.summary || "";
-  const by = pickBySide(s);
-  const row = (a, side, label) => (a ? `<a class="pk-side pk-${side}" href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener noreferrer" data-read="${readAttr(a)}">
-      <span class="pk-h">${label} · <span data-no-tr>${esc(a.sourceName)}</span></span><span class="pk-t" data-no-tr>${esc(a.title)}</span></a>` : "");
-  const sides3 = [row(by.left, "l", "Gauche"), row(by.center, "c", "Centre"), row(by.right, "r", "Droite")].filter(Boolean);
-  return `<div class="peek">${dek ? `<p class="pk-dek" data-no-tr>${esc(dek.length > 320 ? `${dek.slice(0, 317)}…` : dek)}</p>` : ""}
-    ${sides3.length ? `<div class="pk-sides">${sides3.join("")}</div>` : ""}
-    <a class="pk-open" href="${href({ h: s.id })}" data-nav>Toute l'histoire, tous les médias →</a></div>`;
-}
-document.addEventListener("click", (e) => {
-  const b = e.target.closest("[data-peek]");
-  if (!b) return;
-  e.preventDefault(); e.stopPropagation();
-  const card = b.closest("article");
-  const s = card && state.stories.get(cardId(card));
-  if (!s) return;
-  const open = $(".peek", card);
-  if (open) { open.remove(); b.setAttribute("aria-expanded", "false"); return; }
-  card.insertAdjacentHTML("beforeend", peekHtml(s));
-  b.setAttribute("aria-expanded", "true");
-  buzz(8);
-}, true);
 // Une carte « Angle mort » glissée dans le fil.
 function blindCard(s) {
   const r = s.blindspot === "right";
@@ -1608,10 +1605,9 @@ async function openCityBref(city = null) {
 function openEnBref() {
   const f = state.route?.view === "feed" ? state.feeds.get(feedKey(state.route)) : null;
   if (f?.stories.length && !state.panel) { openShorts(); return; }
+  // Le fil s'affiche (parfois un instant plus tard, avec la transition) : il ouvrira En bref dès qu'il a des histoires.
   state.enBrefPending = true;
   go(href({}));
-  const f2 = state.feeds.get(feedKey(state.route));
-  if (f2?.stories.length) { state.enBrefPending = false; openShorts(); }
 }
 function closeShorts() {
   const o = $("#shorts");
@@ -1748,7 +1744,8 @@ function openSettings() {
 /* ---------- Accueil, la première fois ---------- */
 function openOnboarding() {
   let step = 0;
-  const choice = { region: state.region, city: prefs.city, cats: new Set(prefs.cats), scale: prefs.scale };
+  store.set("onboarded", "1"); // vu une fois, même fermé par ✕ ou en glissant
+  const choice = { region: state.region, city: prefs.city, cityLabel: prefs.cityLabel, cats: new Set(prefs.cats), scale: prefs.scale };
   const steps = [
     () => `<div class="ob-hero"><svg class="ob-logo" viewBox="0 0 64 40" aria-hidden="true"><path d="M1 23.5 L21 21" style="stroke:var(--ink)"/><path d="M27 4 L41 34 H13 Z" style="stroke:var(--ink)"/><path d="M32.5 18.5 L63 7" style="stroke:var(--b-l2)"/><path d="M33.3 20 L63 14" style="stroke:var(--b-l1)"/><path d="M34 21.5 L63 21" style="stroke:var(--b-c)"/><path d="M34.7 23 L63 28" style="stroke:var(--b-r1)"/><path d="M35.4 24.5 L63 35" style="stroke:var(--b-r2)"/></svg>
         <h2>Bienvenue dans Prisme</h2>
@@ -1842,8 +1839,17 @@ function speak(parts, btn) {
   if (!canSpeak) { toast("La lecture à voix haute n'est pas offerte sur cet appareil."); return; }
   const setBtn = (b, on) => { if (!b) return; b.setAttribute("aria-pressed", on); const sp = $("span", b); if (sp) sp.textContent = on ? "Arrêter" : "Écouter"; };
   // Toucher « Arrêter » arrête ; toucher un autre « Écouter » passe à cette histoire-là.
-  const wasMine = speakBtn === btn;
-  if (speakBtn) { speechSynthesis.cancel(); setBtn(speakBtn, false); speakBtn = null; if (wasMine) return; }
+  const drop = (b) => { setBtn(b, false); if (b?.dataset.float) b.remove(); };
+  const wasMine = btn && speakBtn === btn;
+  if (speakBtn) { speechSynthesis.cancel(); drop(speakBtn); speakBtn = null; if (wasMine) return; }
+  // Sans bouton sous le doigt (menu de l'appui long) : un bouton « Arrêter » flottant.
+  if (!btn) {
+    btn = document.createElement("button");
+    btn.type = "button"; btn.className = "speak-stop"; btn.dataset.float = "1";
+    btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg><span>Arrêter</span>';
+    btn.onclick = () => { speechSynthesis.cancel(); btn.remove(); if (speakBtn === btn) speakBtn = null; };
+    document.body.appendChild(btn);
+  }
   unlockAudio();
   speechSynthesis.cancel(); // iPhone : vide une lecture restée coincée
   const want = LANG === "en" ? "en" : "fr";
@@ -1852,7 +1858,7 @@ function speak(parts, btn) {
   // Des phrases courtes : l'iPhone coupe parfois les longs textes en plein milieu.
   const list = parts.filter(Boolean).map((t) => String(t).replace(/\s+/g, " ").trim()).filter(Boolean)
     .flatMap((t) => t.match(/[^.!?…]+[.!?…]*\s*/g) || [t]).map((t) => t.trim()).filter(Boolean);
-  if (!list.length) return;
+  if (!list.length) { if (btn.dataset.float) btn.remove(); return; }
   let started = false;
   speakBtn = btn;
   list.forEach((t, i) => {
@@ -1861,8 +1867,8 @@ function speak(parts, btn) {
     if (voice) u.voice = voice;
     u.rate = 1;
     u.onstart = () => { started = true; };
-    if (i === list.length - 1) u.onend = () => { if (speakBtn === btn) { setBtn(btn, false); speakBtn = null; } };
-    u.onerror = (ev) => { if (ev.error !== "interrupted" && ev.error !== "canceled" && speakBtn === btn) { setBtn(btn, false); speakBtn = null; } };
+    if (i === list.length - 1) u.onend = () => { if (speakBtn === btn) { drop(btn); speakBtn = null; } };
+    u.onerror = (ev) => { if (ev.error !== "interrupted" && ev.error !== "canceled" && speakBtn === btn) { drop(btn); speakBtn = null; } };
     speechSynthesis.speak(u);
   });
   speechSynthesis.resume();
@@ -2105,14 +2111,6 @@ async function shareStoryImage(s) {
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   toast("Image enregistrée : tu peux l'envoyer dans Messenger.");
 }
-document.addEventListener("click", (e) => {
-  const b = e.target.closest("[data-share-img]");
-  if (!b) return;
-  const s = state.stories.get(b.dataset.shareImg);
-  if (s) shareStoryImage(s);
-});
-const imgShareBtn = (s) => `<button class="act act-l" type="button" data-share-img="${esc(s.id)}" title="Partager en image">${'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><circle cx="9" cy="10" r="1.8"/><path d="m20.5 16-5-5-8 8.5"/></svg>'}<span>Image</span></button>`;
-
 /* ---------- Titres anglais traduits en français (préparés par le robot) ---------- */
 async function withTitlesFr(stories) {
   const [tr, sums] = await Promise.all([
@@ -2219,7 +2217,7 @@ async function viewVille(v, route) {
   const mine = prefs.city === city.s;
   const near = V.list.filter((x) => x !== city && x.pr === city.pr && (city.m ? x.m === city.m : x.r === city.r)).slice(0, 10);
   const nearRegion = near.length < 6 ? V.list.filter((x) => x !== city && x.pr === city.pr && x.r === city.r && !near.includes(x)).slice(0, 10 - near.length) : [];
-  state.wf.media = "";
+  Object.assign(state.wf, { scope: "auto", hours: 0, side: "all", lang: "all", cat: "all", media: "" });
   v.innerHTML = `<header class="ville-top">
       <div class="vt-row"><h1>${esc(villeLabel(city))}</h1>
         <div class="vt-acts">
@@ -2366,6 +2364,7 @@ const panelWanted = (url) => {
 };
 
 function openPanel(route) {
+  stopSpeaking();
   const mode = panelMode();
   let p = $("#panel");
   if (!p) {
@@ -2398,6 +2397,15 @@ function closePanel() {
   }, 320);
   $$(".kbd-sel").forEach((x) => x.classList.remove("kbd-sel"));
   state.panel = null;
+  stopSpeaking(); // fermer l'histoire coupe la lecture à voix haute
+}
+function stopSpeaking() {
+  if (!canSpeak) return;
+  speechSynthesis.cancel();
+  if (!speakBtn) return;
+  speakBtn.setAttribute("aria-pressed", "false");
+  if (speakBtn.dataset.float) speakBtn.remove(); else { const sp = $("span", speakBtn); if (sp) sp.textContent = "Écouter"; }
+  speakBtn = null;
 }
 document.addEventListener("click", (e) => {
   if (e.target.closest("[data-panel-close]")) { e.preventDefault(); history.back(); }
@@ -2480,14 +2488,14 @@ document.addEventListener("keydown", (e) => {
   const cards = storyCards();
   if (!cards.length) return;
   e.preventDefault();
-  if (e.key === "Enter") { cards[kbdIndex]?.querySelector("h2 a, h3 a")?.click(); return; }
+  if (e.key === "Enter") { const id = cards[kbdIndex] && cardId(cards[kbdIndex]); if (id) go(href({ h: id })); return; }
   kbdIndex = Math.max(0, Math.min(cards.length - 1, kbdIndex + (next ? 1 : -1)));
   $$(".kbd-sel").forEach((x) => x.classList.remove("kbd-sel"));
   const c = cards[kbdIndex];
   c.classList.add("kbd-sel");
   c.scrollIntoView({ block: "center", behavior: reduceMotion() ? "auto" : "smooth" });
   // En deux colonnes, l'histoire choisie s'ouvre tout de suite à droite.
-  if (arrows) { const a = c.querySelector("h2 a, h3 a"); if (a) go(a.getAttribute("href"), { replace: true }); }
+  if (arrows) { const id = cardId(c); if (id) go(href({ h: id }), { replace: true }); }
 });
 
 // Recherche plein écran sur téléphone.
@@ -2536,7 +2544,7 @@ document.addEventListener("click", (e) => { if (e.target.closest("#installX")) {
 // Les histoires enregistrées restent lisibles hors ligne (et après leur sortie de l'édition).
 const favStoryKey = (id) => `fs:${id}`;
 function saveFavStory(s) {
-  const slim = { ...s, articles: (s.articles || []).slice(0, 24).map((a) => ({ title: a.title, url: a.url, published: a.published, sourceName: a.sourceName, domain: a.domain, lang: a.lang, media: a.media })), world: undefined };
+  const slim = { ...s, articles: (s.articles || []).slice(0, 24).map((a) => ({ title: a.title, url: a.url, published: a.published, sourceName: a.sourceName, domain: a.domain, lang: a.lang, media: a.media })), world: undefined, _fold: undefined };
   try {
     store.set(favStoryKey(s.id), JSON.stringify(slim));
     const ids = JSON.parse(store.get("fsIds", "[]")).filter((x) => x !== s.id);
@@ -2845,7 +2853,7 @@ function tryResume(f, key) {
     });
     return;
   }
-  if (f.hasMore && f.page < 6) { setTimeout(() => loadMore(key), 0); return; }
+  if (r.id && f.hasMore && f.page < 6) { setTimeout(() => loadMore(key), 0); return; }
   state.resume = null;
   if (r.y) requestAnimationFrame(() => scrollTo(0, Math.min(r.y, document.documentElement.scrollHeight - innerHeight)));
   reopenStory(r.h);
@@ -3009,7 +3017,7 @@ document.addEventListener("click", async (e) => {
     if (c.dataset.unlessCat) less.delCat(c.dataset.unlessCat); else less.delMed(c.dataset.unlessMed);
     state.feeds.clear();
     const sec = $("#setLess");
-    if (sec) sec.outerHTML = settingsExtra().split("</section>")[0] + "</section>";
+    if (sec) { const t = document.createElement("div"); t.innerHTML = settingsExtra(); const fresh = t.querySelector("#setLess"); if (fresh) sec.replaceWith(fresh); }
     return;
   }
   const gq = e.target.closest("[data-gnpref]");
@@ -3083,35 +3091,6 @@ function homeCards(route) {
     ${ville ? `<aside class="hcard hc-ville" data-hc="hcVille" id="hcVille" hidden></aside>` : ""}`;
 }
 let cityCache = null;
-async function cityToday(city) {
-  if (cityCache && cityCache.s === city.s && Date.now() - cityCache.at < 10 * 60e3) return cityCache;
-  const q = city.s === "quebec" ? `"ville de Québec"` : `"${city.n}"`;
-  const [r, loc] = await Promise.all([indexSearch(q).catch(() => null), localMedia()]);
-  if (!r) return null;
-  const m = r.meta;
-  const own = new Set(Object.entries(loc).filter(([, [, , cities]]) => (cities || []).some((c) => foldText(c) === city.f)).map(([d]) => d));
-  const ids = new Set(r.ids.filter((id) => m.D[m.dom[id]].country === "CA"));
-  if (own.size) {
-    const idx = new Set(m.D.map((d, i) => (own.has(d.domain) ? i : -1)).filter((i) => i >= 0));
-    for (let id = 0; id < m.dom.length; id++) if (idx.has(m.dom[id])) ids.add(id);
-  }
-  const today = [...ids].filter((id) => m.age[id] * 10 <= 24 * 60).sort((a, b) => m.age[a] - m.age[b]);
-  cityCache = { s: city.s, at: Date.now(), n: today.length, top: await docsFor(today.slice(0, 3)) };
-  return cityCache;
-}
-async function fillCityCard() {
-  const el = $("#hcVille");
-  if (!el) return;
-  const city = await myVille();
-  if (!city) return;
-  const d = await cityToday(city).catch(() => null);
-  if (!d?.n || !el.isConnected) return;
-  el.innerHTML = `<span class="hc-ico" aria-hidden="true">${pin}</span>
-    <div class="hc-body"><a href="${href({ ville: city.s })}" data-nav><b>${esc(city.n)} aujourd'hui</b><span>${d.n > 1 ? `${d.n} nouvelles depuis 24 heures` : "1 nouvelle depuis 24 heures"} · tout voir →</span></a>
-      <ul class="hc-list">${d.top.slice(0, 2).map((x) => `<li>${artLink(x, "hc-t")}<small data-no-tr>${esc(x.sourceName)} · ${esc(ago(x.published))}</small></li>`).join("")}</ul></div>
-    <button class="icon-btn hc-x" type="button" data-hc-x aria-label="Ranger pour aujourd'hui"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
-  el.hidden = false;
-}
 function dismissCard(c) {
   store.set(c.dataset.hc, todayKey());
   c.style.height = `${c.offsetHeight}px`;
@@ -3504,6 +3483,14 @@ async function weather(city) {
     days: (d.time || []).map((t, i) => ({ t, code: d.weather_code[i], max: r(d.temperature_2m_max[i]), min: r(d.temperature_2m_min[i]), p: d.precipitation_probability_max?.[i] ?? null, rise: d.sunrise?.[i] || "", set: d.sunset?.[i] || "" })),
   };
   store.set(`wx.${city.s}`, JSON.stringify(out));
+  try {
+    const keep = new Set([prefs.city, ...wxSaved(), city.s]);
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i) || "";
+      const m = k.match(/^prisme\.(?:wx|geo)\.(.+)$/);
+      if (m && !keep.has(m[1])) localStorage.removeItem(k);
+    }
+  } catch { /* stockage indisponible */ }
   return out;
 }
 // L'icône de nuit pour un ciel dégagé.
@@ -3697,8 +3684,10 @@ function nextStory(id) {
   const i = list.findIndex((x) => x.id === id);
   return i >= 0 ? list[i + 1] || null : null;
 }
-function goNext(id) {
-  const nx = nextStory(id);
+async function goNext(id) {
+  let nx = nextStory(id);
+  const f = state.feeds.get(state.lastFeedKey);
+  if (!nx && f?.hasMore && f.stories.some((x) => x.id === id)) { await loadMore(state.lastFeedKey); nx = nextStory(id); }
   if (!nx) { toast("C'est la dernière histoire de ce fil."); return; }
   buzz(8);
   const host = state.panel ? $("#panelBody") : $("#view");
@@ -3733,7 +3722,7 @@ document.addEventListener("click", (e) => { if (e.target.closest("[data-next]"))
 // Glisser vers la gauche dans une histoire : la suivante.
 {
   let x0 = null, y0 = 0, t0 = 0;
-  const NOSW = ".s-read-alt, .chips, .cols3, .ff-g, .zones, .words, .vgrid, input, textarea, select, .s-readbar, .modal";
+  const NOSW = ".s-acts, .s-read-alt, .chips, .cols3, .ff-g, .zones, .words, .vgrid, input, textarea, select, .s-readbar, .modal";
   addEventListener("touchstart", (e) => {
     x0 = null;
     if (e.touches.length !== 1 || state.route?.view !== "story") return;
@@ -3934,6 +3923,7 @@ function coachMarks() {
 function hScroll(el) {
   if (!el || el.dataset.hs) return;
   el.dataset.hs = "1";
+  for (const k of hsLive.keys()) if (!k.isConnected) hsLive.delete(k); // les rangées des pages précédentes
   const wrap = document.createElement("div");
   wrap.className = "hs-wrap";
   el.replaceWith(wrap);
@@ -3955,7 +3945,7 @@ function hScroll(el) {
     wrap.classList.toggle("hs-fl", !L.hidden); wrap.classList.toggle("hs-fr", !R.hidden);
   };
   el.addEventListener("scroll", sync, { passive: true });
-  addEventListener("resize", sync);
+  hsLive.set(el, sync);
   new MutationObserver(() => requestAnimationFrame(sync)).observe(el, { childList: true });
   requestAnimationFrame(sync);
   // La molette (haut / bas) fait défiler la rangée de côté.
@@ -3966,16 +3956,23 @@ function hScroll(el) {
     if (el.scrollLeft !== before) e.preventDefault();
   }, { passive: false });
   // Glisser à la souris (le doigt glisse déjà tout seul).
-  let x0 = null, s0 = 0, moved = false;
-  el.addEventListener("pointerdown", (e) => { if (e.pointerType !== "mouse" || e.button) return; x0 = e.clientX; s0 = el.scrollLeft; moved = false; });
-  addEventListener("pointermove", (e) => {
-    if (x0 == null) return;
-    const dx = e.clientX - x0;
-    if (Math.abs(dx) > 5) { moved = true; el.classList.add("hs-drag"); el.scrollLeft = s0 - dx; }
-  });
-  addEventListener("pointerup", () => { x0 = null; setTimeout(() => el.classList.remove("hs-drag"), 0); });
-  el.addEventListener("click", (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+  el.addEventListener("pointerdown", (e) => { if (e.pointerType !== "mouse" || e.button) return; hsDrag = { el, x0: e.clientX, s0: el.scrollLeft, moved: false }; });
+  el.addEventListener("click", (e) => { if (el.dataset.hsMoved) { e.preventDefault(); e.stopPropagation(); delete el.dataset.hsMoved; } }, true);
 }
+// Un seul jeu d'écouteurs sur la fenêtre pour toutes les rangées (les rangées retirées de la page sont oubliées).
+const hsLive = new Map();
+let hsDrag = null;
+addEventListener("resize", () => { for (const [el, sync] of hsLive) { if (el.isConnected) sync(); else hsLive.delete(el); } });
+addEventListener("pointermove", (e) => {
+  if (!hsDrag) return;
+  const dx = e.clientX - hsDrag.x0;
+  if (Math.abs(dx) > 5) { hsDrag.moved = true; hsDrag.el.classList.add("hs-drag"); hsDrag.el.scrollLeft = hsDrag.s0 - dx; }
+});
+addEventListener("pointerup", () => {
+  if (!hsDrag) return;
+  const d = hsDrag; hsDrag = null;
+  if (d.moved) { d.el.dataset.hsMoved = "1"; setTimeout(() => { d.el.classList.remove("hs-drag"); delete d.el.dataset.hsMoved; }, 50); }
+});
 
 // Raccourcis de l'icône (Android) et liens directs : ?bref=une|ville|video, ?focus=search.
 function bootShortcut() {
@@ -3998,9 +3995,9 @@ const HOWTO = `<aside class="howto" aria-label="Comment lire Prisme">
   <div class="howto-h"><span class="kicker">Comment lire Prisme</span><button class="btn" type="button" id="howtoOk">Compris</button></div>
   <ol>
     <li><b>Chaque bloc est une histoire</b>, pas un article : un même évènement, raconté par plusieurs médias. Prisme regroupe leurs articles.</li>
-    <li><b>« 6 médias en parlent »</b> : six médias différents ont publié un article sur cette histoire. Leurs noms sont écrits en dessous (« Couvert par… ») ; touche un nom pour voir ce média.</li>
+    <li><b>Touche le titre ou la photo</b> pour lire l'article. Le nom du média est sous le titre ; touche-le pour en choisir un autre.</li>
     <li><b>La barre de couleur</b> montre d'où viennent ces médias : <span class="sw-l">gauche</span>, <span class="sw-c">centre</span>, <span class="sw-r">droite</span>.</li>
-    <li><b>Touche le titre</b> pour comparer : chaque article, média par média, les mots de chaque côté et qui possède ces médias.</li>
+    <li><b>« Comparer les médias »</b>, sous chaque nouvelle : ce que la gauche, le centre et la droite en disent, titre par titre.</li>
   </ol>
 </aside>`;
 // Noms courts des lentilles (téléphone : tout tient sur deux lignes, rien à glisser).
@@ -4063,6 +4060,8 @@ function mountFeed(key, params) {
   if (!f) { f = { stories: [], page: -1, hasMore: true, loading: false, params }; state.feeds.set(key, f); }
   state.lastFeedKey = key; // pour « Histoire suivante »
   drawFeed(f);
+  // « En bref » demandé depuis une autre page : le fil est là, on l'ouvre.
+  if (state.enBrefPending && f.stories.length) { state.enBrefPending = false; setTimeout(openShorts, 60); }
   if (f.page < 0) loadMore(key); else tryResume(f, key);
   const sentinel = $("#sentinel");
   state.observer = new IntersectionObserver((entries) => {
@@ -4530,7 +4529,7 @@ function keywordsOf(s) {
 /* ---------- Un sujet (recherche) ---------- */
 function viewSearch(v, route) {
   document.title = `${route.q} — Prisme`;
-  state.wf.media = "";
+  Object.assign(state.wf, { scope: "auto", hours: 0, side: "all", lang: "all", cat: "all", media: "" });
   const followed = topics.has(route.q);
   const pq = parseQuery(route.q);
   v.innerHTML = `<header class="page-h">
@@ -4575,6 +4574,7 @@ function viewSearch(v, route) {
   // Peu d'histoires dans l'édition : on montre aussi celles du monde entier.
   const check = async () => {
     const ff = state.feeds.get(key);
+    if (!ff || ff.error || state.route.view !== "search" || state.route.q !== route.q) return;
     if (ff.loading || ff.page < 0) return setTimeout(check, 300);
     if (ff.stories.length >= 3 || state.region === "monde") return;
     const w = await api(`/api/feed?q=${encodeURIComponent(route.q)}&region=monde&page=0`).catch(() => null);
@@ -6109,7 +6109,7 @@ syncThemeColor();
 bootShortcut();
 $("#prefsBtn").onclick = openSettings;
 // La première fois (sur l'accueil seulement) : quelques questions pour personnaliser Prisme.
-if (!store.get("onboarded") && state.route.view === "feed" && !location.search) setTimeout(openOnboarding, 600);
+if (!store.get("onboarded") && state.route.view === "feed" && (!location.search || location.search === "?source=app")) setTimeout(openOnboarding, 600);
 
 // App installable : le service worker garde l'app et les dernières histoires pour le mode hors ligne.
 if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));

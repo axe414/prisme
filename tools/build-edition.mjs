@@ -40,6 +40,12 @@ await refreshAuto();
 const index = await getIndex();
 const st = autoStatus();
 log(`${index.articles.length} articles lus (${st.loaded} médias découverts sur ${st.total})`);
+// Garde-fou : une lecture qui échoue en bloc (panne de réseau du serveur) ne doit pas publier des éditions vides.
+// On arrête le passage : le site en ligne garde les nouvelles du passage précédent.
+if (index.articles.length < 2000) {
+  console.error(`Trop peu d'articles lus (${index.articles.length}) : passage annulé, le site en ligne reste tel quel.`);
+  process.exit(1);
+}
 // Rapport : les médias que le robot n'arrive pas à lire, et pourquoi (pour l'entretien des sources).
 {
   const fails = Object.entries(index.sources || {}).filter(([, s]) => !s.ok).map(([d, s]) => [d, s.error || "?"]);
@@ -67,7 +73,12 @@ for (const region of REGIONS) {
   const e = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const seen = new Set();
   let n = 0;
-  for (const [region, file] of Object.entries(editions)) {
+  // Le Québec d'abord : une histoire présente dans plusieurs éditions garde la page (titre, chiffres, lien)
+  // de l'édition Québec, celle de la plupart des lecteurs. Sinon « Monde » passait devant et envoyait
+  // le destinataire d'un lien dans l'édition Monde.
+  const order = ["qc", "ca", ...Object.keys(editions).filter((r) => r !== "qc" && r !== "ca")].filter((r) => editions[r]);
+  for (const region of order) {
+    const file = editions[region];
     const top = [...file.stories].sort((a, b) => (b.scores?.essentiel || 0) - (a.scores?.essentiel || 0)).slice(0, 250);
     for (const s of top) {
       if (seen.has(s.id) || !/^[\w-]+$/.test(s.id)) continue;

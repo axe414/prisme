@@ -2237,3 +2237,12 @@ html.soir img { filter: brightness(.92); }
 
 /* Téléphone : la barre des rubriques (maintenant dans .hs-wrap) garde sa propre rangée sous la recherche */
 @media (max-width: 760px) { .sections-in > .hs-wrap { order: 2; flex: 0 0 100%; min-width: 0; } }
+
+/* ================= Correctifs de la revue ================= */
+/* « Aa » et le pincement grossissent aussi l'histoire ouverte dans le panneau */
+#panel .panel-body { zoom: var(--scale, 1); }
+/* Une fenêtre ouverte depuis « En bref » passe par-dessus (elle s'ouvrait derrière) */
+body.shorts-open .modal { z-index: 99; }
+/* Le bouton « Arrêter » flottant de la lecture à voix haute */
+.speak-stop { position: fixed; z-index: 96; left: 50%; transform: translateX(-50%); bottom: calc(78px + env(safe-area-inset-bottom)); display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px 0 14px; border: 0; border-radius: 999px; background: var(--ink); color: var(--paper); font: 600 15px var(--sans); cursor: pointer; box-shadow: 0 10px 30px -8px rgba(0, 0, 0, .6); }
+.speak-stop svg { width: 18px; height: 18px; fill: currentColor; }
