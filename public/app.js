@@ -946,8 +946,8 @@ function renderChrome(route) {
     // « Ma ville » en un toucher, aller et retour : sur la page de ta ville, la même pastille (avec ✕) ramène à la une.
     + (() => { const onMine = route.view === "ville" && route.ville === prefs.city && prefs.city;
       return `<a class="cat-ville${onMine ? " on" : ""}" href="${onMine ? href({}) : prefs.city ? href({ ville: prefs.city }) : href({ v: "villes" })}" data-nav ${["ville", "villes"].includes(route.view) ? 'aria-current="page"' : ""} title="${onMine ? "Revenir à la une" : "Les nouvelles de ma ville"}">${pico("pin")} ${esc(prefs.cityLabel || "Ma ville")}${onMine ? `<span class="cv-x" aria-hidden="true">✕</span>` : ""}</a>`; })()
-    // La météo de ta ville. Sans ville choisie (Québec et Canada), la pastille reste là et mène au choix de la ville.
-    + `${prefs.city ? `<button class="cat-wx" id="catWx" type="button" aria-label="Météo" hidden></button>` : ["qc", "ca"].includes(state.region) ? `<button class="cat-wx" type="button" data-open-settings="city" title="Choisis ta ville pour voir sa météo">${pico("partly")}Météo</button>` : ""}<span class="sep"></span>`
+    // La météo : celle de ta ville, sinon celle de la grande ville de l'édition (avec son nom), en attendant ton choix.
+    + `${wxSlug() ? `<button class="cat-wx" id="catWx" type="button" aria-label="Météo" hidden></button>` : ""}<span class="sep"></span>`
     + CATS.slice(1).map(catLink).join("");
   const onUne = ["feed", "story", "search", "outlet", "ville", "villes"].includes(route.view);
   const alerts = alertCount();
@@ -1909,8 +1909,14 @@ function openSettings() {
       if (!hit) { $("#setCityNote").textContent = "Ville introuvable : choisis-la dans la liste."; return; }
       store.set("city", hit.s); store.set("cityLabel", hit.n); state.feeds.clear();
       e.target.value = villeLabel(hit); $("#setCityNote").textContent = `✓ ${villeWhere(hit)}`;
-      if (state.route.view === "feed") render();
+      if (state.route.view === "feed") render(); else { renderChrome(state.route); drawCatWx(); }
     };
+    // Pas besoin d'appuyer sur Entrée : dès que le nom tapé est exactement celui d'une ville, elle est enregistrée.
+    $("#setCity").addEventListener("input", (e) => {
+      const f = foldText(e.target.value).trim();
+      const hit = f.length >= 3 && V.list.find((x) => foldText(villeLabel(x)) === f);
+      if (hit && hit.s !== prefs.city) e.target.dispatchEvent(new Event("change"));
+    });
   }).catch(() => {});
 }
 
@@ -2345,9 +2351,13 @@ function cityAuto(input, V) {
   const draw = () => {
     const hits = matchVilles(V, input.value, 6);
     box.innerHTML = hits.map((x) => `<button type="button" role="option" data-cs="${esc(x.s)}">${pin}<span><b>${esc(villeLabel(x))}</b><small>${esc(villeWhere(x))}${x.p ? ` · ${x.p.toLocaleString(LOCALE)} hab.` : ""}</small></span></button>`).join("");
-    box.hidden = !hits.length || foldText(input.value).trim() === foldText(villeLabel(hits[0])) && hits.length === 1;
+    const done = hits.length === 1 && foldText(input.value).trim() === foldText(villeLabel(hits[0]));
+    box.hidden = !hits.length || done;
+    return done;
   };
-  input.addEventListener("input", draw);
+  // Le nom tapé est complet et ne désigne qu'une ville : elle est choisie, sans avoir à appuyer sur Entrée.
+  // (Les réglages ont leur propre règle, plus souple.)
+  input.addEventListener("input", () => { if (draw() && input.id !== "setCity") input.dispatchEvent(new Event("change")); });
   input.addEventListener("focus", () => { if (input.value) draw(); });
   input.addEventListener("blur", () => setTimeout(() => { box.hidden = true; }, 150));
   box.addEventListener("mousedown", (e) => e.preventDefault());
@@ -3692,10 +3702,12 @@ async function fillWeather(el, city) {
 // La pastille météo en haut, à côté de ta ville : toujours visible, même en descendant.
 // La ville de la météo : ta ville, ou une autre choisie dans la feuille météo (chalet, parents…).
 const wxSaved = () => { try { return JSON.parse(store.get("wxCities", "[]")); } catch { return []; } };
-const wxSlug = () => { const s = store.get("wxSel", ""); return s && (s === prefs.city || wxSaved().includes(s)) ? s : prefs.city; };
+// Sans ville choisie : la grande ville de l'édition (Québec et Canada seulement), pour que la météo soit là dès la première visite.
+const WX_DEFAULT = { qc: "montreal", ca: "toronto-on" };
+const wxSlug = () => { const s = store.get("wxSel", ""); return s && (s === prefs.city || wxSaved().includes(s)) ? s : prefs.city || WX_DEFAULT[state.region] || ""; };
 async function drawCatWx() {
   const b = $("#catWx");
-  if (!b || !prefs.city || !navigator.onLine) return;
+  if (!b || !wxSlug() || !navigator.onLine) return;
   const city = (await villesData().catch(() => null))?.bySlug.get(wxSlug());
   if (!city || !b.isConnected) return;
   b.dataset.other = city.s !== prefs.city ? city.n : "";
@@ -3716,8 +3728,9 @@ async function openWeather(slug, { add = false } = {}) {
   // Les villes de la météo : ta ville, puis celles ajoutées (jusqu'à 4).
   const list = [...new Set([prefs.city, ...wxSaved()].filter(Boolean))].map((x) => V.bySlug.get(x)).filter(Boolean);
   const chips = `<div class="wx-cities">${list.map((c) => `<span class="wx-city${c.s === city.s ? " on" : ""}"><button type="button" data-wx-pick="${esc(c.s)}">${c.s === prefs.city ? pico("pin") + " " : ""}${esc(c.n)}</button>${c.s !== prefs.city ? `<button class="wx-del" type="button" data-wx-del="${esc(c.s)}" aria-label="Retirer ${esc(c.n)}">✕</button>` : ""}</span>`).join("")}
-      ${wxSaved().length < 4 ? `<button class="wx-add" type="button" data-wx-add>+ Ajouter une ville</button>` : ""}</div>
-    <div class="wx-addbox" id="wxAddBox"${add ? "" : " hidden"}><input class="set-select" id="wxAddIn" placeholder="Chalet, parents… tape le nom de la ville" autocomplete="off"></div>`;
+      ${!prefs.city ? "" : wxSaved().length < 4 ? `<button class="wx-add" type="button" data-wx-add>+ Ajouter une ville</button>` : ""}</div>
+    ${prefs.city ? "" : `<p class="wx-mine">Voici la météo de ${esc(city.n)}. Pour voir celle de chez toi, tape le nom de ta ville :</p>`}
+    <div class="wx-addbox" id="wxAddBox"${add || !prefs.city ? "" : " hidden"}><input class="set-select" id="wxAddIn" placeholder="${prefs.city ? "Chalet, parents… tape le nom de la ville" : "Ta ville (ex. Victoriaville)"}" autocomplete="off"></div>`;
   openModal(`<div class="modal-pad wx-sheet">${chips}<div class="loader">Météo de ${esc(city.n)}…</div></div>`, true);
   bindWxSheet(V);
   if (add) setTimeout(() => $("#wxAddIn")?.focus(), 250);
@@ -3774,8 +3787,15 @@ function bindWxSheet(V) {
     const f = foldText(inp.value).trim();
     const hit = V.list.find((x) => foldText(villeLabel(x)) === f) || matchVilles(V, inp.value, 1)[0];
     if (!hit) return;
-    if (hit.s !== prefs.city) store.set("wxCities", JSON.stringify([...new Set([...wxSaved(), hit.s])].slice(-4)));
-    store.set("wxSel", hit.s);
+    if (!prefs.city) {
+      // Première ville choisie : elle devient « Ma ville » (météo, fil de ta ville, alertes).
+      store.set("city", hit.s); store.set("cityLabel", hit.n); store.set("wxSel", ""); state.feeds.clear();
+      renderChrome(state.route);
+      toast(`Ta ville : ${hit.n}. Tu peux la changer dans les réglages.`);
+    } else {
+      if (hit.s !== prefs.city) store.set("wxCities", JSON.stringify([...new Set([...wxSaved(), hit.s])].slice(-4)));
+      store.set("wxSel", hit.s);
+    }
     drawCatWx();
     openWeather(hit.s);
   });
@@ -4613,7 +4633,7 @@ function drawRail(f) {
   const now = (f.trending || []).slice(0, 7);
   // Une colonne aérée : la météo de ta ville, tes sujets (s'il y en a), les angles morts. Les chiffres du fil sont repliés.
   el.innerHTML = `
-    ${prefs.city ? `<section class="rail-wx" id="railWx" hidden></section>` : ""}
+    ${wxSlug() ? `<section class="rail-wx" id="railWx" hidden></section>` : ""}
     ${topics.list().length ? `<section>
       <h2 class="block-h">Mes sujets <small>sur cet appareil</small></h2>
       <div class="chips">${topics.list().map(topicChip).join("")}</div>

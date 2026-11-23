@@ -2647,3 +2647,6 @@ svg.fx { display: block; width: 100%; height: auto; overflow: visible; }
   .story.c3.has-img > .c3-cmp svg { margin: -7px 0 -6px; }
   .story.c3.has-img > .c3-cmp > span { padding: 2px 0; background: none; color: var(--ink-2); font-size: 12px; }
 }
+
+/* La feuille météo sans ville choisie : une phrase qui invite à taper la sienne. */
+.wx-mine { margin: 0 0 10px; font: 14.5px/1.45 var(--sans); color: var(--ink-2); }
