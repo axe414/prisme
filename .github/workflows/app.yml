@@ -25,12 +25,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Dernier passage réussi du robot
+      # Le dernier passage du robot qui a vraiment publié le site. Un passage arrêté par sa garde finit « réussi » sans rien
+      # publier, et un passage publié reste « en cours » pendant qu'il attend de se relancer : on regarde donc la publication.
+      - name: Dernier passage publié du robot
         id: last
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          id=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow edition.yml --status success --limit 1 --json databaseId -q '.[0].databaseId')
+          id=""
+          for r in $(gh run list --repo "$GITHUB_REPOSITORY" --workflow edition.yml --limit 15 --json databaseId -q '.[].databaseId'); do
+            ok=$(gh run view "$r" --repo "$GITHUB_REPOSITORY" --json jobs -q '[.jobs[] | select(.name == "deploy" and .conclusion == "success")] | length')
+            if [ "$ok" = "1" ]; then id=$r; break; fi
+          done
+          if [ -z "$id" ]; then echo "Aucun passage publié trouvé."; exit 1; fi
+          echo "Site repris du passage $id"
           echo "id=$id" >> "$GITHUB_OUTPUT"
 
       - name: Site déjà publié (avec ses données)
