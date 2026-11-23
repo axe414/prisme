@@ -946,7 +946,8 @@ function renderChrome(route) {
     // « Ma ville » en un toucher, aller et retour : sur la page de ta ville, la même pastille (avec ✕) ramène à la une.
     + (() => { const onMine = route.view === "ville" && route.ville === prefs.city && prefs.city;
       return `<a class="cat-ville${onMine ? " on" : ""}" href="${onMine ? href({}) : prefs.city ? href({ ville: prefs.city }) : href({ v: "villes" })}" data-nav ${["ville", "villes"].includes(route.view) ? 'aria-current="page"' : ""} title="${onMine ? "Revenir à la une" : "Les nouvelles de ma ville"}">${pico("pin")} ${esc(prefs.cityLabel || "Ma ville")}${onMine ? `<span class="cv-x" aria-hidden="true">✕</span>` : ""}</a>`; })()
-    + `${prefs.city ? `<button class="cat-wx" id="catWx" type="button" aria-label="Météo" hidden></button>` : ""}<span class="sep"></span>`
+    // La météo de ta ville. Sans ville choisie (Québec et Canada), la pastille reste là et mène au choix de la ville.
+    + `${prefs.city ? `<button class="cat-wx" id="catWx" type="button" aria-label="Météo" hidden></button>` : ["qc", "ca"].includes(state.region) ? `<button class="cat-wx" type="button" data-open-settings="city" title="Choisis ta ville pour voir sa météo">${pico("partly")}Météo</button>` : ""}<span class="sep"></span>`
     + CATS.slice(1).map(catLink).join("");
   const onUne = ["feed", "story", "search", "outlet", "ville", "villes"].includes(route.view);
   const alerts = alertCount();
@@ -1056,7 +1057,13 @@ function openReport() {
 document.addEventListener("click", (e) => {
   if (e.target.closest("[data-explore]")) { e.preventDefault(); openExplore(); return; }
   if (e.target.closest("[data-report]")) { e.preventDefault(); openReport(); return; }
-  if (e.target.closest("[data-open-settings]")) { e.preventDefault(); openSettings(); return; }
+  const os = e.target.closest("[data-open-settings]");
+  if (os) {
+    e.preventDefault(); openSettings();
+    // Venu de la pastille météo : on arrive directement sur le champ « Ma ville ».
+    if (os.dataset.openSettings === "city") setTimeout(() => { const c = $("#setCity"); c?.scrollIntoView({ block: "center" }); c?.focus({ preventScroll: true }); }, 280);
+    return;
+  }
   if (e.target.closest("[data-close-modal]")) closeLayer("#modal");
   if (e.target.closest("[data-close-drawer]")) closeLayer("#drawer");
 });
@@ -1861,7 +1868,7 @@ function openSettings() {
     <section><h3>Thème</h3>
       <div class="seg seg-big" role="group">${[["light", "Clair"], ["dark", "Sombre"], ["oled", "Noir (OLED)"], ["auto", "Automatique"]].map(([v, l]) => `<button type="button" data-theme-set="${v}" aria-pressed="${theme === v}">${l}</button>`).join("")}</div></section>
     <section><h3>Mon édition</h3><select id="setRegion" class="set-select">${regionOpts}</select></section>
-    <section><h3>Ma ville <small>pour le fil « Ma ville »</small></h3>
+    <section><h3>Ma ville <small>pour la météo et le fil « Ma ville »</small></h3>
       <input id="setCity" class="set-select" list="villesList" placeholder="Tape le nom de ta ville…" autocomplete="off"><datalist id="villesList"></datalist>
       <p class="note" id="setCityNote" style="margin:6px 0 0"></p></section>
     <section><h3>Ce qui m'intéresse <small>pour le fil « Pour toi »</small></h3>
