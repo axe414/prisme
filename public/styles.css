@@ -1631,6 +1631,11 @@ body.shorts-open { overflow: hidden; }
 .sh-div .sh-in { padding-bottom: calc(env(safe-area-inset-bottom) + 30vh); }
 .sh-div h2 { font-size: clamp(30px, 8vw, 44px); }
 .sh-hint { margin-top: 18px; font: 600 14px var(--sans); opacity: .7; }
+.sh-dead .sh-hint { opacity: 1; }
+.sh-dead .sh-hint span { opacity: .7; }
+.sh-dead .sh-hint a { color: #fff; text-decoration: underline; text-underline-offset: 3px; position: relative; z-index: 5; }
+.sh-dead .sh-play, .sh-dead .sh-sound { display: none; }
+.sh-dead .sh-player img { filter: brightness(.55); }
 .sh-div .btn { margin-top: 18px; }
 .row-acts { display: inline-flex; align-items: center; gap: 12px; }
 .row-bref { height: 30px; padding: 0 12px; border-radius: 999px; border: 0; background: var(--ink); color: var(--paper); font: 600 12.5px var(--sans); cursor: pointer; white-space: nowrap; }

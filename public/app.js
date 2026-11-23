@@ -3399,17 +3399,84 @@ const vidSlide = (v) => `<section class="sh sh-v" data-vid="${esc(v.id)}">
 // Le lecteur YouTube, sans ses commandes (titre, réglages, liens) : Prisme garde un seul bouton « Son ».
 // (Les avis obligatoires de YouTube, comme « promotion payée », restent affichés par YouTube.)
 const ytSend = (f, func) => { try { f.contentWindow.postMessage(JSON.stringify({ event: "command", func, args: [] }), "*"); } catch { /* lecteur pas prêt */ } };
+// Chaque vidéo est suivie : le lecteur YouTube dit s'il joue. Si elle ne part pas, on la relance ;
+// si elle ne peut pas jouer (pas encore diffusée, lecture refusée hors de YouTube), on le dit et on passe à la suivante.
+const ytDead = new Set();
+const ytHear = (f) => { try { for (const m of [{ event: "listening", id: 1, channel: "widget" }, { event: "command", func: "addEventListener", args: ["onError"] }]) f.contentWindow.postMessage(JSON.stringify(m), "*"); } catch { /* lecteur pas prêt */ } };
+const shSoundBtn = (sec) => { const sb = $("[data-sound]", sec); if (sb) { sb.setAttribute("aria-pressed", String(!!state.vidSound)); sb.innerHTML = soundLabel(); } };
+function deadSlide(sec, why) {
+  if (sec.classList.contains("sh-dead")) return;
+  ytDead.add(sec.dataset.vid);
+  sec.classList.add("sh-dead");
+  $("iframe", sec)?.remove();
+  const hint = $(".sh-hint", sec);
+  if (hint) hint.innerHTML = `<span>${why === "soon" ? "Pas encore diffusée." : "Cette vidéo ne se lit pas ici."}</span> <a href="https://www.youtube.com/watch?v=${esc(sec.dataset.vid)}" target="_blank" rel="noopener noreferrer">La voir sur YouTube ↗</a>`;
+  // On passe à la suivante toute seule, si c'est encore celle-ci qu'on regarde.
+  const sc = sec.parentElement, here = () => sc && Math.abs(sec.getBoundingClientRect().top - sc.getBoundingClientRect().top) < 12;
+  if (here()) setTimeout(() => { if (here()) sec.nextElementSibling?.scrollIntoView({ behavior: "smooth" }); }, 900);
+}
+// Le son ouvert par Prisme a mis la vidéo en pause (certains téléphones le refusent) : elle repart, sans le son.
+function ytQuiet(sec, f) {
+  f._yt.quiet = true;
+  state.vidSound = false;
+  ytSend(f, "mute"); ytSend(f, "playVideo");
+  shSoundBtn(sec);
+}
+addEventListener("message", (e) => {
+  if (!/^https:\/\/www\.youtube(-nocookie)?\.com$/.test(e.origin) || typeof e.data !== "string") return;
+  const f = [...document.querySelectorAll("#shorts .sh-player iframe")].find((x) => x.contentWindow === e.source);
+  const sec = f?.closest(".sh-v");
+  if (!sec) return;
+  let d; try { d = JSON.parse(e.data); } catch { return; }
+  const y = (f._yt ||= {});
+  y.heard = true;
+  if (d.event === "onError") return deadSlide(sec, "err");
+  if (d.event === "onReady" && !y.ready) {
+    y.ready = true;
+    if (state.vidSound) { y.unmuteAt = Date.now(); ytSend(f, "unMute"); }
+    ytSend(f, "playVideo");
+  }
+  const i = d.info && typeof d.info === "object" ? d.info : null;
+  if (!i) return;
+  if (i.videoData) y.vd = { ...y.vd, ...i.videoData };
+  if (typeof i.duration === "number") y.dur = i.duration;
+  if (i.playerState !== undefined) y.st = i.playerState;
+  if (y.vd && (y.vd.errorCode || y.vd.isPlayable === false)) return deadSlide(sec, "err");
+  if (y.st === 1 || y.st === 3) y.played = true;
+  if (y.st === 2 && !y.quiet && state.vidSound && Date.now() - (y.unmuteAt || 0) < 2000) ytQuiet(sec, f);
+});
+function ytWatch(sec, f) {
+  const y = (f._yt ||= {});
+  let n = 0, asks = 0;
+  const tick = setInterval(() => {
+    if (!f.isConnected) return clearInterval(tick);
+    if (document.hidden) return; // page en arrière-plan : le navigateur retient lui-même la lecture
+    if (!y.heard || asks < 2) { asks++; ytHear(f); }
+    if (y.played) return clearInterval(tick);
+    if (!y.heard) { if (++asks > 30) clearInterval(tick); return; }
+    n++;
+    // Une diffusion annoncée mais pas commencée : rien à jouer.
+    if (n >= 4 && y.st === -1 && y.vd?.isLive && !y.dur) { clearInterval(tick); return deadSlide(sec, "soon"); }
+    if (n === 3 || n === 7) ytSend(f, "playVideo");
+    if (n === 6 && state.vidSound && !y.quiet) ytQuiet(sec, f);
+    if (n >= 12) {
+      clearInterval(tick);
+      const hint = $(".sh-hint", sec);
+      if (hint) hint.textContent = "Touche la vidéo pour la démarrer";
+    }
+  }, 500);
+}
 function playSlide(sec, on) {
   const box = $(".sh-player", sec);
   if (!box) return;
   const f = $("iframe", box);
-  if (on && !f) {
+  if (on && !f && !sec.classList.contains("sh-dead")) {
     box.insertAdjacentHTML("beforeend", `<iframe src="https://www.youtube-nocookie.com/embed/${sec.dataset.vid}?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1&controls=0&iv_load_policy=3&disablekb=1&fs=0&enablejsapi=1&origin=${encodeURIComponent(location.origin)}" title="Vidéo" allow="autoplay; encrypted-media; picture-in-picture"></iframe>`);
     const nf = $("iframe", box);
     // Le son déjà ouvert sur la vidéo d'avant : on le garde.
-    nf.addEventListener("load", () => { if (state.vidSound) [600, 1500].forEach((t) => setTimeout(() => ytSend(nf, "unMute"), t)); });
-    const sb = $("[data-sound]", sec);
-    if (sb) { sb.setAttribute("aria-pressed", String(!!state.vidSound)); sb.innerHTML = soundLabel(); }
+    // (Si le lecteur ne répond pas à Prisme, on ouvre quand même le son un peu après le chargement.)
+    nf.addEventListener("load", () => { ytWatch(sec, nf); setTimeout(() => { if (state.vidSound && nf.isConnected && !nf._yt?.heard) ytSend(nf, "unMute"); }, 1500); });
+    shSoundBtn(sec);
   }
   if (!on && f) f.remove();
 }
@@ -3419,7 +3486,7 @@ document.addEventListener("click", (e) => {
   e.preventDefault(); e.stopPropagation();
   state.vidSound = !state.vidSound;
   const f = $("iframe", b.closest(".sh-player"));
-  if (f) { ytSend(f, state.vidSound ? "unMute" : "mute"); ytSend(f, "playVideo"); }
+  if (f) { if (state.vidSound) (f._yt ||= {}).unmuteAt = Date.now(); ytSend(f, state.vidSound ? "unMute" : "mute"); ytSend(f, "playVideo"); }
   b.setAttribute("aria-pressed", String(state.vidSound));
   b.innerHTML = soundLabel();
 }, true);
@@ -3453,7 +3520,7 @@ async function openVideoBref() {
     const next = list.slice(shown, shown + 12);
     if (!next.length) return;
     const before = sc.children.length;
-    sc.insertAdjacentHTML("beforeend", next.map(vidSlide).join(""));
+    sc.insertAdjacentHTML("beforeend", next.filter((v) => !ytDead.has(v.id)).map(vidSlide).join(""));
     shown += next.length;
     for (const el of [...sc.children].slice(before)) io.observe(el);
   };
